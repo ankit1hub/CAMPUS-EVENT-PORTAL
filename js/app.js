@@ -102,6 +102,7 @@ class UniPulseApp {
     const tabDashboard = document.getElementById('navTabDashboard');
     const tabOrganizer = document.getElementById('navTabOrganizer');
     const hostBtn = document.getElementById('navHostEventBtn');
+    const notifBtn = document.getElementById('navNotifBtn');
     const navName = document.getElementById('navUserName');
     const navRole = document.getElementById('navUserRole');
     const navAvatar = document.getElementById('navAvatar');
@@ -115,6 +116,7 @@ class UniPulseApp {
     if (tabDashboard) tabDashboard.style.display = isStudent ? 'inline-flex' : 'none';
     if (tabOrganizer) tabOrganizer.style.display = isAdmin ? 'inline-flex' : 'none';
     if (hostBtn) hostBtn.style.display = isAdmin ? 'inline-flex' : 'none';
+    if (notifBtn) notifBtn.style.display = isStudent ? 'inline-flex' : 'none';
 
     if (this.currentUser) {
       if (mainNavLinks) mainNavLinks.style.display = 'flex';
@@ -2293,6 +2295,9 @@ class UniPulseApp {
   }
 
   showNotificationsModal() {
+    if (this.currentUser && this.currentUser.role === 'admin') {
+      return;
+    }
     this.openModal('modalNotifications');
   }
 
