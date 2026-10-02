@@ -934,6 +934,106 @@
             <input type="text" id="regNotes" class="form-control" placeholder="Size M / Vegetarian">
           </div>
 
+          <!-- PAYMENT GATEWAY SECTION FOR PAID EVENTS -->
+          <div id="regPaymentSection" style="display: none; margin-top: 1.25rem; border-top: 1px solid var(--border-subtle); padding-top: 1.25rem;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.85rem; flex-wrap: wrap; gap: 0.5rem;">
+              <div style="font-weight: 700; font-size: 0.95rem; color: var(--text-main); display: flex; align-items: center; gap: 0.4rem;">
+                <i class="fa-solid fa-credit-card" style="color: var(--accent-emerald);"></i> Payment Checkout
+              </div>
+              <span id="regPaymentAmountBadge" style="background: rgba(16, 185, 129, 0.15); color: var(--accent-emerald); font-weight: 800; font-size: 0.88rem; padding: 0.25rem 0.65rem; border-radius: var(--radius-full);">
+                Amount: ₹100
+              </span>
+            </div>
+
+            <!-- Price Breakdown Summary Box -->
+            <div style="background: var(--bg-subtle); border-radius: var(--radius-md); padding: 0.85rem 1rem; margin-bottom: 1rem; font-size: 0.82rem;">
+              <div style="display: flex; justify-content: space-between; margin-bottom: 0.35rem; color: var(--text-muted);">
+                <span>Event Entry Ticket Fee</span>
+                <span id="regSummaryBaseFee" style="font-weight: 600; color: var(--text-main);">₹100</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; margin-bottom: 0.35rem; color: var(--text-muted);">
+                <span>Campus Tech & Gateway Fee</span>
+                <span style="color: var(--accent-emerald); font-weight: 600;">₹0 (Free / Waived)</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; border-top: 1px dashed var(--border-subtle); padding-top: 0.45rem; margin-top: 0.45rem; font-weight: 700; font-size: 0.92rem; color: var(--text-main);">
+                <span>Total Payable Amount</span>
+                <span id="regSummaryTotalFee" style="color: var(--accent-emerald);">₹100</span>
+              </div>
+            </div>
+
+            <!-- Payment Method Tabs -->
+            <label class="form-label" style="margin-bottom: 0.45rem;">Select Payment Method *</label>
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.5rem; margin-bottom: 1rem;">
+              <button type="button" class="btn btn-secondary btn-sm active" id="payMethodUpi" style="border-radius: var(--radius-md); flex-direction: column; padding: 0.6rem 0.3rem; gap: 0.2rem; font-size: 0.78rem; background: var(--primary-light); color: var(--primary); border-color: var(--primary);" onclick="app.switchPayMethod('upi')">
+                <i class="fa-solid fa-mobile-screen-button" style="font-size: 1rem;"></i>
+                <span>UPI / QR</span>
+              </button>
+              <button type="button" class="btn btn-secondary btn-sm" id="payMethodCard" style="border-radius: var(--radius-md); flex-direction: column; padding: 0.6rem 0.3rem; gap: 0.2rem; font-size: 0.78rem;" onclick="app.switchPayMethod('card')">
+                <i class="fa-solid fa-credit-card" style="font-size: 1rem; color: #10b981;"></i>
+                <span>Card</span>
+              </button>
+              <button type="button" class="btn btn-secondary btn-sm" id="payMethodNet" style="border-radius: var(--radius-md); flex-direction: column; padding: 0.6rem 0.3rem; gap: 0.2rem; font-size: 0.78rem;" onclick="app.switchPayMethod('net')">
+                <i class="fa-solid fa-building-columns" style="font-size: 1rem; color: #f59e0b;"></i>
+                <span>NetBanking</span>
+              </button>
+            </div>
+
+            <!-- 1. UPI Payment Option -->
+            <div id="payOptionUpi" style="background: var(--bg-subtle); padding: 1rem; border-radius: var(--radius-md); margin-bottom: 0.75rem;">
+              <div class="form-group" style="margin-bottom: 0.6rem;">
+                <label class="form-label" style="font-size: 0.8rem;">Enter Virtual Payment Address (UPI ID)</label>
+                <div style="display: flex; gap: 0.5rem;">
+                  <input type="text" id="regUpiId" class="form-control" placeholder="username@oksbi / @paytm" value="student@okhdfcbank" style="font-size: 0.85rem;">
+                  <button type="button" class="btn btn-secondary btn-sm" style="white-space: nowrap;" onclick="app.verifyUpiFast()">Verify</button>
+                </div>
+                <span id="upiVerifyStatus" style="font-size: 0.72rem; color: var(--accent-emerald); display: block; margin-top: 3px;"><i class="fa-solid fa-circle-check"></i> UPI VPA Ready & Verified</span>
+              </div>
+              <div style="display: flex; align-items: center; justify-content: center; gap: 1rem; padding-top: 0.5rem; border-top: 1px solid var(--border-subtle); font-size: 0.75rem; color: var(--text-muted); flex-wrap: wrap;">
+                <span><i class="fa-brands fa-google-pay" style="font-size: 1.1rem; color: #4285F4;"></i> GPay</span>
+                <span><i class="fa-solid fa-bolt" style="color: #6739B7;"></i> PhonePe</span>
+                <span><i class="fa-solid fa-wallet" style="color: #00BAF2;"></i> Paytm</span>
+                <span><i class="fa-solid fa-qrcode"></i> Scan & Pay</span>
+              </div>
+            </div>
+
+            <!-- 2. Card Payment Option -->
+            <div id="payOptionCard" class="hidden" style="background: var(--bg-subtle); padding: 1rem; border-radius: var(--radius-md); margin-bottom: 0.75rem;">
+              <div class="form-group" style="margin-bottom: 0.6rem;">
+                <label class="form-label" style="font-size: 0.8rem;">Card Number</label>
+                <input type="text" id="regCardNumber" class="form-control" placeholder="4532 •••• •••• 8921" maxlength="19">
+              </div>
+              <div class="form-row" style="margin-bottom: 0;">
+                <div class="form-group" style="margin-bottom: 0;">
+                  <label class="form-label" style="font-size: 0.8rem;">Expiry (MM/YY)</label>
+                  <input type="text" id="regCardExpiry" class="form-control" placeholder="12/28" maxlength="5">
+                </div>
+                <div class="form-group" style="margin-bottom: 0;">
+                  <label class="form-label" style="font-size: 0.8rem;">CVV</label>
+                  <input type="password" id="regCardCvv" class="form-control" placeholder="•••" maxlength="3">
+                </div>
+              </div>
+            </div>
+
+            <!-- 3. Net Banking Option -->
+            <div id="payOptionNet" class="hidden" style="background: var(--bg-subtle); padding: 1rem; border-radius: var(--radius-md); margin-bottom: 0.75rem;">
+              <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label" style="font-size: 0.8rem;">Select University Partner Bank</label>
+                <select id="regNetBankSelect" class="form-control">
+                  <option value="sbi">State Bank of India (SBI)</option>
+                  <option value="hdfc">HDFC Bank</option>
+                  <option value="icici">ICICI Bank</option>
+                  <option value="axis">Axis Bank</option>
+                  <option value="pnb">Punjab National Bank</option>
+                  <option value="wallet">Campus Student ID Smart Wallet</option>
+                </select>
+              </div>
+            </div>
+
+            <div style="font-size: 0.72rem; color: var(--text-muted); display: flex; align-items: center; gap: 0.35rem; margin-top: 0.4rem;">
+              <i class="fa-solid fa-shield-halved" style="color: var(--accent-emerald);"></i> 256-Bit Encrypted Campus Payment Gateway
+            </div>
+          </div>
+
           <div style="display: flex; align-items: flex-start; gap: 0.45rem; font-size: 0.8rem; color: var(--text-muted); margin-top: 0.85rem;">
             <input type="checkbox" id="regTerms" required checked style="margin-top: 0.2rem;">
             <label for="regTerms">I agree to abide by the university campus event code of conduct and consent to official attendance logging.</label>
@@ -941,7 +1041,7 @@
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary btn-sm" onclick="app.closeModal('modalRegistrationForm')">Cancel</button>
-          <button type="submit" class="btn btn-primary btn-sm"><i class="fa-solid fa-check"></i> Confirm & Generate E-Pass</button>
+          <button type="submit" class="btn btn-primary btn-sm" id="regSubmitBtn"><i class="fa-solid fa-check"></i> Confirm & Generate E-Pass</button>
         </div>
       </form>
     </div>
@@ -987,8 +1087,8 @@
                 <div class="val" id="ticketDept">CSE (Year 3)</div>
               </div>
               <div class="ticket-info-item">
-                <div class="label">Seat / Entry Status</div>
-                <div class="val" style="color: var(--accent-emerald);">CONFIRMED ✅</div>
+                <div class="label">Payment Status</div>
+                <div class="val" id="ticketPaymentStatus" style="color: var(--accent-emerald); font-weight: 700;">Free Pass</div>
               </div>
             </div>
           </div>

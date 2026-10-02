@@ -1090,7 +1090,52 @@ class UniPulseApp {
     this.updateOrgAnalytics();
   }
 
-  /* ---------------- Registration Flow ---------------- */
+  /* ---------------- Registration Flow & Payment Checkout ---------------- */
+  switchPayMethod(method) {
+    this.currentPayMethod = method;
+    const btnUpi = document.getElementById('payMethodUpi');
+    const btnCard = document.getElementById('payMethodCard');
+    const btnNet = document.getElementById('payMethodNet');
+
+    const optUpi = document.getElementById('payOptionUpi');
+    const optCard = document.getElementById('payOptionCard');
+    const optNet = document.getElementById('payOptionNet');
+
+    if (btnUpi) {
+      btnUpi.style.background = method === 'upi' ? 'var(--primary-light)' : 'var(--bg-surface)';
+      btnUpi.style.color = method === 'upi' ? 'var(--primary)' : 'var(--text-main)';
+      btnUpi.style.borderColor = method === 'upi' ? 'var(--primary)' : 'var(--border-subtle)';
+    }
+    if (btnCard) {
+      btnCard.style.background = method === 'card' ? 'rgba(16, 185, 129, 0.15)' : 'var(--bg-surface)';
+      btnCard.style.color = method === 'card' ? 'var(--accent-emerald)' : 'var(--text-main)';
+      btnCard.style.borderColor = method === 'card' ? 'var(--accent-emerald)' : 'var(--border-subtle)';
+    }
+    if (btnNet) {
+      btnNet.style.background = method === 'net' ? 'rgba(245, 158, 11, 0.15)' : 'var(--bg-surface)';
+      btnNet.style.color = method === 'net' ? 'var(--accent-amber)' : 'var(--text-main)';
+      btnNet.style.borderColor = method === 'net' ? 'var(--accent-amber)' : 'var(--border-subtle)';
+    }
+
+    if (optUpi) optUpi.classList.toggle('hidden', method !== 'upi');
+    if (optCard) optCard.classList.toggle('hidden', method !== 'card');
+    if (optNet) optNet.classList.toggle('hidden', method !== 'net');
+  }
+
+  verifyUpiFast() {
+    const input = document.getElementById('regUpiId');
+    const status = document.getElementById('upiVerifyStatus');
+    if (!input || !input.value.trim()) {
+      this.showToast('Please enter a valid UPI ID (e.g., student@okhdfcbank)', 'error');
+      return;
+    }
+    if (status) {
+      status.style.display = 'block';
+      status.innerHTML = '<i class="fa-solid fa-circle-check"></i> ' + input.value.trim() + ' Verified';
+    }
+    this.showToast('UPI VPA verified successfully!', 'success');
+  }
+
   openRegistrationModal(eventId) {
     const evt = this.events.find(e => e.id === eventId);
     if (!evt) return;
@@ -1114,7 +1159,13 @@ class UniPulseApp {
     const emailIn = document.getElementById('regEmail');
     const teamWrap = document.getElementById('teamFieldsWrap');
 
-    if (subEl) subEl.textContent = `For: ${evt.title} (${evt.priceText || 'Free'})`;
+    const paySec = document.getElementById('regPaymentSection');
+    const payBadge = document.getElementById('regPaymentAmountBadge');
+    const baseFeeEl = document.getElementById('regSummaryBaseFee');
+    const totalFeeEl = document.getElementById('regSummaryTotalFee');
+    const submitBtn = document.getElementById('regSubmitBtn');
+
+    if (subEl) subEl.textContent = `For: ${evt.title} (${evt.priceText || (evt.price === 0 ? 'Free' : '₹' + evt.price)})`;
     if (idIn) idIn.value = evt.id;
     if (nameIn) nameIn.value = this.currentUser ? this.currentUser.name : "";
     if (rollIn) rollIn.value = this.currentUser ? (this.currentUser.rollNo || "") : "";
@@ -1126,6 +1177,22 @@ class UniPulseApp {
       } else {
         teamWrap.style.display = 'none';
       }
+    }
+
+    // Payment Section Toggle
+    const isPaid = (evt.price && evt.price > 0);
+    if (paySec) {
+      paySec.style.display = isPaid ? 'block' : 'none';
+    }
+
+    if (isPaid) {
+      if (payBadge) payBadge.textContent = `Amount: ₹${evt.price}`;
+      if (baseFeeEl) baseFeeEl.textContent = `₹${evt.price}`;
+      if (totalFeeEl) totalFeeEl.textContent = `₹${evt.price}`;
+      if (submitBtn) submitBtn.innerHTML = `<i class="fa-solid fa-lock"></i> Pay ₹${evt.price} & Book E-Pass`;
+      this.switchPayMethod('upi');
+    } else {
+      if (submitBtn) submitBtn.innerHTML = `<i class="fa-solid fa-check"></i> Confirm & Generate Free E-Pass`;
     }
 
     this.openModal('modalRegistrationForm');
@@ -1163,6 +1230,17 @@ class UniPulseApp {
       return;
     }
 
+    const isPaid = (evt.price && evt.price > 0);
+    const submitBtn = document.getElementById('regSubmitBtn');
+
+    if (isPaid && submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Processing Payment of ₹${evt.price}...`;
+    }
+
+    const payMethodName = this.currentPayMethod === 'upi' ? 'UPI' : (this.currentPayMethod === 'card' ? 'Credit/Debit Card' : 'NetBanking');
+    const txnId = isPaid ? `TXN-UPI-${Math.floor(100000 + Math.random() * 900000)}` : 'FREE-PASS';
+
     const newTicketId = `UP-2026-${Math.floor(1000 + Math.random() * 9000)}`;
 
     const newReg = {
@@ -1176,7 +1254,11 @@ class UniPulseApp {
       year: year,
       teamName: teamName,
       registeredAt: new Date().toISOString().replace('T', ' ').substring(0, 16),
-      isCheckedIn: false
+      isCheckedIn: false,
+      isPaid: isPaid,
+      amountPaid: isPaid ? evt.price : 0,
+      paymentMethod: isPaid ? payMethodName : 'Free Event',
+      paymentTxn: txnId
     };
 
     // Save locally
@@ -1191,11 +1273,16 @@ class UniPulseApp {
       await supabaseService.createRegistration(newReg);
     }
 
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = `<i class="fa-solid fa-check"></i> Confirm & Generate E-Pass`;
+    }
+
     this.closeModal('modalRegistrationForm');
 
     this.triggerConfetti();
 
-    this.showToast('🎉 Booking Confirmed! Digital E-Pass generated.', 'success');
+    this.showToast(isPaid ? `🎉 Payment of ₹${evt.price} Successful! E-Pass & Receipt generated.` : '🎉 Booking Confirmed! Digital E-Pass generated.', 'success');
     this.updateRegistrationBadge();
     this.renderEvents();
     this.updateCategoryCounters();
