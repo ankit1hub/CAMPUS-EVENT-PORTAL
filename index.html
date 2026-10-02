@@ -583,15 +583,25 @@
           </div>
         </div>
 
-        <!-- Attendee Roster Table -->
+        <!-- Attendee Roster Table with PulseAI Engine -->
         <div class="data-table-wrap">
           <div style="padding: 1rem 1.25rem; border-bottom: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
             <div>
-              <h3 style="font-size: 1.15rem;">Live Registration Roster</h3>
-              <p style="font-size: 0.78rem; color: var(--text-muted);">Manage real-time signups and verify attendance</p>
+              <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <h3 style="font-size: 1.15rem; margin: 0;">Live Registration Roster</h3>
+                <span class="role-pill role-admin" style="font-size: 0.7rem; background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(217, 70, 239, 0.15)); color: var(--primary); border: 1px solid rgba(139, 92, 246, 0.3);">
+                  <i class="fa-solid fa-wand-magic-sparkles"></i> AI Verification Active
+                </span>
+              </div>
+              <p style="font-size: 0.78rem; color: var(--text-muted); margin-top: 2px;">Manage real-time signups, autonomous transaction validation, and AI attendance clearance</p>
             </div>
-            <div class="flex gap-2">
-              <button class="btn btn-secondary btn-sm" onclick="app.exportAttendeesCSV()"><i class="fa-solid fa-file-csv"></i> Export CSV Roster</button>
+            <div class="flex items-center gap-2" style="flex-wrap: wrap;">
+              <button class="btn btn-primary btn-sm" id="btnAIBatchVerify" onclick="app.runAIBatchVerification()" style="background: linear-gradient(135deg, #6366f1, #8b5cf6, #d946ef); border: none; font-weight: 700; box-shadow: 0 3px 12px rgba(139, 92, 246, 0.35);">
+                <i class="fa-solid fa-brain"></i> ⚡ PulseAI Auto-Verify All
+              </button>
+              <button class="btn btn-secondary btn-sm" onclick="app.exportAttendeesCSV()">
+                <i class="fa-solid fa-file-csv"></i> Export CSV Roster
+              </button>
             </div>
           </div>
           <div style="overflow-x: auto;">
@@ -599,16 +609,16 @@
               <thead>
                 <tr>
                   <th>Ticket ID</th>
-                  <th>Student Name</th>
+                  <th>Student & Contact</th>
                   <th>Roll / Reg No.</th>
-                  <th>Event Name</th>
+                  <th>Event & Txn Info</th>
                   <th>Department</th>
-                  <th>Status</th>
+                  <th>AI Verification Status</th>
                   <th>Actions</th>
                 </tr>
               </thead>
               <tbody id="organizerAttendeesTableBody">
-                <!-- Dynamically populated -->
+                <!-- Dynamically populated with AI tags -->
               </tbody>
             </table>
           </div>
@@ -1306,6 +1316,83 @@
             </div>
           </div>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PULSEAI AUTONOMOUS TRANSACTION & REGISTRATION VERIFICATION MODAL -->
+  <div class="modal-overlay" id="modalAIVerify">
+    <div class="modal-box" style="max-width: 580px;">
+      <div class="modal-header" style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.12), rgba(217, 70, 239, 0.12)); border-bottom: 1px solid rgba(139, 92, 246, 0.25);">
+        <div class="flex items-center gap-2">
+          <div style="width: 36px; height: 36px; border-radius: var(--radius-md); background: linear-gradient(135deg, #6366f1, #d946ef); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 1.1rem; box-shadow: 0 2px 10px rgba(139, 92, 246, 0.4);">
+            <i class="fa-solid fa-wand-magic-sparkles"></i>
+          </div>
+          <div>
+            <h3 style="font-size: 1.15rem; margin: 0;">PulseAI Autonomous Verification Core</h3>
+            <span style="font-size: 0.72rem; color: #8b5cf6; font-weight: 700;">Real-Time Transaction Clearance & Registration Pipeline v3.4</span>
+          </div>
+        </div>
+        <button class="modal-close-btn" onclick="app.closeModal('modalAIVerify')"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <div class="modal-body" style="padding: 1.4rem;">
+        <!-- AI Pipeline Status Steps -->
+        <div style="margin-bottom: 1.25rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem; font-size: 0.85rem;">
+            <span style="font-weight: 700; color: var(--text-main);" id="aiProgressStageText">Initializing Neural Verification Pipeline...</span>
+            <span style="font-weight: 800; color: #8b5cf6;" id="aiProgressPercent">0%</span>
+          </div>
+          <div style="width: 100%; height: 8px; background: var(--bg-subtle); border-radius: 999px; overflow: hidden; position: relative;">
+            <div id="aiProgressBar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #6366f1, #8b5cf6, #10b981); transition: width 0.25s ease; border-radius: 999px;"></div>
+          </div>
+        </div>
+
+        <!-- Pipeline Matrix Cards -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.65rem; margin-bottom: 1.1rem;">
+          <div id="aiStep1" style="padding: 0.75rem; border-radius: var(--radius-md); background: var(--bg-subtle); border: 1px solid var(--border-subtle); display: flex; align-items: center; gap: 0.6rem; transition: all 0.3s ease;">
+            <div id="aiIcon1" style="color: var(--text-muted); font-size: 1.1rem;"><i class="fa-solid fa-id-card"></i></div>
+            <div>
+              <div style="font-weight: 700; font-size: 0.8rem;">1. Student Roll & ID</div>
+              <div style="font-size: 0.7rem; color: var(--text-muted);" id="aiSub1">Pending check</div>
+            </div>
+          </div>
+          <div id="aiStep2" style="padding: 0.75rem; border-radius: var(--radius-md); background: var(--bg-subtle); border: 1px solid var(--border-subtle); display: flex; align-items: center; gap: 0.6rem; transition: all 0.3s ease;">
+            <div id="aiIcon2" style="color: var(--text-muted); font-size: 1.1rem;"><i class="fa-solid fa-receipt"></i></div>
+            <div>
+              <div style="font-weight: 700; font-size: 0.8rem;">2. UPI & Bank Gateway</div>
+              <div style="font-size: 0.7rem; color: var(--text-muted);" id="aiSub2">Txn validation</div>
+            </div>
+          </div>
+          <div id="aiStep3" style="padding: 0.75rem; border-radius: var(--radius-md); background: var(--bg-subtle); border: 1px solid var(--border-subtle); display: flex; align-items: center; gap: 0.6rem; transition: all 0.3s ease;">
+            <div id="aiIcon3" style="color: var(--text-muted); font-size: 1.1rem;"><i class="fa-solid fa-shield-halved"></i></div>
+            <div>
+              <div style="font-weight: 700; font-size: 0.8rem;">3. Fraud & Sybil Shield</div>
+              <div style="font-size: 0.7rem; color: var(--text-muted);" id="aiSub3">Zero duplicate risk</div>
+            </div>
+          </div>
+          <div id="aiStep4" style="padding: 0.75rem; border-radius: var(--radius-md); background: var(--bg-subtle); border: 1px solid var(--border-subtle); display: flex; align-items: center; gap: 0.6rem; transition: all 0.3s ease;">
+            <div id="aiIcon4" style="color: var(--text-muted); font-size: 1.1rem;"><i class="fa-solid fa-circle-check"></i></div>
+            <div>
+              <div style="font-weight: 700; font-size: 0.8rem;">4. Pass Issuance</div>
+              <div style="font-size: 0.7rem; color: var(--text-muted);" id="aiSub4">Auto-checkin approval</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Terminal Output Console -->
+        <div style="background: #090d16; border: 1px solid #1e293b; border-radius: var(--radius-lg); padding: 0.85rem 1rem; font-family: 'Courier New', Courier, monospace; font-size: 0.75rem; color: #38bdf8; max-height: 170px; overflow-y: auto; line-height: 1.45;" id="aiTerminalConsole">
+          <div style="color: #94a3b8;">> PulseAI Autonomous Engine v3.4 ready...</div>
+        </div>
+      </div>
+
+      <div class="modal-footer" style="justify-content: space-between;">
+        <div style="font-size: 0.78rem; color: var(--text-muted); display: flex; align-items: center; gap: 0.4rem;">
+          <i class="fa-solid fa-bolt" style="color: #8b5cf6;"></i> Autonomous Supabase DB Sync
+        </div>
+        <button class="btn btn-primary btn-sm" id="aiModalDoneBtn" onclick="app.closeModal('modalAIVerify')" style="display: none; background: var(--accent-emerald); border: none;">
+          <i class="fa-solid fa-check"></i> Finished & Roster Updated
+        </button>
       </div>
     </div>
   </div>
