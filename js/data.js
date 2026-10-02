@@ -275,3 +275,95 @@ const INITIAL_ANNOUNCEMENTS = [
   "🎉 Euphoria Cultural Fest wristband pickup starts this Thursday at Student Center.",
   "🤖 Free AI Workshop cloud credits ($25) sponsored by Tech Innovation Lab."
 ];
+
+const INITIAL_REGISTRATIONS = [
+  {
+    ticketId: "TKT-8491",
+    eventId: "evt-101",
+    attendeeName: "Rahul Sharma",
+    rollNo: "12204581",
+    email: "rahul.12204581@lpu.in",
+    dept: "Computer Science & Engineering",
+    year: "3rd Year",
+    timestamp: "2026-10-03T10:14:00Z",
+    isCheckedIn: true
+  },
+  {
+    ticketId: "TKT-8492",
+    eventId: "evt-101",
+    attendeeName: "Pooja Verma",
+    rollNo: "12209124",
+    email: "pooja.v@lpu.in",
+    dept: "Information Technology",
+    year: "2nd Year",
+    timestamp: "2026-10-04T14:22:00Z",
+    isCheckedIn: false
+  },
+  {
+    ticketId: "TKT-8493",
+    eventId: "evt-102",
+    attendeeName: "Aarav Kapoor",
+    rollNo: "12108745",
+    email: "aarav.k@lpu.in",
+    dept: "Performing Arts & Humanities",
+    year: "4th Year",
+    timestamp: "2026-10-06T11:05:00Z",
+    isCheckedIn: true
+  },
+  {
+    ticketId: "TKT-8494",
+    eventId: "evt-102",
+    attendeeName: "Simran Kaur",
+    rollNo: "12215689",
+    email: "simran.k@lpu.in",
+    dept: "Business & Management",
+    year: "3rd Year",
+    timestamp: "2026-10-07T16:40:00Z",
+    isCheckedIn: false
+  },
+  {
+    ticketId: "TKT-8495",
+    eventId: "evt-103",
+    attendeeName: "Devansh Patel",
+    rollNo: "12301142",
+    email: "devansh.p@lpu.in",
+    dept: "Computer Science (AI & ML)",
+    year: "2nd Year",
+    timestamp: "2026-10-08T09:30:00Z",
+    isCheckedIn: true
+  },
+  {
+    ticketId: "TKT-8496",
+    eventId: "evt-104",
+    attendeeName: "Manpreet Singh",
+    rollNo: "12104590",
+    email: "manpreet.s@lpu.in",
+    dept: "Mechanical Engineering",
+    year: "4th Year",
+    timestamp: "2026-10-09T15:10:00Z",
+    isCheckedIn: false
+  },
+  {
+    ticketId: "TKT-8497",
+    eventId: "evt-105",
+    attendeeName: "Karan Johal",
+    rollNo: "12218890",
+    email: "karan.j@lpu.in",
+    dept: "Multimedia & Animation",
+    year: "3rd Year",
+    timestamp: "2026-10-10T12:00:00Z",
+    isCheckedIn: true
+  },
+  {
+    ticketId: "TKT-8498",
+    eventId: "evt-106",
+    attendeeName: "Ananya Iyer",
+    rollNo: "12009844",
+    email: "ananya.i@lpu.in",
+    dept: "Computer Science & Engineering",
+    year: "4th Year",
+    timestamp: "2026-10-11T17:45:00Z",
+    isCheckedIn: false
+  }
+];
+

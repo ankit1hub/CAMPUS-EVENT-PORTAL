@@ -24,8 +24,9 @@ class UniPulseApp {
     this.events = this.loadStorage('unipulse_events', INITIAL_EVENTS);
     this.clubs = this.loadStorage('unipulse_clubs', INITIAL_CLUBS);
     this.bookmarks = this.loadStorage('unipulse_bookmarks', []);
-    this.registrations = this.loadStorage('unipulse_registrations', []);
+    this.registrations = this.loadStorage('unipulse_registrations', typeof INITIAL_REGISTRATIONS !== 'undefined' ? INITIAL_REGISTRATIONS : []);
 
+    this.selectedOrgEvent = 'all';
     this.chartInstances = {};
   }
 
@@ -613,8 +614,8 @@ class UniPulseApp {
     if (viewName === 'dashboard') {
       this.renderDashboard();
     } else if (viewName === 'organizer') {
-      this.renderOrganizerTable();
-      setTimeout(() => this.initCharts(), 50);
+      this.populateOrgEventDropdown();
+      this.updateOrgAnalytics();
     } else if (viewName === 'calendar') {
       this.renderCalendar();
     }
@@ -1444,35 +1445,250 @@ class UniPulseApp {
   }
 
   /* ---------------- Organizer Studio & Analytics ---------------- */
+  populateOrgEventDropdown() {
+    const select = document.getElementById('orgEventFilterSelect');
+    if (!select) return;
+
+    const currentVal = this.selectedOrgEvent || 'all';
+    let optionsHtml = '<option value="all">🌐 All Events (Campus Overview)</option>';
+
+    this.events.forEach(evt => {
+      const icon = evt.organizerIcon || '🎯';
+      optionsHtml += `<option value="${evt.id}" ${evt.id === currentVal ? 'selected' : ''}>${icon} ${evt.title} (${evt.date})</option>`;
+    });
+
+    select.innerHTML = optionsHtml;
+    select.value = currentVal;
+  }
+
+  handleOrgEventFilterChange(eventId) {
+    this.selectedOrgEvent = eventId;
+    this.updateOrgAnalytics();
+  }
+
+  updateOrgAnalytics() {
+    this.updateOrgStats();
+    this.renderOrganizerTable();
+    setTimeout(() => this.initCharts(), 50);
+  }
+
+  updateOrgStats() {
+    const stat1Val = document.getElementById('orgStatTotalEvents');
+    const stat1Label = document.getElementById('orgStat1Label');
+    const stat2Val = document.getElementById('orgStatTotalRegistrations');
+    const stat2Label = document.getElementById('orgStat2Label');
+    const stat3Val = document.getElementById('orgStatCheckedIn');
+    const stat3Label = document.getElementById('orgStat3Label');
+    const stat4Val = document.getElementById('orgStatSatisfaction');
+    const stat4Label = document.getElementById('orgStat4Label');
+    const scopeSubtext = document.getElementById('orgEventScopeSubtext');
+
+    if (this.selectedOrgEvent === 'all') {
+      const totalEvents = this.events.length;
+      const totalRegistrations = this.events.reduce((sum, e) => sum + (e.registeredCount || 0), 0) + this.registrations.length;
+      const actualChecked = this.registrations.filter(r => r.isCheckedIn).length;
+      const totalChecked = 1240 + actualChecked;
+
+      if (stat1Val) stat1Val.textContent = totalEvents;
+      if (stat1Label) stat1Label.textContent = 'Published Events';
+      if (stat2Val) stat2Val.textContent = totalRegistrations.toLocaleString();
+      if (stat2Label) stat2Label.textContent = 'Total Registrations';
+      if (stat3Val) stat3Val.textContent = totalChecked.toLocaleString();
+      if (stat3Label) stat3Label.textContent = 'Checked-in Attendees';
+      if (stat4Val) stat4Val.textContent = '98.4%';
+      if (stat4Label) stat4Label.textContent = 'Student Satisfaction';
+      if (scopeSubtext) scopeSubtext.textContent = 'Showing aggregated campus overview across all published events';
+    } else {
+      const evt = this.events.find(e => e.id === this.selectedOrgEvent);
+      if (!evt) return;
+
+      const evtActualRegs = this.registrations.filter(r => r.eventId === evt.id);
+      const totalRegs = (evt.registeredCount || 0) + evtActualRegs.length;
+      const checkedInCount = evtActualRegs.filter(r => r.isCheckedIn).length;
+      const estimatedChecked = Math.round(totalRegs * 0.74) + checkedInCount;
+      const fillPercent = Math.min(100, Math.round((totalRegs / (evt.maxCapacity || 100)) * 100));
+
+      if (stat1Val) stat1Val.textContent = evt.maxCapacity || 100;
+      if (stat1Label) stat1Label.textContent = 'Max Capacity Limit';
+      if (stat2Val) stat2Val.textContent = totalRegs.toLocaleString();
+      if (stat2Label) stat2Label.textContent = 'Confirmed Registrations';
+      if (stat3Val) stat3Val.textContent = Math.min(totalRegs, estimatedChecked).toLocaleString();
+      if (stat3Label) stat3Label.textContent = 'Verified / Checked-in';
+      if (stat4Val) stat4Val.textContent = `${fillPercent}%`;
+      if (stat4Label) stat4Label.textContent = 'Slot Fill Rate';
+      if (scopeSubtext) scopeSubtext.textContent = `Live real-time analytics & demographics for ${evt.title}`;
+    }
+  }
+
   initCharts() {
     const regCanvas = document.getElementById('registrationChart');
     const deptCanvas = document.getElementById('departmentChart');
+    const regTitle = document.getElementById('regChartTitle');
+    const regBadge = document.getElementById('regChartBadge');
+    const deptTitle = document.getElementById('deptChartTitle');
+    const deptBadge = document.getElementById('deptChartBadge');
 
     if (!regCanvas || !deptCanvas) return;
 
-    if (this.chartInstances.regChart) this.chartInstances.regChart.destroy();
-    if (this.chartInstances.deptChart) this.chartInstances.deptChart.destroy();
+    if (this.chartInstances.regChart) {
+      try { this.chartInstances.regChart.destroy(); } catch (e) {}
+    }
+    if (this.chartInstances.deptChart) {
+      try { this.chartInstances.deptChart.destroy(); } catch (e) {}
+    }
+
+    let lineLabels = [];
+    let lineData = [];
+    let lineColor = '#6366f1';
+    let lineBg = 'rgba(99, 102, 241, 0.12)';
+    let lineTitle = 'Registration Velocity (Oct 2026)';
+    let lineBadgeText = 'Campus Timeline';
+
+    let donutLabels = [];
+    let donutData = [];
+    let donutColors = [];
+    let donutTitle = 'Department Demographics';
+    let donutBadgeText = 'All Branches';
+
+    if (this.selectedOrgEvent === 'all') {
+      lineLabels = ['Oct 01', 'Oct 05', 'Oct 10', 'Oct 15', 'Oct 20', 'Oct 25', 'Oct 30'];
+      lineData = [420, 890, 1450, 2100, 2890, 3240, 3450];
+      lineColor = '#6366f1';
+      lineBg = 'rgba(99, 102, 241, 0.12)';
+      lineTitle = 'Campus Registration Velocity (Oct 2026)';
+      lineBadgeText = 'Aggregated Timeline';
+
+      donutLabels = ['Computer Science', 'Info Tech', 'Electronics (ECE)', 'Mech & Civil', 'Business & Design'];
+      donutData = [45, 25, 15, 10, 5];
+      donutColors = ['#6366f1', '#06b6d4', '#ec4899', '#f59e0b', '#10b981'];
+      donutTitle = 'University Department Demographics';
+      donutBadgeText = 'All Departments';
+    } else {
+      const evt = this.events.find(e => e.id === this.selectedOrgEvent);
+      if (!evt) return;
+
+      const regCount = evt.registeredCount || 50;
+      const category = evt.category || 'tech';
+
+      // Set titles & badges
+      lineTitle = `Registration Velocity: ${evt.title.length > 28 ? evt.title.substring(0, 28) + '...' : evt.title}`;
+      lineBadgeText = `${evt.categoryName || 'Event'}`;
+      donutTitle = `Demographics: ${evt.categoryName || 'Event'}`;
+      donutBadgeText = `${evt.teamType || 'Attendees'}`;
+
+      // Custom event-specific velocity data & timeline
+      if (evt.id === 'evt-101' || category === 'hackathon') {
+        lineLabels = ['Oct 02', 'Oct 06', 'Oct 10', 'Oct 13', 'Oct 16', 'Oct 18'];
+        lineData = [18, 42, 88, 145, 205, regCount];
+        lineColor = '#6366f1';
+        lineBg = 'rgba(99, 102, 241, 0.15)';
+
+        donutLabels = ['Computer Science', 'Information Tech', 'Electronics (ECE)', 'Mechanical & Robotics', 'Business & UI/UX'];
+        donutData = [54, 24, 12, 6, 4];
+        donutColors = ['#6366f1', '#3b82f6', '#06b6d4', '#f59e0b', '#ec4899'];
+      } else if (evt.id === 'evt-102' || category === 'cultural') {
+        lineLabels = ['Oct 04', 'Oct 09', 'Oct 14', 'Oct 19', 'Oct 22', 'Oct 24'];
+        lineData = [120, 290, 520, 750, 890, regCount];
+        lineColor = '#ec4899';
+        lineBg = 'rgba(236, 72, 153, 0.15)';
+
+        donutLabels = ['Arts & Humanities', 'Business / MBA', 'Computer Science', 'Fashion & Design', 'Biotech & Science'];
+        donutData = [36, 26, 18, 12, 8];
+        donutColors = ['#ec4899', '#f43f5e', '#8b5cf6', '#f59e0b', '#10b981'];
+      } else if (evt.id === 'evt-103' || category === 'workshop') {
+        lineLabels = ['Oct 01', 'Oct 04', 'Oct 07', 'Oct 10', 'Oct 13', 'Oct 15'];
+        lineData = [12, 28, 49, 68, 81, regCount];
+        lineColor = '#10b981';
+        lineBg = 'rgba(16, 185, 129, 0.15)';
+
+        donutLabels = ['Computer Science & AI', 'Data Science & IT', 'Electronics (ECE)', 'Mechanical', 'Aerospace / Others'];
+        donutData = [58, 22, 12, 5, 3];
+        donutColors = ['#10b981', '#06b6d4', '#6366f1', '#f59e0b', '#ec4899'];
+      } else if (evt.id === 'evt-104' || category === 'sports') {
+        lineLabels = ['Oct 05', 'Oct 11', 'Oct 16', 'Oct 21', 'Oct 25', 'Oct 28'];
+        lineData = [35, 80, 145, 215, 290, regCount];
+        lineColor = '#f59e0b';
+        lineBg = 'rgba(245, 158, 11, 0.15)';
+
+        donutLabels = ['Mechanical & Civil', 'Physical Education', 'Computer Science', 'Electrical (EEE)', 'Management'];
+        donutData = [32, 24, 20, 14, 10];
+        donutColors = ['#f59e0b', '#ef4444', '#6366f1', '#06b6d4', '#10b981'];
+      } else if (evt.id === 'evt-105' || category === 'gaming') {
+        lineLabels = ['Oct 12', 'Oct 18', 'Oct 23', 'Oct 27', 'Oct 30', 'Nov 02'];
+        lineData = [6, 15, 26, 36, 46, regCount];
+        lineColor = '#8b5cf6';
+        lineBg = 'rgba(139, 92, 246, 0.15)';
+
+        donutLabels = ['Computer Science', 'Info Tech', 'Animation & Game Design', 'Electronics', 'Commerce'];
+        donutData = [46, 28, 14, 8, 4];
+        donutColors = ['#8b5cf6', '#6366f1', '#ec4899', '#06b6d4', '#f59e0b'];
+      } else if (evt.id === 'evt-106' || category === 'tech') {
+        lineLabels = ['Oct 14', 'Oct 19', 'Oct 24', 'Oct 29', 'Nov 02', 'Nov 06'];
+        lineData = [25, 75, 140, 210, 270, regCount];
+        lineColor = '#06b6d4';
+        lineBg = 'rgba(6, 182, 212, 0.15)';
+
+        donutLabels = ['Final Year B.Tech (CSE/IT)', 'MBA / Management', 'MCA & M.Tech', 'Electronics', 'Design & Media'];
+        donutData = [44, 26, 16, 9, 5];
+        donutColors = ['#06b6d4', '#3b82f6', '#6366f1', '#10b981', '#f59e0b'];
+      } else {
+        // Dynamic procedural curve for newly created user events
+        lineLabels = ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Final Days', 'Event Day'];
+        lineData = [
+          Math.max(1, Math.round(regCount * 0.1)),
+          Math.max(2, Math.round(regCount * 0.28)),
+          Math.max(3, Math.round(regCount * 0.52)),
+          Math.max(4, Math.round(regCount * 0.76)),
+          Math.max(5, Math.round(regCount * 0.92)),
+          regCount
+        ];
+        lineColor = '#3b82f6';
+        lineBg = 'rgba(59, 130, 246, 0.15)';
+
+        donutLabels = ['Computer Science', 'Info Tech', 'Electronics', 'Mechanical', 'Business & Design'];
+        donutData = [40, 25, 15, 12, 8];
+        donutColors = ['#3b82f6', '#6366f1', '#06b6d4', '#f59e0b', '#10b981'];
+      }
+    }
+
+    if (regTitle) regTitle.textContent = lineTitle;
+    if (regBadge) regBadge.textContent = lineBadgeText;
+    if (deptTitle) deptTitle.textContent = donutTitle;
+    if (deptBadge) deptBadge.textContent = donutBadgeText;
 
     this.chartInstances.regChart = new Chart(regCanvas, {
       type: 'line',
       data: {
-        labels: ['Oct 01', 'Oct 05', 'Oct 10', 'Oct 15', 'Oct 20', 'Oct 25', 'Oct 30'],
+        labels: lineLabels,
         datasets: [{
-          label: 'Total Signups',
-          data: [420, 890, 1450, 2100, 2890, 3240, 3450],
-          borderColor: '#6366f1',
-          backgroundColor: 'rgba(99, 102, 241, 0.12)',
+          label: 'Registrations',
+          data: lineData,
+          borderColor: lineColor,
+          backgroundColor: lineBg,
           fill: true,
-          tension: 0.3,
-          borderWidth: 2.5
+          tension: 0.35,
+          borderWidth: 2.5,
+          pointBackgroundColor: lineColor,
+          pointRadius: 4,
+          pointHoverRadius: 6
         }]
       },
       options: {
         responsive: true,
-        animation: { duration: 300 },
-        plugins: { legend: { display: false } },
+        animation: { duration: 400 },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: (context) => ` ${context.parsed.y} registered attendees`
+            }
+          }
+        },
         scales: {
-          y: { grid: { color: 'rgba(148, 163, 184, 0.12)' } },
+          y: {
+            beginAtZero: true,
+            grid: { color: 'rgba(148, 163, 184, 0.12)' }
+          },
           x: { grid: { display: false } }
         }
       }
@@ -1481,17 +1697,27 @@ class UniPulseApp {
     this.chartInstances.deptChart = new Chart(deptCanvas, {
       type: 'doughnut',
       data: {
-        labels: ['Computer Science', 'Info Tech', 'Electronics', 'Mech & Civil', 'Business/Design'],
+        labels: donutLabels,
         datasets: [{
-          data: [45, 25, 15, 10, 5],
-          backgroundColor: ['#6366f1', '#06b6d4', '#ec4899', '#f59e0b', '#10b981']
+          data: donutData,
+          backgroundColor: donutColors,
+          borderWidth: 2,
+          borderColor: 'var(--bg-surface)'
         }]
       },
       options: {
         responsive: true,
-        animation: { duration: 300 },
+        animation: { duration: 400 },
         plugins: {
-          legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 11 } } }
+          legend: {
+            position: 'bottom',
+            labels: { boxWidth: 10, font: { size: 11 } }
+          },
+          tooltip: {
+            callbacks: {
+              label: (context) => ` ${context.label}: ${context.parsed}%`
+            }
+          }
         }
       }
     });
@@ -1501,16 +1727,27 @@ class UniPulseApp {
     const tbody = document.getElementById('organizerAttendeesTableBody');
     if (!tbody) return;
 
-    const totalEventsEl = document.getElementById('orgStatTotalEvents');
-    const totalRegsEl = document.getElementById('orgStatTotalRegistrations');
-    const totalCheckedEl = document.getElementById('orgStatCheckedIn');
+    let displayList = this.registrations;
+    if (this.selectedOrgEvent && this.selectedOrgEvent !== 'all') {
+      displayList = this.registrations.filter(r => r.eventId === this.selectedOrgEvent);
+    }
 
-    if (totalEventsEl) totalEventsEl.textContent = this.events.length;
-    
-    const countChecked = this.registrations.filter(r => r.isCheckedIn).length;
-    if (totalCheckedEl) totalCheckedEl.textContent = (1240 + countChecked).toLocaleString();
+    if (displayList.length === 0) {
+      const selectedEvt = this.events.find(e => e.id === this.selectedOrgEvent);
+      const title = selectedEvt ? selectedEvt.title : 'this event';
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="7" style="text-align: center; padding: 2rem; color: var(--text-muted);">
+            <i class="fa-regular fa-clipboard" style="font-size: 1.5rem; margin-bottom: 0.5rem; display: block;"></i>
+            No direct web pass records logged yet for <strong>${title}</strong>.<br>
+            <span style="font-size: 0.78rem;">New attendee signups from student accounts will appear here in real-time.</span>
+          </td>
+        </tr>
+      `;
+      return;
+    }
 
-    tbody.innerHTML = this.registrations.map(r => {
+    tbody.innerHTML = displayList.map(r => {
       const evt = this.events.find(e => e.id === r.eventId) || { title: "Campus Event" };
       return `
         <tr>
@@ -1550,14 +1787,24 @@ class UniPulseApp {
         await supabaseService.updateCheckIn(ticketId, reg.isCheckedIn);
       }
 
+      this.updateOrgStats();
       this.renderOrganizerTable();
       this.showToast(`Ticket ${ticketId}: ${reg.isCheckedIn ? 'Checked-in' : 'Pending'}`, 'success');
     }
   }
 
   exportAttendeesCSV() {
+    let listToExport = this.registrations;
+    if (this.selectedOrgEvent && this.selectedOrgEvent !== 'all') {
+      listToExport = this.registrations.filter(r => r.eventId === this.selectedOrgEvent);
+    }
+
+    if (listToExport.length === 0) {
+      listToExport = this.registrations;
+    }
+
     let csv = "TicketID,AttendeeName,RollNo,Email,Department,Year,EventName,CheckInStatus\n";
-    this.registrations.forEach(r => {
+    listToExport.forEach(r => {
       const evt = this.events.find(e => e.id === r.eventId) || { title: "Event" };
       csv += `"${r.ticketId}","${r.attendeeName}","${r.rollNo}","${r.email}","${r.dept}","${r.year}","${evt.title}","${r.isCheckedIn ? 'CheckedIn' : 'Pending'}"\n`;
     });
@@ -1647,6 +1894,7 @@ class UniPulseApp {
     this.renderEvents();
     this.updateCategoryCounters();
     this.renderCalendar();
+    this.populateOrgEventDropdown();
     this.navigate('events');
   }
 

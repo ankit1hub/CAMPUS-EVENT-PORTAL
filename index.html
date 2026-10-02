@@ -503,42 +503,61 @@
           </div>
         </div>
 
+        <!-- Event Analytics Filter Selector Bar -->
+        <div style="background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-xl); padding: 1.1rem 1.4rem; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; box-shadow: var(--shadow-sm);">
+          <div class="flex items-center gap-3">
+            <div style="width: 42px; height: 42px; border-radius: var(--radius-lg); background: var(--primary-light); color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">
+              <i class="fa-solid fa-chart-pie"></i>
+            </div>
+            <div>
+              <div style="font-weight: 700; font-size: 1rem; color: var(--text-main);">Event Analytics Scope</div>
+              <div style="font-size: 0.8rem; color: var(--text-muted);" id="orgEventScopeSubtext">Showing aggregated campus overview across all events</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-2" style="min-width: 280px; flex: 1; max-width: 460px;">
+            <label for="orgEventFilterSelect" style="font-size: 0.85rem; font-weight: 600; white-space: nowrap; color: var(--text-muted);"><i class="fa-solid fa-filter"></i> Select Event:</label>
+            <select id="orgEventFilterSelect" class="form-control" style="font-weight: 600; padding: 0.55rem 0.85rem;" onchange="app.handleOrgEventFilterChange(this.value)">
+              <option value="all">🌐 All Events (Campus Overview)</option>
+            </select>
+          </div>
+        </div>
+
         <!-- Metric KPI Cards -->
         <div class="stats-grid-row">
           <div class="stat-card">
-            <div class="stat-icon" style="background: var(--primary-light); color: var(--primary);">
+            <div class="stat-icon" id="orgStat1Icon" style="background: var(--primary-light); color: var(--primary);">
               <i class="fa-solid fa-calendar-check"></i>
             </div>
             <div>
               <div class="stat-val" id="orgStatTotalEvents">6</div>
-              <div class="stat-title">Published Events</div>
+              <div class="stat-title" id="orgStat1Label">Published Events</div>
             </div>
           </div>
           <div class="stat-card">
-            <div class="stat-icon" style="background: var(--secondary-light); color: var(--secondary);">
+            <div class="stat-icon" id="orgStat2Icon" style="background: var(--secondary-light); color: var(--secondary);">
               <i class="fa-solid fa-users"></i>
             </div>
             <div>
               <div class="stat-val" id="orgStatTotalRegistrations">3,450</div>
-              <div class="stat-title">Total Registrations</div>
+              <div class="stat-title" id="orgStat2Label">Total Registrations</div>
             </div>
           </div>
           <div class="stat-card">
-            <div class="stat-icon" style="background: rgba(16, 185, 129, 0.15); color: var(--accent-emerald);">
+            <div class="stat-icon" id="orgStat3Icon" style="background: rgba(16, 185, 129, 0.15); color: var(--accent-emerald);">
               <i class="fa-solid fa-user-check"></i>
             </div>
             <div>
               <div class="stat-val" id="orgStatCheckedIn">1,240</div>
-              <div class="stat-title">Checked-in Attendees</div>
+              <div class="stat-title" id="orgStat3Label">Checked-in Attendees</div>
             </div>
           </div>
           <div class="stat-card">
-            <div class="stat-icon" style="background: rgba(236, 72, 153, 0.15); color: var(--accent-pink);">
+            <div class="stat-icon" id="orgStat4Icon" style="background: rgba(236, 72, 153, 0.15); color: var(--accent-pink);">
               <i class="fa-solid fa-award"></i>
             </div>
             <div>
-              <div class="stat-val">98.4%</div>
-              <div class="stat-title">Student Satisfaction</div>
+              <div class="stat-val" id="orgStatSatisfaction">98.4%</div>
+              <div class="stat-title" id="orgStat4Label">Student Satisfaction</div>
             </div>
           </div>
         </div>
@@ -546,11 +565,17 @@
         <!-- Charts Grid -->
         <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 1.25rem; margin-bottom: 2rem;" class="charts-layout">
           <div style="background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-xl); padding: 1.25rem; box-shadow: var(--shadow-sm);">
-            <h3 style="font-size: 1.05rem; margin-bottom: 0.85rem;">Registration Velocity (Oct 2026)</h3>
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.85rem; flex-wrap: wrap; gap: 0.5rem;">
+              <h3 style="font-size: 1.05rem;" id="regChartTitle">Registration Velocity</h3>
+              <span id="regChartBadge" class="role-pill role-student" style="font-size: 0.72rem;">Campus Timeline</span>
+            </div>
             <canvas id="registrationChart" height="170"></canvas>
           </div>
           <div style="background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-xl); padding: 1.25rem; box-shadow: var(--shadow-sm);">
-            <h3 style="font-size: 1.05rem; margin-bottom: 0.85rem;">Department Demographics</h3>
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.85rem; flex-wrap: wrap; gap: 0.5rem;">
+              <h3 style="font-size: 1.05rem;" id="deptChartTitle">Department Demographics</h3>
+              <span id="deptChartBadge" class="role-pill role-admin" style="font-size: 0.72rem;">All Branches</span>
+            </div>
             <canvas id="departmentChart" height="170"></canvas>
           </div>
         </div>
