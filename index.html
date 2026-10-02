@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UniPulse | Campus Event Management & Registration Portal</title>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome 6 for crisp icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <!-- Chart.js for Analytics -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <!-- Canvas Confetti for Celebrations -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  
+  <!-- Supabase JS Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- Top Announcement Live Ticker -->
+  <div class="top-ticker" id="topTicker">
+    <span class="badge-flash"><i class="fa-solid fa-bolt"></i> Live Buzz</span>
+    <span id="tickerText">⚡ Registration for HackPulse '26 is 85% full! Secure your team slot today.</span>
+  </div>
+
+  <!-- Main Navigation Header -->
+  <header class="site-header">
+    <div class="container nav-container">
+      <!-- Logo -->
+      <a href="#" class="brand-logo" onclick="app.navigate('events')">
+        <div class="brand-icon">
+          <i class="fa-solid fa-graduation-cap"></i>
+        </div>
+        <span>Uni<span class="brand-gradient">Pulse</span></span>
+      </a>
+
+      <!-- Desktop Navigation Tabs -->
+      <nav class="nav-links" id="mainNavLinks">
+        <button class="nav-item-btn active" data-view="events" onclick="app.navigate('events')">
+          <i class="fa-solid fa-compass"></i> Explore Events
+        </button>
+        <button class="nav-item-btn" data-view="calendar" onclick="app.navigate('calendar')">
+          <i class="fa-regular fa-calendar-days"></i> Calendar
+        </button>
+        <button class="nav-item-btn" data-view="clubs" onclick="app.navigate('clubs')">
+          <i class="fa-solid fa-people-group"></i> Clubs & Societies
+        </button>
+        
+        <!-- Student-Only Tab -->
+        <button class="nav-item-btn" id="navTabDashboard" data-view="dashboard" onclick="app.navigate('dashboard')">
+          <i class="fa-solid fa-ticket"></i> My Registrations
+          <span class="icon-badge" id="myRegistrationsBadge" style="position: static; margin-left: 4px; display: none;">0</span>
+        </button>
+
+        <!-- Admin/Organizer-Only Tab -->
+        <button class="nav-item-btn" id="navTabOrganizer" data-view="organizer" onclick="app.navigate('organizer')">
+          <i class="fa-solid fa-chart-line"></i> Admin Studio
+        </button>
+      </nav>
+
+      <!-- Action Buttons -->
+      <div class="nav-actions">
+        <!-- Dark/Light Theme Toggle -->
+        <button class="icon-btn" id="themeToggleBtn" title="Toggle Theme" onclick="app.toggleTheme()">
+          <i class="fa-regular fa-moon" id="themeIcon"></i>
+        </button>
+
+        <!-- Quick Notifications -->
+        <button class="icon-btn" onclick="app.showNotificationsModal()" title="Notifications">
+          <i class="fa-regular fa-bell"></i>
+          <span class="icon-badge" id="notifBadge">3</span>
+        </button>
+
+        <!-- Admin Host Event Button -->
+        <button class="btn btn-primary btn-sm" id="navHostEventBtn" onclick="app.openCreateEventModal()">
+          <i class="fa-solid fa-plus"></i> Host Event
+        </button>
+
+        <!-- Logged-in User Profile Dropdown -->
+        <div class="user-menu-btn" id="navUserPill" onclick="app.openUserDropdownModal()" title="User Account">
+          <div class="user-avatar" id="navAvatar">JD</div>
+          <div class="user-meta">
+            <div class="user-name" id="navUserName">John Doe</div>
+            <div class="user-role-label" id="navUserRole"><span class="role-pill role-student">🎓 Student</span></div>
+          </div>
+        </div>
+
+        <!-- Logged-out Auth Action Buttons (if guest) -->
+        <div id="navAuthBtns" class="flex items-center gap-2" style="display: none;">
+          <button class="btn btn-secondary btn-sm" onclick="app.openAuthModal('student')">
+            <i class="fa-solid fa-user-graduate"></i> Student Login
+          </button>
+          <button class="btn btn-primary btn-sm" onclick="app.openAuthModal('admin')">
+            <i class="fa-solid fa-shield-halved"></i> Admin Login
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main View Container -->
+  <main id="mainContainer">
+    
+    <!-- ==========================================
+         VIEW 1: EXPLORE EVENTS (DEFAULT VIEW)
+         ========================================== -->
+    <section id="view-events" class="view-section">
+      <!-- Hero Banner -->
+      <div class="hero-section">
+        <div class="container hero-center-container">
+          <div class="hero-text-content">
+            <div class="hero-tag">
+              <i class="fa-solid fa-sparkles"></i> Fall Semester 2026 Season
+            </div>
+            <h1 class="hero-title">
+              Experience, Compete & Elevate Your <span class="brand-gradient">Campus Life</span>
+            </h1>
+            <p class="hero-desc">
+              Discover university hackathons, cultural fests, hands-on tech workshops, sports tournaments, and club meets. Register in 1-click & claim official attendance credits.
+            </p>
+            <div class="hero-actions">
+              <button class="btn btn-primary btn-lg" onclick="document.getElementById('exploreSection').scrollIntoView({behavior: 'smooth'})">
+                <i class="fa-solid fa-fire"></i> Explore Trending Events
+              </button>
+              <button class="btn btn-secondary btn-lg" id="heroHostBtn" onclick="app.handleHostEventClick()">
+                <i class="fa-solid fa-bullhorn"></i> Submit Club Event
+              </button>
+            </div>
+            <!-- Quick Stats -->
+            <div class="hero-stats">
+              <div>
+                <div class="hero-stat-number" id="statLiveEvents">12+</div>
+                <div class="hero-stat-label">Live Events</div>
+              </div>
+              <div>
+                <div class="hero-stat-number" id="statTotalRegistrations">3,450+</div>
+                <div class="hero-stat-label">Students Registered</div>
+              </div>
+              <div>
+                <div class="hero-stat-number">24</div>
+                <div class="hero-stat-label">Active Campus Clubs</div>
+              </div>
+              <div>
+                <div class="hero-stat-number">100%</div>
+                <div class="hero-stat-label">Verified E-Certificates</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Category Quick Filter Section -->
+      <div class="search-filter-section" id="exploreSection">
+        <div class="container">
+          <!-- Category Quick Pills -->
+          <div class="category-pills">
+            <button class="category-pill active" data-category="all" onclick="app.selectCategoryPill('all')">
+              <i class="fa-solid fa-layer-group"></i> All Events (<span id="countAll">0</span>)
+            </button>
+            <button class="category-pill" data-category="hackathon" onclick="app.selectCategoryPill('hackathon')">
+              <i class="fa-solid fa-code"></i> Hackathons (<span id="countHackathon">0</span>)
+            </button>
+            <button class="category-pill" data-category="cultural" onclick="app.selectCategoryPill('cultural')">
+              <i class="fa-solid fa-guitar"></i> Cultural & Arts (<span id="countCultural">0</span>)
+            </button>
+            <button class="category-pill" data-category="workshop" onclick="app.selectCategoryPill('workshop')">
+              <i class="fa-solid fa-laptop-code"></i> Workshops & AI (<span id="countWorkshop">0</span>)
+            </button>
+            <button class="category-pill" data-category="sports" onclick="app.selectCategoryPill('sports')">
+              <i class="fa-solid fa-trophy"></i> Sports & Fitness (<span id="countSports">0</span>)
+            </button>
+            <button class="category-pill" data-category="gaming" onclick="app.selectCategoryPill('gaming')">
+              <i class="fa-solid fa-gamepad"></i> Gaming & Esports (<span id="countGaming">0</span>)
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Events List Grid -->
+      <div class="container">
+        <div class="flex items-center justify-between" style="margin-bottom: 1.25rem;">
+          <h2 style="font-size: 1.45rem;" id="eventsSectionTitle">Upcoming Campus Events</h2>
+          <span style="font-size: 0.85rem; color: var(--text-muted);" id="eventsMatchCounter">Showing 6 events</span>
+        </div>
+        
+        <div class="events-grid" id="eventsGrid">
+          <!-- Rendered dynamically by JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         VIEW 2: EVENT CALENDAR VIEW
+         ========================================== -->
+    <section id="view-calendar" class="view-section hidden">
+      <div class="container" style="padding-top: 2rem;">
+        <div class="calendar-wrap">
+          <div class="calendar-nav-bar">
+            <div>
+              <h2 style="font-size: 1.5rem;" id="calendarMonthYearTitle">October 2026</h2>
+              <p style="font-size: 0.85rem; color: var(--text-muted);">Click on any scheduled event or date to inspect details</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <button class="btn btn-secondary btn-sm" onclick="app.changeCalendarMonth(-1)"><i class="fa-solid fa-chevron-left"></i> Prev</button>
+              <button class="btn btn-secondary btn-sm" onclick="app.resetCalendarMonth()">Today</button>
+              <button class="btn btn-secondary btn-sm" onclick="app.changeCalendarMonth(1)">Next <i class="fa-solid fa-chevron-right"></i></button>
+            </div>
+          </div>
+
+          <!-- Calendar Days Grid -->
+          <div class="calendar-grid" id="calendarDaysGrid">
+            <!-- Injected via JavaScript -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         VIEW 3: CLUBS & SOCIETIES HUB
+         ========================================== -->
+    <section id="view-clubs" class="view-section hidden">
+      <div class="container" style="padding-top: 2.5rem;">
+        <div style="text-align: center; max-width: 650px; margin: 0 auto 2.5rem;">
+          <h1 style="font-size: 2.15rem; margin-bottom: 0.6rem;">Campus Clubs & Student Societies</h1>
+          <p style="color: var(--text-muted);">Join student-led organizations, build real-world leadership, lead flagship fests, and expand your campus network.</p>
+        </div>
+
+        <div class="clubs-grid" id="clubsGrid">
+          <!-- Dynamically Rendered -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         VIEW 4: STUDENT HUB ("MY REGISTRATIONS")
+         ========================================== -->
+    <section id="view-dashboard" class="view-section hidden">
+      <div class="container" style="padding-top: 2.5rem;">
+        <div class="flex items-center justify-between flex-wrap gap-4" style="margin-bottom: 1.75rem;">
+          <div>
+            <div style="display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.2rem 0.65rem; background: var(--primary-light); color: var(--primary); border-radius: var(--radius-full); font-size: 0.75rem; font-weight: 700; margin-bottom: 0.4rem;">
+              <i class="fa-solid fa-user-graduate"></i> Student Portal
+            </div>
+            <h1 style="font-size: 2rem; margin-bottom: 0.25rem;">My Campus Hub</h1>
+            <p style="color: var(--text-muted);">Manage your registered event passes, downloaded QR tickets, saved events & verifiable certificates.</p>
+          </div>
+          <div class="flex gap-2">
+            <button class="btn btn-primary btn-sm" onclick="app.navigate('events')"><i class="fa-solid fa-magnifying-glass"></i> Browse Events</button>
+          </div>
+        </div>
+
+        <!-- Dashboard Sub-Tabs -->
+        <div style="display: flex; gap: 0.75rem; border-bottom: 1px solid var(--border-subtle); margin-bottom: 1.75rem;">
+          <button class="nav-item-btn active" id="dashTabTickets" onclick="app.switchDashboardTab('tickets')">
+            <i class="fa-solid fa-ticket"></i> Registered E-Passes (<span id="dashTicketsCount">0</span>)
+          </button>
+          <button class="nav-item-btn" id="dashTabBookmarks" onclick="app.switchDashboardTab('bookmarks')">
+            <i class="fa-solid fa-bookmark"></i> Saved Events (<span id="dashBookmarksCount">0</span>)
+          </button>
+          <button class="nav-item-btn" id="dashTabCertificates" onclick="app.switchDashboardTab('certificates')">
+            <i class="fa-solid fa-award"></i> Certificates (<span id="dashCertificatesCount">0</span>)
+          </button>
+        </div>
+
+        <!-- Dashboard Content Panels -->
+        <div id="dashPanelTickets">
+          <div class="events-grid" id="myTicketsGrid"></div>
+          <div id="emptyTicketsState" style="padding: 3.5rem 1rem; display: none; text-align: center;">
+            <div style="font-size: 3rem; margin-bottom: 0.75rem; color: var(--text-muted);"><i class="fa-regular fa-calendar-xmark"></i></div>
+            <h3 style="font-size: 1.3rem; margin-bottom: 0.35rem;">No active registrations yet</h3>
+            <p style="color: var(--text-muted); max-width: 420px; margin: 0 auto 1.25rem;">You haven't registered for any events yet. Check out upcoming hackathons, fests, and workshops!</p>
+            <button class="btn btn-primary btn-sm" onclick="app.navigate('events')">Browse Live Events</button>
+          </div>
+        </div>
+
+        <div id="dashPanelBookmarks" class="hidden">
+          <div class="events-grid" id="myBookmarksGrid"></div>
+          <div id="emptyBookmarksState" style="padding: 3.5rem 1rem; display: none; text-align: center;">
+            <div style="font-size: 3rem; margin-bottom: 0.75rem; color: var(--text-muted);"><i class="fa-regular fa-bookmark"></i></div>
+            <h3 style="font-size: 1.3rem; margin-bottom: 0.35rem;">No saved events</h3>
+            <p style="color: var(--text-muted); max-width: 420px; margin: 0 auto 1.25rem;">Bookmark interesting events to register later.</p>
+            <button class="btn btn-secondary btn-sm" onclick="app.navigate('events')">Explore Events</button>
+          </div>
+        </div>
+
+        <div id="dashPanelCertificates" class="hidden">
+          <div class="events-grid" id="myCertificatesGrid"></div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ==========================================
+         VIEW 5: ORGANIZER & ADMIN STUDIO (ADMIN ONLY)
+         ========================================== -->
+    <section id="view-organizer" class="view-section hidden">
+      <div class="container" style="padding-top: 2.5rem;">
+        <div class="flex items-center justify-between flex-wrap gap-4" style="margin-bottom: 1.75rem;">
+          <div>
+            <div style="display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.2rem 0.65rem; background: rgba(16, 185, 129, 0.15); color: var(--accent-emerald); border-radius: var(--radius-full); font-size: 0.75rem; font-weight: 700; margin-bottom: 0.4rem;">
+              <i class="fa-solid fa-shield-halved"></i> Administrator & Host Control
+            </div>
+            <h1 style="font-size: 2.1rem; margin-bottom: 0.25rem;">Admin & Organizer Studio</h1>
+            <p style="color: var(--text-muted);">Real-time analytics, gate check-in scanner simulator, CSV attendee export & event management.</p>
+          </div>
+          <div class="flex gap-2">
+            <button class="btn btn-secondary btn-sm" onclick="app.openScannerModal()"><i class="fa-solid fa-qrcode"></i> Gate QR Scanner</button>
+            <button class="btn btn-primary btn-sm" onclick="app.openCreateEventModal()"><i class="fa-solid fa-plus"></i> Create New Event</button>
+          </div>
+        </div>
+
+        <!-- Metric KPI Cards -->
+        <div class="stats-grid-row">
+          <div class="stat-card">
+            <div class="stat-icon" style="background: var(--primary-light); color: var(--primary);">
+              <i class="fa-solid fa-calendar-check"></i>
+            </div>
+            <div>
+              <div class="stat-val" id="orgStatTotalEvents">6</div>
+              <div class="stat-title">Published Events</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background: var(--secondary-light); color: var(--secondary);">
+              <i class="fa-solid fa-users"></i>
+            </div>
+            <div>
+              <div class="stat-val" id="orgStatTotalRegistrations">3,450</div>
+              <div class="stat-title">Total Registrations</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background: rgba(16, 185, 129, 0.15); color: var(--accent-emerald);">
+              <i class="fa-solid fa-user-check"></i>
+            </div>
+            <div>
+              <div class="stat-val" id="orgStatCheckedIn">1,240</div>
+              <div class="stat-title">Checked-in Attendees</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background: rgba(236, 72, 153, 0.15); color: var(--accent-pink);">
+              <i class="fa-solid fa-award"></i>
+            </div>
+            <div>
+              <div class="stat-val">98.4%</div>
+              <div class="stat-title">Student Satisfaction</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Charts Grid -->
+        <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 1.25rem; margin-bottom: 2rem;" class="charts-layout">
+          <div style="background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-xl); padding: 1.25rem; box-shadow: var(--shadow-sm);">
+            <h3 style="font-size: 1.05rem; margin-bottom: 0.85rem;">Registration Velocity (Oct 2026)</h3>
+            <canvas id="registrationChart" height="170"></canvas>
+          </div>
+          <div style="background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-xl); padding: 1.25rem; box-shadow: var(--shadow-sm);">
+            <h3 style="font-size: 1.05rem; margin-bottom: 0.85rem;">Department Demographics</h3>
+            <canvas id="departmentChart" height="170"></canvas>
+          </div>
+        </div>
+
+        <!-- Attendee Roster Table -->
+        <div class="data-table-wrap">
+          <div style="padding: 1rem 1.25rem; border-bottom: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
+            <div>
+              <h3 style="font-size: 1.15rem;">Live Registration Roster</h3>
+              <p style="font-size: 0.78rem; color: var(--text-muted);">Manage real-time signups and verify attendance</p>
+            </div>
+            <div class="flex gap-2">
+              <button class="btn btn-secondary btn-sm" onclick="app.exportAttendeesCSV()"><i class="fa-solid fa-file-csv"></i> Export CSV Roster</button>
+            </div>
+          </div>
+          <div style="overflow-x: auto;">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Ticket ID</th>
+                  <th>Student Name</th>
+                  <th>Roll / Reg No.</th>
+                  <th>Event Name</th>
+                  <th>Department</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="organizerAttendeesTableBody">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ==========================================
+       MODALS
+       ========================================== -->
+
+  <!-- AUTH / LOGIN MODAL (STUDENT & ADMIN SEPARATED) -->
+  <div class="modal-overlay" id="modalAuth">
+    <div class="modal-box" style="max-width: 500px;">
+      <div class="modal-header">
+        <h3 style="font-size: 1.25rem;" id="authModalTitle">Sign In to UniPulse</h3>
+        <button class="modal-close-btn" onclick="app.closeModal('modalAuth')"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <div class="modal-body" style="padding-top: 1rem;">
+        <!-- Auth Role Tabs -->
+        <div class="auth-role-tabs">
+          <button class="auth-role-tab active" id="authTabStudent" onclick="app.switchAuthTab('student')">
+            <i class="fa-solid fa-user-graduate"></i> Student Portal
+          </button>
+          <button class="auth-role-tab" id="authTabAdmin" onclick="app.switchAuthTab('admin')">
+            <i class="fa-solid fa-shield-halved"></i> Admin / Organizer
+          </button>
+        </div>
+
+        <!-- 1. STUDENT AUTH PANEL -->
+        <div id="authStudentPanel">
+          <!-- Sub-mode: Sign In vs Sign Up -->
+          <div style="display: flex; justify-content: center; gap: 0.5rem; margin-bottom: 1rem;">
+            <button class="btn btn-secondary btn-sm active" id="studentModeSignInBtn" style="flex: 1;" onclick="app.toggleStudentAuthMode('signin')">
+              Sign In
+            </button>
+            <button class="btn btn-secondary btn-sm" id="studentModeSignUpBtn" style="flex: 1;" onclick="app.toggleStudentAuthMode('signup')">
+              Create New Account
+            </button>
+          </div>
+
+          <div class="demo-auth-banner">
+            <span style="font-weight: 700; font-size: 0.8rem; color: var(--primary);"><i class="fa-solid fa-bolt"></i> Quick Demo Access:</span>
+            <button type="button" class="btn btn-secondary btn-sm" style="width: 100%; margin-top: 0.35rem;" onclick="app.loginAsDemoStudent()">
+              ⚡ 1-Click Login as Demo Student (John Doe)
+            </button>
+          </div>
+
+          <!-- Student Sign-In Form -->
+          <form id="studentSignInForm" onsubmit="app.handleStudentLogin(event)">
+            <div class="form-group">
+              <label class="form-label">University Email</label>
+              <input type="email" id="loginStudentEmail" class="form-control" required placeholder="john.doe@campus.edu" value="john.doe@campus.edu">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Password</label>
+              <input type="password" id="loginStudentPass" class="form-control" required placeholder="••••••••" value="student123">
+            </div>
+            <div class="flex items-center justify-between" style="font-size: 0.8rem; margin-bottom: 1.25rem;">
+              <label style="display: flex; align-items: center; gap: 0.35rem; cursor: pointer;">
+                <input type="checkbox" checked> Remember me
+              </label>
+              <a href="#" onclick="app.showToast('Use demo password: student123', 'info')">Forgot Password?</a>
+            </div>
+            <button type="submit" class="btn btn-primary w-full" style="width: 100%;" id="studentSignInSubmitBtn">
+              <i class="fa-solid fa-right-to-bracket"></i> Login as Student
+            </button>
+          </form>
+
+          <!-- Student Sign-Up Form -->
+          <form id="studentSignUpForm" class="hidden" onsubmit="app.handleStudentSignUp(event)">
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Full Name *</label>
+                <input type="text" id="signupFullName" class="form-control" required placeholder="Alex Rivera">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Roll / Student ID *</label>
+                <input type="text" id="signupRollNo" class="form-control" required placeholder="24CS0192">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">University Email *</label>
+              <input type="email" id="signupEmail" class="form-control" required placeholder="alex.rivera@campus.edu">
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Department *</label>
+                <select id="signupDept" class="form-control" required>
+                  <option value="Computer Science & Eng">Computer Science & Eng</option>
+                  <option value="Information Technology">Information Technology</option>
+                  <option value="Electronics & Comm">Electronics & Comm</option>
+                  <option value="Mechanical Engineering">Mechanical Engineering</option>
+                  <option value="Business Administration">Business Administration</option>
+                  <option value="Design & Media">Design & Media</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Academic Year *</label>
+                <select id="signupYear" class="form-control" required>
+                  <option value="Year 1 (Freshman)">Year 1 (Freshman)</option>
+                  <option value="Year 2 (Sophomore)">Year 2 (Sophomore)</option>
+                  <option value="Year 3 (Junior)" selected>Year 3 (Junior)</option>
+                  <option value="Year 4 (Senior)">Year 4 (Senior)</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Create Password (Min. 6 chars) *</label>
+              <input type="password" id="signupPass" class="form-control" required minlength="6" placeholder="••••••••">
+            </div>
+
+            <button type="submit" class="btn btn-primary w-full" style="width: 100%;" id="studentSignUpSubmitBtn">
+              <i class="fa-solid fa-user-plus"></i> Register & Create Account
+            </button>
+          </form>
+        </div>
+
+        <!-- 2. ADMIN AUTH PANEL -->
+        <div id="authAdminPanel" class="hidden">
+          <!-- Sub-mode: Sign In vs Create Account for Admin -->
+          <div style="display: flex; justify-content: center; gap: 0.5rem; margin-bottom: 1rem;">
+            <button class="btn btn-secondary btn-sm active" id="adminModeSignInBtn" style="flex: 1;" onclick="app.toggleAdminAuthMode('signin')">
+              Sign In
+            </button>
+            <button class="btn btn-secondary btn-sm" id="adminModeSignUpBtn" style="flex: 1;" onclick="app.toggleAdminAuthMode('signup')">
+              Create Admin Account
+            </button>
+          </div>
+
+          <div class="demo-auth-banner" style="background: rgba(16, 185, 129, 0.1); border-color: rgba(16, 185, 129, 0.3);">
+            <span style="font-weight: 700; font-size: 0.8rem; color: var(--accent-emerald);"><i class="fa-solid fa-shield-halved"></i> Quick Admin Access:</span>
+            <button type="button" class="btn btn-secondary btn-sm" style="width: 100%; margin-top: 0.35rem;" onclick="app.loginAsDemoAdmin()">
+              🛡️ 1-Click Login as Admin (Aarav Sharma)
+            </button>
+          </div>
+
+          <!-- Admin Sign-In Form -->
+          <form id="adminSignInForm" onsubmit="app.handleAdminLogin(event)">
+            <div class="form-group">
+              <label class="form-label">Admin / Organizer Email</label>
+              <input type="email" id="loginAdminEmail" class="form-control" required placeholder="admin@campus.edu" value="admin@campus.edu">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Admin Security Key / Password</label>
+              <input type="password" id="loginAdminPass" class="form-control" required placeholder="••••••••" value="admin123">
+              <div class="form-help">Enter club lead key or faculty admin credentials.</div>
+            </div>
+            <button type="submit" class="btn btn-primary w-full" style="width: 100%; background: linear-gradient(135deg, #059669, #10b981);" id="adminSignInSubmitBtn">
+              <i class="fa-solid fa-lock-open"></i> Login to Admin Studio
+            </button>
+          </form>
+
+          <!-- Admin Sign-Up Form -->
+          <form id="adminSignUpForm" class="hidden" onsubmit="app.handleAdminSignUp(event)">
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Admin Full Name *</label>
+                <input type="text" id="signupAdminFullName" class="form-control" required placeholder="e.g. Dr. Robert Vance">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Admin Security Code / PIN *</label>
+                <input type="text" id="signupAdminKey" class="form-control" required placeholder="CAMPUS_ADMIN_2026 or admin123" value="CAMPUS_ADMIN_2026">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Official Staff / Club Email *</label>
+              <input type="email" id="signupAdminEmail" class="form-control" required placeholder="staff.lead@campus.edu">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Department / Society / Committee *</label>
+              <select id="signupAdminDept" class="form-control" required>
+                <option value="Campus Event Council & Student Affairs">Campus Event Council & Student Affairs</option>
+                <option value="Google Developer Student Club & ACM">Google Developer Student Club & ACM</option>
+                <option value="Campus Cultural & Music Society">Campus Cultural & Music Society</option>
+                <option value="AI & Robotics Club (ARC)">AI & Robotics Club (ARC)</option>
+                <option value="Sports & Athletics Committee">Sports & Athletics Committee</option>
+                <option value="Esports & Gaming Guild">Esports & Gaming Guild</option>
+                <option value="Faculty Administration">Faculty Administration</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Create Admin Password (Min. 6 chars) *</label>
+              <input type="password" id="signupAdminPass" class="form-control" required minlength="6" placeholder="••••••••">
+            </div>
+
+            <button type="submit" class="btn btn-primary w-full" style="width: 100%; background: linear-gradient(135deg, #059669, #10b981);" id="adminSignUpSubmitBtn">
+              <i class="fa-solid fa-user-shield"></i> Register Administrator Account
+            </button>
+          </form>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+
+
+  <!-- USER PROFILE & LOGOUT DROPDOWN MODAL -->
+  <div class="modal-overlay" id="modalUserDropdown">
+    <div class="modal-box" style="max-width: 440px;">
+      <div class="modal-header">
+        <h3 style="font-size: 1.15rem;">Account & Session</h3>
+        <button class="modal-close-btn" onclick="app.closeModal('modalUserDropdown')"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <div class="flex items-center gap-3" style="padding-bottom: 1.25rem; border-bottom: 1px solid var(--border-subtle); margin-bottom: 1.25rem;">
+          <div class="user-avatar" id="modalUserAvatar" style="width: 3.2rem; height: 3.2rem; font-size: 1.25rem;">JD</div>
+          <div>
+            <div style="font-size: 1.1rem; font-weight: 700;" id="modalUserName">John Doe</div>
+            <div style="font-size: 0.82rem; color: var(--text-muted);" id="modalUserSub">john.doe@campus.edu</div>
+            <div style="margin-top: 0.35rem;" id="modalUserRoleBadge"><span class="role-pill role-student">🎓 Student</span></div>
+          </div>
+        </div>
+
+        <div class="flex flex-col gap-2">
+          <button class="btn btn-secondary" style="justify-content: flex-start;" onclick="app.closeModal('modalUserDropdown'); app.openAuthModal('student');">
+            <i class="fa-solid fa-user-graduate"></i> Switch to Student Login
+          </button>
+          <button class="btn btn-secondary" style="justify-content: flex-start;" onclick="app.closeModal('modalUserDropdown'); app.openAuthModal('admin');">
+            <i class="fa-solid fa-shield-halved"></i> Switch to Admin Login
+          </button>
+          <button class="btn btn-secondary" style="justify-content: flex-start; color: var(--accent-rose); border-color: rgba(244, 63, 94, 0.3);" onclick="app.logout()">
+            <i class="fa-solid fa-right-from-bracket"></i> Sign Out
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EVENT DETAILS MODAL -->
+  <div class="modal-overlay" id="modalEventDetails">
+    <div class="modal-box" style="max-width: 740px;">
+      <div class="modal-header">
+        <div class="flex items-center gap-2">
+          <span id="detailModalCategory" class="event-card-category category-tech" style="position: static;">TECH</span>
+          <h3 id="detailModalTitle" style="font-size: 1.25rem;">Event Title</h3>
+        </div>
+        <button class="modal-close-btn" onclick="app.closeModal('modalEventDetails')"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body" id="detailModalBody"></div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary btn-sm" onclick="app.closeModal('modalEventDetails')">Close</button>
+        <button class="btn btn-secondary btn-sm" id="detailShareBtn" onclick="app.shareCurrentEvent()"><i class="fa-solid fa-share-nodes"></i> Share</button>
+        <button class="btn btn-primary btn-sm" id="detailRegisterCtaBtn"><i class="fa-solid fa-ticket"></i> Register Now</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- REGISTRATION FORM MODAL -->
+  <div class="modal-overlay" id="modalRegistrationForm">
+    <div class="modal-box" style="max-width: 600px;">
+      <div class="modal-header">
+        <div>
+          <h3 style="font-size: 1.2rem;">Event Registration</h3>
+          <p style="font-size: 0.8rem; color: var(--text-muted);" id="regModalEventSub">For: HackPulse 2026</p>
+        </div>
+        <button class="modal-close-btn" onclick="app.closeModal('modalRegistrationForm')"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <form id="registrationForm" onsubmit="app.handleRegistrationSubmit(event)">
+        <div class="modal-body">
+          <input type="hidden" id="regEventId" value="">
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Full Name *</label>
+              <input type="text" id="regFullName" class="form-control" required placeholder="e.g. John Doe">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Roll / Student ID *</label>
+              <input type="text" id="regRollNo" class="form-control" required placeholder="e.g. 23CS0148">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">University Email *</label>
+              <input type="email" id="regEmail" class="form-control" required placeholder="name@campus.edu">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Phone Number *</label>
+              <input type="tel" id="regPhone" class="form-control" required placeholder="+1 555-0199" value="+1 555-0199">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Department *</label>
+              <select id="regDept" class="form-control" required>
+                <option value="Computer Science & Eng">Computer Science & Eng</option>
+                <option value="Information Technology">Information Technology</option>
+                <option value="Electronics & Comm">Electronics & Comm</option>
+                <option value="Mechanical Engineering">Mechanical Engineering</option>
+                <option value="Business Administration">Business Administration</option>
+                <option value="Design & Media">Design & Media</option>
+                <option value="Biotechnology">Biotechnology</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Academic Year *</label>
+              <select id="regYear" class="form-control" required>
+                <option value="Year 1 (Freshman)">Year 1 (Freshman)</option>
+                <option value="Year 2 (Sophomore)">Year 2 (Sophomore)</option>
+                <option value="Year 3 (Junior)" selected>Year 3 (Junior)</option>
+                <option value="Year 4 (Senior)">Year 4 (Senior)</option>
+                <option value="Postgraduate / PhD">Postgraduate / PhD</option>
+              </select>
+            </div>
+          </div>
+
+          <div id="teamFieldsWrap" style="display: none; background: var(--bg-subtle); padding: 0.85rem; border-radius: var(--radius-md); margin-bottom: 1rem;">
+            <div class="form-group">
+              <label class="form-label">Team Name *</label>
+              <input type="text" id="regTeamName" class="form-control" placeholder="e.g. ByteBusters">
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label">Team Member Roll Numbers (comma-separated)</label>
+              <input type="text" id="regTeamMembers" class="form-control" placeholder="23CS0149, 23CS0150, 23CS0151">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Special Requirements / Dietary / T-shirt Size</label>
+            <input type="text" id="regNotes" class="form-control" placeholder="Size M / Vegetarian">
+          </div>
+
+          <div style="display: flex; align-items: flex-start; gap: 0.45rem; font-size: 0.8rem; color: var(--text-muted); margin-top: 0.85rem;">
+            <input type="checkbox" id="regTerms" required checked style="margin-top: 0.2rem;">
+            <label for="regTerms">I agree to abide by the university campus event code of conduct and consent to official attendance logging.</label>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary btn-sm" onclick="app.closeModal('modalRegistrationForm')">Cancel</button>
+          <button type="submit" class="btn btn-primary btn-sm"><i class="fa-solid fa-check"></i> Confirm & Generate E-Pass</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- E-TICKET PASS & QR CODE MODAL -->
+  <div class="modal-overlay" id="modalTicketPass">
+    <div class="modal-box" style="max-width: 650px; background: transparent; border: none; box-shadow: none;">
+      <div style="display: flex; justify-content: flex-end; margin-bottom: 0.5rem;">
+        <button class="modal-close-btn" style="background: rgba(15, 23, 42, 0.6); color: white;" onclick="app.closeModal('modalTicketPass')"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <div class="ticket-container" id="printableTicketContainer">
+        <div class="ticket-header">
+          <div class="ticket-brand">
+            <i class="fa-solid fa-graduation-cap"></i> UniPulse Campus Pass
+          </div>
+          <div class="ticket-badge" id="ticketCategoryPill">HACKATHON PASS</div>
+        </div>
+
+        <div class="ticket-body">
+          <div>
+            <h3 style="font-size: 1.25rem; margin-bottom: 0.85rem; color: var(--text-main);" id="ticketEventTitle">HackPulse 2026</h3>
+            <div class="ticket-info-grid">
+              <div class="ticket-info-item">
+                <div class="label">Attendee Name</div>
+                <div class="val" id="ticketAttendeeName">John Doe</div>
+              </div>
+              <div class="ticket-info-item">
+                <div class="label">Roll / Reg No.</div>
+                <div class="val" id="ticketRollNo">23CS0148</div>
+              </div>
+              <div class="ticket-info-item">
+                <div class="label">Date & Time</div>
+                <div class="val" id="ticketDateTime" style="font-size: 0.82rem;">Oct 18, 09:00 AM</div>
+              </div>
+              <div class="ticket-info-item">
+                <div class="label">Venue / Hall</div>
+                <div class="val" id="ticketVenue" style="font-size: 0.82rem;">Auditorium A</div>
+              </div>
+              <div class="ticket-info-item">
+                <div class="label">Department</div>
+                <div class="val" id="ticketDept">CSE (Year 3)</div>
+              </div>
+              <div class="ticket-info-item">
+                <div class="label">Seat / Entry Status</div>
+                <div class="val" style="color: var(--accent-emerald);">CONFIRMED ✅</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="ticket-qr-section">
+            <div class="qr-canvas-box" id="ticketQrWrapper">
+              <canvas id="ticketQrCanvas" width="120" height="120"></canvas>
+            </div>
+            <div class="ticket-id" id="ticketPassId">UP-2026-8492</div>
+            <span style="font-size: 0.68rem; color: var(--text-muted); margin-top: 0.2rem;">Scan at Gate for Check-in</span>
+          </div>
+        </div>
+
+        <div class="ticket-perks">
+          <span><i class="fa-solid fa-award" style="color: var(--primary);"></i> Attendance Logged</span>
+          <span><i class="fa-solid fa-utensils" style="color: var(--secondary);"></i> Refreshment Pass</span>
+          <span><i class="fa-solid fa-certificate" style="color: var(--accent-amber);"></i> Skill Certificate</span>
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: center; gap: 0.75rem; margin-top: 1rem;">
+        <button class="btn btn-primary btn-sm" onclick="window.print()"><i class="fa-solid fa-print"></i> Print E-Pass</button>
+        <button class="btn btn-secondary btn-sm" onclick="app.downloadTicketImage()"><i class="fa-solid fa-download"></i> Save</button>
+        <button class="btn btn-secondary btn-sm" onclick="app.closeModal('modalTicketPass')">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CERTIFICATE MODAL -->
+  <div class="modal-overlay" id="modalCertificate">
+    <div class="modal-box" style="max-width: 680px; background: transparent; border: none; box-shadow: none;">
+      <div style="display: flex; justify-content: flex-end; margin-bottom: 0.5rem;">
+        <button class="modal-close-btn" style="background: rgba(15, 23, 42, 0.6); color: white;" onclick="app.closeModal('modalCertificate')"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <div class="certificate-preview" id="printableCert">
+        <div class="cert-corner-decor tl"></div>
+        <div class="cert-corner-decor tr"></div>
+        <div class="cert-corner-decor bl"></div>
+        <div class="cert-corner-decor br"></div>
+
+        <div style="font-size: 1.75rem; color: #4338ca; margin-bottom: 0.2rem;"><i class="fa-solid fa-graduation-cap"></i></div>
+        <div class="cert-header">Certificate of Completion</div>
+        <div class="cert-sub">CAMPUS EVENT MANAGEMENT & EXCELLENCE COUNCIL</div>
+
+        <div style="font-size: 0.85rem; color: #64748b; margin-top: 0.75rem;">This is proudly presented to</div>
+        <div class="cert-recipient" id="certRecipientName">John Doe</div>
+        
+        <p class="cert-body-text">
+          for active participation and outstanding performance in <strong id="certEventTitle">Hands-on Generative AI & Autonomous Agents Workshop</strong> organized on campus by the student council.
+        </p>
+
+        <div class="cert-footer-row">
+          <div class="cert-sign-block">
+            <div class="cert-sign-line"></div>
+            <div class="cert-sign-label">Prof. Robert Vance<br>Dean of Student Affairs</div>
+          </div>
+          <div style="text-align: center;">
+            <div style="width: 48px; height: 48px; border-radius: 50%; border: 2px dashed #4338ca; display: flex; align-items: center; justify-content: center; margin: 0 auto 0.2rem; font-size: 1.3rem; color: #4338ca;">
+              <i class="fa-solid fa-stamp"></i>
+            </div>
+            <span style="font-size: 0.62rem; color: #64748b; font-weight: 700;">OFFICIAL SEAL</span>
+          </div>
+          <div class="cert-sign-block">
+            <div class="cert-sign-line"></div>
+            <div class="cert-sign-label" id="certOrganizerSign">Aarav Sharma<br>Lead Club Convener</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: center; gap: 0.75rem; margin-top: 1rem;">
+        <button class="btn btn-primary btn-sm" onclick="window.print()"><i class="fa-solid fa-print"></i> Print / Save PDF</button>
+        <button class="btn btn-secondary btn-sm" onclick="app.closeModal('modalCertificate')">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CREATE NEW EVENT (ORGANIZER WIZARD) MODAL -->
+  <div class="modal-overlay" id="modalCreateEvent">
+    <div class="modal-box" style="max-width: 650px;">
+      <div class="modal-header">
+        <div>
+          <h3 style="font-size: 1.25rem;">Host a Campus Event</h3>
+          <p style="font-size: 0.78rem; color: var(--text-muted);">Publish club activities, seminars, or fests to the live portal</p>
+        </div>
+        <button class="modal-close-btn" onclick="app.closeModal('modalCreateEvent')"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <form id="createEventForm" onsubmit="app.handleCreateEventSubmit(event)">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">Event Title *</label>
+            <input type="text" id="newEventTitle" class="form-control" required placeholder="e.g. Web3 DevCon 2026">
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Category *</label>
+              <select id="newEventCategory" class="form-control" required>
+                <option value="hackathon">Hackathons & Coding</option>
+                <option value="cultural">Cultural & Arts</option>
+                <option value="workshop">Workshops & AI</option>
+                <option value="sports">Sports & Tournaments</option>
+                <option value="gaming">Esports & Gaming</option>
+                <option value="tech">Tech & Career</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Organizing Club / Society *</label>
+              <input type="text" id="newEventOrganizer" class="form-control" required placeholder="e.g. GDSC & ACM Chapter">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Event Date *</label>
+              <input type="date" id="newEventDate" class="form-control" required value="2026-11-10">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Time / Duration *</label>
+              <input type="text" id="newEventTime" class="form-control" required placeholder="e.g. 10:00 AM - 04:00 PM">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Venue / Hall *</label>
+              <input type="text" id="newEventVenue" class="form-control" required placeholder="e.g. Campus Amphitheatre / Lab 202">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Total Seat Capacity *</label>
+              <input type="number" id="newEventCapacity" class="form-control" required value="150" min="10" max="5000">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Registration Fee (₹/$) *</label>
+              <input type="number" id="newEventPrice" class="form-control" required value="0" min="0">
+              <div class="form-help">Enter 0 for Free admission</div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Participation Format *</label>
+              <select id="newEventTeamType" class="form-control" required>
+                <option value="Solo">Solo Individual</option>
+                <option value="Team (2-4)">Team (2-4 Members)</option>
+                <option value="Squad (4-5)">Squad (4-5 Members)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Event Description & Perks *</label>
+            <textarea id="newEventDesc" class="form-control" rows="3" required placeholder="Describe what attendees will learn, win, or experience..."></textarea>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Cover Banner Image URL</label>
+            <input type="url" id="newEventBanner" class="form-control" placeholder="https://images.unsplash.com/... (optional)">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary btn-sm" onclick="app.closeModal('modalCreateEvent')">Cancel</button>
+          <button type="submit" class="btn btn-primary btn-sm"><i class="fa-solid fa-paper-plane"></i> Publish Event</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- SCANNER SIMULATOR MODAL (FOR ORGANIZERS) -->
+  <div class="modal-overlay" id="modalScanner">
+    <div class="modal-box" style="max-width: 460px; text-align: center;">
+      <div class="modal-header">
+        <h3 style="font-size: 1.2rem;"><i class="fa-solid fa-qrcode"></i> Gate Check-in Simulator</h3>
+        <button class="modal-close-btn" onclick="app.closeModal('modalScanner')"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <div style="background: var(--bg-subtle); padding: 1.5rem; border-radius: var(--radius-lg); border: 2px dashed var(--primary); margin-bottom: 1.25rem;">
+          <div style="font-size: 2.5rem; color: var(--primary); margin-bottom: 0.35rem;"><i class="fa-solid fa-expand"></i></div>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.85rem;">Enter Ticket ID or click below to simulate scan</p>
+          <input type="text" id="scanTicketInput" class="form-control" placeholder="e.g. UP-2026-8492" style="text-align: center; font-weight: 700; font-family: monospace; font-size: 1.05rem; margin-bottom: 0.85rem;">
+          <button class="btn btn-primary w-full" style="width: 100%;" onclick="app.simulateScanTicket()"><i class="fa-solid fa-camera"></i> Verify & Check-in Ticket</button>
+        </div>
+
+        <div id="scanResultBox" style="display: none; padding: 0.85rem; border-radius: var(--radius-md); font-weight: 600;"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary btn-sm" onclick="app.closeModal('modalScanner')">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- NOTIFICATIONS MODAL -->
+  <div class="modal-overlay" id="modalNotifications">
+    <div class="modal-box" style="max-width: 480px;">
+      <div class="modal-header">
+        <h3 style="font-size: 1.15rem;"><i class="fa-regular fa-bell"></i> Campus Notifications</h3>
+        <button class="modal-close-btn" onclick="app.closeModal('modalNotifications')"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <div class="flex flex-col gap-2" id="notifsList">
+          <div style="padding: 0.75rem; border-radius: var(--radius-md); background: var(--bg-subtle); display: flex; gap: 0.65rem;">
+            <div style="color: var(--primary); font-size: 1.1rem;"><i class="fa-solid fa-ticket"></i></div>
+            <div>
+              <div style="font-weight: 700; font-size: 0.85rem;">Registration Confirmed!</div>
+              <div style="font-size: 0.78rem; color: var(--text-muted);">Your E-Pass for HackPulse '26 is ready with QR barcode.</div>
+              <div style="font-size: 0.68rem; color: var(--text-dim); margin-top: 0.2rem;">10 mins ago</div>
+            </div>
+          </div>
+          <div style="padding: 0.75rem; border-radius: var(--radius-md); background: var(--bg-subtle); display: flex; gap: 0.65rem;">
+            <div style="color: var(--accent-amber); font-size: 1.1rem;"><i class="fa-solid fa-clock"></i></div>
+            <div>
+              <div style="font-weight: 700; font-size: 0.85rem;">Workshop Reminder</div>
+              <div style="font-size: 0.78rem; color: var(--text-muted);">Generative AI workshop starts in 2 days. Bring your laptop.</div>
+              <div style="font-size: 0.68rem; color: var(--text-dim); margin-top: 0.2rem;">2 hours ago</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Message Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="brand-logo" style="margin-bottom: 0.4rem;">
+            <div class="brand-icon" style="width: 1.85rem; height: 1.85rem; font-size: 0.95rem;"><i class="fa-solid fa-graduation-cap"></i></div>
+            <span>Uni<span class="brand-gradient">Pulse</span></span>
+          </div>
+          <p>The centralized hub for campus event discovery, QR pass registrations, certificates, club activities & student engagement.</p>
+        </div>
+        <div>
+          <div class="footer-heading">Portals</div>
+          <ul class="footer-links">
+            <li><a href="#" onclick="app.openAuthModal('student')">🎓 Student Login</a></li>
+            <li><a href="#" onclick="app.openAuthModal('admin')">🛡️ Admin & Host Portal</a></li>
+            <li><a href="#" onclick="app.navigate('calendar')">Academic Calendar</a></li>
+            <li><a href="#" onclick="app.navigate('clubs')">Clubs Directory</a></li>
+          </ul>
+        </div>
+        <div>
+          <div class="footer-heading">For Organizers</div>
+          <ul class="footer-links">
+            <li><a href="#" onclick="app.handleHostEventClick()">Host a New Event</a></li>
+            <li><a href="#" onclick="app.navigate('organizer')">Organizer Analytics</a></li>
+            <li><a href="#" onclick="app.openScannerModal()">Gate QR Check-in</a></li>
+            <li><a href="#">Guidelines & Rules</a></li>
+          </ul>
+        </div>
+        <div>
+          <div class="footer-heading">Campus Helpdesk</div>
+          <ul class="footer-links">
+            <li><i class="fa-regular fa-envelope" style="margin-right: 6px;"></i> events@campus.edu</li>
+            <li><i class="fa-solid fa-phone" style="margin-right: 6px;"></i> (555) 019-2834</li>
+            <li><i class="fa-solid fa-location-dot" style="margin-right: 6px;"></i> Student Activity Center, Rm 102</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <div>© 2026 UniPulse Campus Portal. All Rights Reserved.</div>
+        <div class="flex gap-4">
+          <a href="#">Privacy Policy</a>
+          <a href="#">Terms of Service</a>
+          <a href="#">Student Code of Conduct</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- App Data & Scripts -->
+  <script src="js/data.js"></script>
+  <script src="js/supabase.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
