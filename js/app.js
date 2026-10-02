@@ -46,10 +46,23 @@ class UniPulseApp {
 
     // Attempt to sync live events from Supabase if connected
     if (typeof supabaseService !== 'undefined' && supabaseService.isConnected) {
-      const liveEvents = await supabaseService.fetchEvents();
-      if (liveEvents && liveEvents.length > 0) {
-        this.events = liveEvents;
-        this.saveStorage('unipulse_events', this.events);
+      try {
+        const liveEvents = await supabaseService.fetchEvents();
+        if (liveEvents && liveEvents.length > 0) {
+          // Merge with current state to preserve any cancellation overrides
+          this.events = liveEvents.map(le => {
+            const localMatch = this.events.find(e => e.id === le.id);
+            if (localMatch && (localMatch.isCancelled || localMatch.status === 'cancelled' || localMatch.is_cancelled)) {
+              le.isCancelled = true;
+              le.status = 'cancelled';
+              le.is_cancelled = true;
+            }
+            return le;
+          });
+          this.saveStorage('unipulse_events', this.events);
+        }
+      } catch (err) {
+        console.warn('Live events sync error:', err);
       }
     }
 
@@ -671,7 +684,7 @@ class UniPulseApp {
 
     grid.innerHTML = filtered.map(e => {
       const isBookmarked = this.bookmarks.includes(e.id);
-      const isCancelled = !!e.isCancelled;
+      const isCancelled = !!e.isCancelled || e.status === 'cancelled' || e.is_cancelled === true;
       
       // Determine if current student user is already registered for this event
       const isRegistered = this.currentUser && this.currentUser.role === 'student'
@@ -686,11 +699,11 @@ class UniPulseApp {
       const seatsLeft = Math.max(0, e.maxCapacity - e.registeredCount);
 
       return `
-        <div class="event-card ${isCancelled ? 'event-cancelled' : ''}" style="${isCancelled ? 'opacity: 0.88;' : ''}">
+        <div class="event-card ${isCancelled ? 'event-cancelled' : ''}" style="${isCancelled ? 'border: 1.5px solid rgba(225, 29, 72, 0.45); box-shadow: 0 4px 14px rgba(225, 29, 72, 0.12);' : ''}">
           <div class="event-card-media">
-            <img src="${e.banner}" class="event-card-img" alt="${e.title}" loading="lazy" decoding="async" width="400" height="180">
+            <img src="${e.banner}" class="event-card-img" alt="${e.title}" loading="lazy" decoding="async" width="400" height="180" style="${isCancelled ? 'filter: grayscale(85%) contrast(85%);' : ''}">
             ${isCancelled ? `
-              <span style="position: absolute; top: 0.85rem; left: 0.85rem; background: #e11d48; color: #fff; padding: 0.25rem 0.65rem; border-radius: var(--radius-sm); font-size: 0.75rem; font-weight: 800; letter-spacing: 0.5px; z-index: 2; box-shadow: 0 2px 8px rgba(225, 29, 72, 0.4);">
+              <span style="position: absolute; top: 0.85rem; left: 0.85rem; background: #e11d48; color: #fff; padding: 0.35rem 0.8rem; border-radius: 999px; font-size: 0.76rem; font-weight: 800; letter-spacing: 0.5px; z-index: 5; box-shadow: 0 4px 12px rgba(225, 29, 72, 0.5); display: flex; align-items: center; gap: 0.35rem;">
                 <i class="fa-solid fa-ban"></i> CANCELLED
               </span>
             ` : `
@@ -701,7 +714,7 @@ class UniPulseApp {
                     onclick="app.toggleBookmark('${e.id}', event)">
               <i class="${isBookmarked ? 'fa-solid' : 'fa-regular'} fa-bookmark"></i>
             </button>
-            <span class="event-card-price">${e.priceText || (e.price === 0 ? 'Free' : '₹' + e.price)}</span>
+            <span class="event-card-price" style="${isCancelled ? 'background: #e11d48; color: #fff;' : ''}">${isCancelled ? 'Cancelled' : (e.priceText || (e.price === 0 ? 'Free' : '₹' + e.price))}</span>
           </div>
 
           <div class="event-card-body">
@@ -710,7 +723,9 @@ class UniPulseApp {
               <span class="organizer-name">${e.organizer}</span>
             </div>
 
-            <h3 class="event-card-title">${e.title}</h3>
+            <h3 class="event-card-title" style="${isCancelled ? 'color: var(--accent-rose); opacity: 0.9;' : ''}">
+              ${e.title} ${isCancelled ? '<span style="font-size: 0.72rem; color: #e11d48; font-weight: 800; margin-left: 0.25rem;">[CANCELLED]</span>' : ''}
+            </h3>
 
             <div class="event-card-meta-list">
               <div class="meta-row">
@@ -729,11 +744,11 @@ class UniPulseApp {
 
             <div class="event-progress-wrap">
               <div class="progress-header">
-                <span><i class="fa-solid fa-fire" style="color: var(--accent-amber); margin-right: 4px;"></i> ${isCancelled ? 'Status: Cancelled' : `${fillPercentage}% Full`}</span>
-                <span>${isCancelled ? '<strong style="color: var(--accent-rose)">EVENT CANCELLED</strong>' : (seatsLeft > 0 ? `${seatsLeft} seats left` : '<strong style="color: var(--accent-rose)">SOLD OUT</strong>')}</span>
+                <span><i class="fa-solid ${isCancelled ? 'fa-ban' : 'fa-fire'}" style="color: ${isCancelled ? 'var(--accent-rose)' : 'var(--accent-amber)'}; margin-right: 4px;"></i> ${isCancelled ? '<strong style="color: var(--accent-rose)">EVENT CANCELLED</strong>' : `${fillPercentage}% Full`}</span>
+                <span>${isCancelled ? '<strong style="color: var(--accent-rose)">REGISTRATIONS CLOSED</strong>' : (seatsLeft > 0 ? `${seatsLeft} seats left` : '<strong style="color: var(--accent-rose)">SOLD OUT</strong>')}</span>
               </div>
               <div class="progress-bar-bg">
-                <div class="progress-bar-fill ${isCancelled ? 'bg-rose' : (fillPercentage > 80 ? 'warning' : '')}" style="width: ${isCancelled ? '100%' : `${fillPercentage}%`}; ${isCancelled ? 'background: var(--accent-rose);' : ''}"></div>
+                <div class="progress-bar-fill" style="width: 100%; background: ${isCancelled ? 'var(--accent-rose)' : (fillPercentage > 80 ? 'var(--accent-amber)' : 'var(--primary)')};"></div>
               </div>
             </div>
 
@@ -742,8 +757,8 @@ class UniPulseApp {
                 <i class="fa-regular fa-eye"></i> Details
               </button>
               ${isAdmin ? `
-                <button class="btn btn-secondary btn-sm" style="${isCancelled ? 'color: var(--accent-emerald); border-color: var(--accent-emerald); background: rgba(16, 185, 129, 0.08);' : 'color: var(--accent-rose); border-color: var(--accent-rose); background: rgba(244, 63, 94, 0.08);'} font-weight: 600;" onclick="app.toggleCancelEvent('${e.id}')">
-                  <i class="fa-solid ${isCancelled ? 'fa-rotate-left' : 'fa-ban'}"></i> ${isCancelled ? 'Restore' : 'Cancel'}
+                <button class="btn btn-secondary btn-sm" style="${isCancelled ? 'color: var(--accent-emerald); border-color: var(--accent-emerald); background: rgba(16, 185, 129, 0.12);' : 'color: var(--accent-rose); border-color: var(--accent-rose); background: rgba(244, 63, 94, 0.12);'} font-weight: 700;" onclick="app.toggleCancelEvent('${e.id}')">
+                  <i class="fa-solid ${isCancelled ? 'fa-rotate-left' : 'fa-ban'}"></i> ${isCancelled ? 'Restore Event' : 'Cancel Event'}
                 </button>
               ` : isCancelled ? `
                 <button class="btn btn-secondary btn-sm" style="color: var(--accent-rose); border-color: var(--accent-rose); background: rgba(244, 63, 94, 0.08); font-weight: 700;" disabled>
@@ -900,7 +915,7 @@ class UniPulseApp {
       : this.registrations.some(r => r.eventId === evt.id);
 
     const isAdmin = this.currentUser && this.currentUser.role === 'admin';
-    const isCancelled = !!evt.isCancelled;
+    const isCancelled = !!evt.isCancelled || evt.status === 'cancelled' || evt.is_cancelled === true;
 
     bodyEl.innerHTML = `
       ${isCancelled ? `
@@ -1061,7 +1076,8 @@ class UniPulseApp {
       return;
     }
 
-    const willCancel = !evt.isCancelled;
+    const isCurrentlyCancelled = !!evt.isCancelled || evt.status === 'cancelled' || evt.is_cancelled === true;
+    const willCancel = !isCurrentlyCancelled;
     const confirmMsg = willCancel 
       ? `Are you sure you want to CANCEL "${evt.title}"?\n\nThis will immediately close registrations and mark the event as cancelled.` 
       : `Do you want to RESTORE and re-activate "${evt.title}"?`;
@@ -1069,16 +1085,22 @@ class UniPulseApp {
     if (!confirm(confirmMsg)) return;
 
     evt.isCancelled = willCancel;
+    evt.status = willCancel ? 'cancelled' : 'active';
+    evt.is_cancelled = willCancel;
     this.saveStorage('unipulse_events', this.events);
 
     // Sync with Supabase if connected
-    if (typeof supabaseService !== 'undefined' && supabaseService.isConnected) {
-      await supabaseService.updateEventStatus(eventId, willCancel ? 'cancelled' : 'active');
+    try {
+      if (typeof supabaseService !== 'undefined' && supabaseService.isConnected) {
+        await supabaseService.updateEventStatus(eventId, willCancel ? 'cancelled' : 'active');
+      }
+    } catch (err) {
+      console.warn('Supabase status sync skipped:', err);
     }
 
     this.showToast(
       willCancel 
-        ? `⛔ "${evt.title}" has been cancelled.` 
+        ? `⛔ "${evt.title}" has been marked as CANCELLED.` 
         : `✅ "${evt.title}" has been restored and re-activated!`,
       willCancel ? 'error' : 'success'
     );
@@ -1086,6 +1108,8 @@ class UniPulseApp {
     this.closeModal('modalEventDetails');
     this.renderEvents();
     this.renderCalendar();
+    this.renderDashboard();
+    this.renderOrganizerTable();
     this.updateCategoryCounters();
     this.updateOrgAnalytics();
   }
@@ -1140,7 +1164,8 @@ class UniPulseApp {
     const evt = this.events.find(e => e.id === eventId);
     if (!evt) return;
 
-    if (evt.isCancelled) {
+    const isCancelled = !!evt.isCancelled || evt.status === 'cancelled' || evt.is_cancelled === true;
+    if (isCancelled) {
       this.showToast('⛔ This event has been cancelled by the administrator. Registrations are closed.', 'error');
       return;
     }

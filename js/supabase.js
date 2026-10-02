@@ -253,6 +253,8 @@ class SupabaseService {
         maxCapacity: e.max_capacity,
         registeredCount: e.registered_count,
         isFeatured: e.is_featured,
+        isCancelled: e.status === 'cancelled' || e.is_cancelled === true || e.isCancelled === true,
+        status: e.status || (e.is_cancelled ? 'cancelled' : 'active'),
         banner: e.banner,
         tags: e.tags || [],
         perks: e.perks || []
@@ -285,6 +287,8 @@ class SupabaseService {
         max_capacity: eventData.maxCapacity,
         registered_count: eventData.registeredCount || 0,
         is_featured: eventData.isFeatured || false,
+        is_cancelled: false,
+        status: 'active',
         banner: eventData.banner,
         tags: eventData.tags,
         perks: eventData.perks,
@@ -294,6 +298,30 @@ class SupabaseService {
       if (error) throw error;
       return { success: true, data: data[0] };
     } catch (err) {
+      return { success: false, error: err.message };
+    }
+  }
+
+  // Update Event Cancellation Status in Supabase
+  async updateEventStatus(eventId, status) {
+    if (!this.isConnected) return { success: true, mode: 'local' };
+    try {
+      const isCancelled = (status === 'cancelled');
+      const { data, error } = await this.client
+        .from('events')
+        .update({ 
+          status: status,
+          is_cancelled: isCancelled
+        })
+        .eq('id', eventId)
+        .select();
+
+      if (error) {
+        console.warn('Supabase event status update warning:', error.message);
+      }
+      return { success: !error, data: data ? data[0] : null };
+    } catch (err) {
+      console.warn('Supabase event status update error:', err);
       return { success: false, error: err.message };
     }
   }
