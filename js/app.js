@@ -134,8 +134,8 @@ class UniPulseApp {
         const initials = nameToUse.split(/[\s._-]+/).filter(Boolean).map(n => n[0]).slice(0, 2).join('').toUpperCase();
         navAvatar.textContent = initials || 'ST';
         navAvatar.style.background = isAdmin 
-          ? 'linear-gradient(135deg, #059669, #10b981)' 
-          : 'linear-gradient(135deg, #6366f1, #ec4899)';
+          ? 'var(--accent-emerald)' 
+          : 'var(--accent)';
       }
       if (navRole) {
         if (isAdmin) {
