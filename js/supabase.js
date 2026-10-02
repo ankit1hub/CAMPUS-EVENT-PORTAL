@@ -4,8 +4,8 @@
 
 // Set your Supabase project credentials here:
 const SUPABASE_CONFIG = {
-  url: '',      // e.g. 'https://your-project-ref.supabase.co'
-  anonKey: ''   // e.g. 'eyJhbGciOiJIUzI1Ni...'
+  url: 'https://wcmsewntdgudoxsmsqvk.supabase.co',
+  anonKey: 'sb_publishable_oSffy1-6UN1VM2fa71P1VQ_x783I3hD'
 };
 
 class SupabaseService {
