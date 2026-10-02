@@ -159,47 +159,9 @@
         </div>
       </div>
 
-      <!-- Search & Filters Bar -->
+      <!-- Category Quick Filter Section -->
       <div class="search-filter-section" id="exploreSection">
         <div class="container">
-          <div class="search-filter-bar">
-            <!-- Search Text -->
-            <div class="search-input-wrapper">
-              <i class="fa-solid fa-magnifying-glass" style="color: var(--text-muted);"></i>
-              <input type="text" id="eventSearchInput" class="search-input" placeholder="Search by event name, keywords, club or tech stack..." oninput="app.handleSearchFilter()">
-            </div>
-
-            <!-- Category Select Filter -->
-            <select id="categorySelectFilter" class="filter-select" onchange="app.handleSearchFilter()">
-              <option value="all">All Categories</option>
-              <option value="hackathon">Hackathons & Coding</option>
-              <option value="cultural">Cultural & Arts</option>
-              <option value="workshop">Workshops & AI</option>
-              <option value="sports">Sports & Tournaments</option>
-              <option value="gaming">Esports & Gaming</option>
-              <option value="tech">Tech & Career</option>
-            </select>
-
-            <!-- Pricing Filter -->
-            <select id="priceFilter" class="filter-select" onchange="app.handleSearchFilter()">
-              <option value="all">Any Pricing</option>
-              <option value="free">Free Events Only</option>
-              <option value="paid">Paid Events Only</option>
-            </select>
-
-            <!-- Sort By -->
-            <select id="sortFilter" class="filter-select" onchange="app.handleSearchFilter()">
-              <option value="date-asc">Date: Upcoming Soon</option>
-              <option value="popularity">Most Popular / Filling Fast</option>
-              <option value="name-asc">Alphabetical (A - Z)</option>
-            </select>
-
-            <!-- Reset Filters -->
-            <button class="btn btn-secondary btn-sm" onclick="app.resetFilters()" title="Reset All Filters">
-              <i class="fa-solid fa-arrow-rotate-left"></i> Reset
-            </button>
-          </div>
-
           <!-- Category Quick Pills -->
           <div class="category-pills">
             <button class="category-pill active" data-category="all" onclick="app.selectCategoryPill('all')">
