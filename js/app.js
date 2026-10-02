@@ -1,5 +1,5 @@
 /* ==========================================================
-   UniPulse - Main Application Logic with Student & Admin Auth
+   UniPulse - Main Application Logic with Supabase & RBAC Auth
    ========================================================== */
 
 class UniPulseApp {
@@ -13,7 +13,7 @@ class UniPulseApp {
     
     this.calendarDate = new Date(2026, 9, 1); // October 2026
 
-    // Default Demo Users
+    // Default Fallback Demo Personas
     this.studentUser = {
       id: "usr-std-101",
       name: "John Doe",
@@ -45,6 +45,7 @@ class UniPulseApp {
       {
         ticketId: "UP-2026-8492",
         eventId: "evt-101",
+        userId: "usr-std-101",
         attendeeName: "John Doe",
         rollNo: "23CS0148",
         email: "john.doe@campus.edu",
@@ -57,6 +58,7 @@ class UniPulseApp {
       {
         ticketId: "UP-2026-3105",
         eventId: "evt-103",
+        userId: "usr-std-101",
         attendeeName: "John Doe",
         rollNo: "23CS0148",
         email: "john.doe@campus.edu",
@@ -71,10 +73,21 @@ class UniPulseApp {
     this.chartInstances = {};
   }
 
-  init() {
+  async init() {
     this.initTheme();
     this.initTicker();
     this.updateUIForRole();
+    this.updateSupabaseStatusIndicator();
+
+    // Attempt to sync live events from Supabase if connected
+    if (typeof supabaseService !== 'undefined' && supabaseService.isConnected) {
+      const liveEvents = await supabaseService.fetchEvents();
+      if (liveEvents && liveEvents.length > 0) {
+        this.events = liveEvents;
+        this.saveStorage('unipulse_events', this.events);
+      }
+    }
+
     this.renderEvents();
     this.renderClubs();
     this.renderCalendar();
@@ -102,6 +115,81 @@ class UniPulseApp {
     }
   }
 
+  /* ---------------- Supabase Cloud Settings Modal ---------------- */
+  openSupabaseModal() {
+    const urlInput = document.getElementById('sbProjectUrl');
+    const keyInput = document.getElementById('sbAnonKey');
+    const alertBox = document.getElementById('supabaseStatusAlert');
+    const statusText = document.getElementById('supabaseStatusText');
+
+    if (urlInput) urlInput.value = supabaseService.supabaseUrl || '';
+    if (keyInput) keyInput.value = supabaseService.supabaseAnonKey || '';
+
+    if (alertBox && statusText) {
+      if (supabaseService.isConnected) {
+        alertBox.style.background = 'rgba(16, 185, 129, 0.15)';
+        alertBox.style.color = '#059669';
+        statusText.innerHTML = `<strong>Connected to Supabase Cloud</strong> (${supabaseService.supabaseUrl.slice(0, 28)}...)`;
+      } else {
+        alertBox.style.background = 'var(--primary-light)';
+        alertBox.style.color = 'var(--primary)';
+        statusText.innerHTML = `<strong>Local Demo Mode Active</strong> (Enter credentials below to connect to live Supabase DB)`;
+      }
+    }
+
+    this.openModal('modalSupabaseConfig');
+  }
+
+  async handleSaveSupabaseConfig(e) {
+    e.preventDefault();
+    const url = document.getElementById('sbProjectUrl').value.trim();
+    const key = document.getElementById('sbAnonKey').value.trim();
+
+    if (!url || !key) {
+      this.showToast('Please enter both Project URL and Anon API Key', 'error');
+      return;
+    }
+
+    const connected = supabaseService.setCredentials(url, key);
+    this.updateSupabaseStatusIndicator();
+    this.closeModal('modalSupabaseConfig');
+
+    if (connected) {
+      this.showToast('🎉 Connected to Supabase Cloud Database!', 'success');
+      // Fetch fresh live events from Supabase
+      const liveEvents = await supabaseService.fetchEvents();
+      if (liveEvents && liveEvents.length > 0) {
+        this.events = liveEvents;
+        this.saveStorage('unipulse_events', this.events);
+        this.renderEvents();
+        this.updateCategoryCounters();
+      }
+    } else {
+      this.showToast('Supabase Client saved. Verify credentials if requests fail.', 'info');
+    }
+  }
+
+  disconnectSupabase() {
+    supabaseService.disconnect();
+    this.updateSupabaseStatusIndicator();
+    this.closeModal('modalSupabaseConfig');
+    this.showToast('Supabase disconnected. Switched back to local demo mode.', 'info');
+  }
+
+  updateSupabaseStatusIndicator() {
+    const icon = document.getElementById('supabaseIcon');
+    const btn = document.getElementById('supabaseStatusBtn');
+    if (!icon || !btn) return;
+
+    if (supabaseService.isConnected) {
+      icon.style.color = 'var(--accent-emerald)';
+      btn.title = `Supabase DB: Connected (${supabaseService.supabaseUrl})`;
+    } else {
+      icon.style.color = 'var(--text-muted)';
+      btn.title = 'Supabase DB: Local Mode (Click to Connect)';
+    }
+  }
+
   /* ---------------- Role-Based Access Control (RBAC) ---------------- */
   updateUIForRole() {
     const isStudent = this.currentUser && this.currentUser.role === 'student';
@@ -114,24 +202,18 @@ class UniPulseApp {
     const navRole = document.getElementById('navUserRole');
     const navAvatar = document.getElementById('navAvatar');
 
-    // Tab visibility by role
-    if (tabDashboard) {
-      tabDashboard.style.display = isStudent ? 'inline-flex' : 'none';
-    }
-    if (tabOrganizer) {
-      tabOrganizer.style.display = isAdmin ? 'inline-flex' : 'none';
-    }
-    if (hostBtn) {
-      hostBtn.style.display = isAdmin ? 'inline-flex' : 'none';
-    }
+    if (tabDashboard) tabDashboard.style.display = isStudent ? 'inline-flex' : 'none';
+    if (tabOrganizer) tabOrganizer.style.display = isAdmin ? 'inline-flex' : 'none';
+    if (hostBtn) hostBtn.style.display = isAdmin ? 'inline-flex' : 'none';
 
-    // User Profile Pill in Navbar
     if (this.currentUser) {
       if (navName) navName.textContent = this.currentUser.name;
       if (navAvatar) {
         const initials = this.currentUser.name.split(' ').map(n => n[0]).join('');
         navAvatar.textContent = initials;
-        navAvatar.style.background = isAdmin ? 'linear-gradient(135deg, #059669, #10b981)' : 'linear-gradient(135deg, #6366f1, #ec4899)';
+        navAvatar.style.background = isAdmin 
+          ? 'linear-gradient(135deg, #059669, #10b981)' 
+          : 'linear-gradient(135deg, #6366f1, #ec4899)';
       }
       if (navRole) {
         if (isAdmin) {
@@ -142,7 +224,6 @@ class UniPulseApp {
       }
     }
 
-    // Ensure view consistency
     if (isStudent && this.currentView === 'organizer') {
       this.navigate('events');
     } else if (isAdmin && this.currentView === 'dashboard') {
@@ -150,7 +231,7 @@ class UniPulseApp {
     }
   }
 
-  /* ---------------- Authentication Modals & Handlers ---------------- */
+  /* ---------------- Authentication Handlers ---------------- */
   openAuthModal(tab = 'student') {
     this.switchAuthTab(tab);
     this.openModal('modalAuth');
@@ -178,44 +259,105 @@ class UniPulseApp {
     }
   }
 
-  handleStudentLogin(e) {
-    e.preventDefault();
-    const email = document.getElementById('loginStudentEmail').value.trim();
-    this.currentUser = {
-      id: "usr-std-101",
-      name: email.split('@')[0].replace('.', ' ').replace(/\b\w/g, l => l.toUpperCase()) || "John Doe",
-      rollNo: "23CS0148",
-      email: email,
-      dept: "Computer Science & Eng",
-      year: "Year 3 (Junior)",
-      role: "student"
-    };
+  toggleStudentAuthMode(mode) {
+    const signinForm = document.getElementById('studentSignInForm');
+    const signupForm = document.getElementById('studentSignUpForm');
+    const signinBtn = document.getElementById('studentModeSignInBtn');
+    const signupBtn = document.getElementById('studentModeSignUpBtn');
 
-    this.saveStorage('unipulse_user', this.currentUser);
-    this.closeModal('modalAuth');
-    this.updateUIForRole();
-    this.showToast(`🎓 Welcome back, ${this.currentUser.name} (Student Portal)`, 'success');
-    this.navigate('events');
+    if (mode === 'signup') {
+      signinForm.classList.add('hidden');
+      signupForm.classList.remove('hidden');
+      signinBtn.classList.remove('active');
+      signupBtn.classList.add('active');
+      signupBtn.style.background = 'var(--primary)';
+      signupBtn.style.color = '#fff';
+      signinBtn.style.background = 'var(--bg-surface)';
+      signinBtn.style.color = 'var(--text-main)';
+    } else {
+      signupForm.classList.add('hidden');
+      signinForm.classList.remove('hidden');
+      signupBtn.classList.remove('active');
+      signinBtn.classList.add('active');
+      signinBtn.style.background = 'var(--primary)';
+      signinBtn.style.color = '#fff';
+      signupBtn.style.background = 'var(--bg-surface)';
+      signupBtn.style.color = 'var(--text-main)';
+    }
   }
 
-  handleAdminLogin(e) {
+  async handleStudentLogin(e) {
+    e.preventDefault();
+    const email = document.getElementById('loginStudentEmail').value.trim();
+    const pass = document.getElementById('loginStudentPass').value.trim();
+    const btn = document.getElementById('studentSignInSubmitBtn');
+
+    if (btn) btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Authenticating...';
+
+    const res = await supabaseService.signIn(email, pass, 'student');
+    if (btn) btn.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> Login as Student';
+
+    if (res.success) {
+      this.currentUser = res.user;
+      this.saveStorage('unipulse_user', this.currentUser);
+      this.closeModal('modalAuth');
+      this.updateUIForRole();
+      this.showToast(`🎓 Welcome back, ${this.currentUser.name}! (${res.mode === 'supabase' ? 'Supabase Live' : 'Demo Session'})`, 'success');
+      this.navigate('events');
+    } else {
+      this.showToast(`Authentication failed: ${res.error}`, 'error');
+    }
+  }
+
+  async handleStudentSignUp(e) {
+    e.preventDefault();
+    const fullName = document.getElementById('signupFullName').value.trim();
+    const rollNo = document.getElementById('signupRollNo').value.trim();
+    const email = document.getElementById('signupEmail').value.trim();
+    const dept = document.getElementById('signupDept').value;
+    const year = document.getElementById('signupYear').value;
+    const pass = document.getElementById('signupPass').value.trim();
+    const btn = document.getElementById('studentSignUpSubmitBtn');
+
+    if (btn) btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Creating Account...';
+
+    const res = await supabaseService.signUpStudent(email, pass, fullName, rollNo, dept, year);
+    if (btn) btn.innerHTML = '<i class="fa-solid fa-user-plus"></i> Register & Create Account';
+
+    if (res.success) {
+      this.currentUser = res.user;
+      this.saveStorage('unipulse_user', this.currentUser);
+      this.closeModal('modalAuth');
+      this.updateUIForRole();
+      this.triggerConfetti();
+      this.showToast(`🎉 Account Created! Welcome, ${this.currentUser.name} (${res.mode === 'supabase' ? 'Saved to Supabase DB' : 'Demo Mode'})`, 'success');
+      this.navigate('events');
+    } else {
+      this.showToast(`Sign up failed: ${res.error}`, 'error');
+    }
+  }
+
+  async handleAdminLogin(e) {
     e.preventDefault();
     const email = document.getElementById('loginAdminEmail').value.trim();
-    this.currentUser = {
-      id: "usr-adm-201",
-      name: "Aarav Sharma",
-      rollNo: "FAC-8821",
-      email: email,
-      dept: "Campus Event Council & GDSC Lead",
-      year: "Administrator / Faculty Lead",
-      role: "admin"
-    };
+    const pass = document.getElementById('loginAdminPass').value.trim();
+    const btn = document.getElementById('adminSignInSubmitBtn');
 
-    this.saveStorage('unipulse_user', this.currentUser);
-    this.closeModal('modalAuth');
-    this.updateUIForRole();
-    this.showToast(`🛡️ Administrator Access Granted: Welcome, ${this.currentUser.name}!`, 'success');
-    this.navigate('organizer');
+    if (btn) btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Verifying Admin Credentials...';
+
+    const res = await supabaseService.signIn(email, pass, 'admin');
+    if (btn) btn.innerHTML = '<i class="fa-solid fa-lock-open"></i> Login to Admin Studio';
+
+    if (res.success) {
+      this.currentUser = res.user;
+      this.saveStorage('unipulse_user', this.currentUser);
+      this.closeModal('modalAuth');
+      this.updateUIForRole();
+      this.showToast(`🛡️ Administrator Access Granted: Welcome, ${this.currentUser.name}!`, 'success');
+      this.navigate('organizer');
+    } else {
+      this.showToast(`Admin verification failed: ${res.error}`, 'error');
+    }
   }
 
   loginAsDemoStudent() {
@@ -260,7 +402,8 @@ class UniPulseApp {
     this.openModal('modalUserDropdown');
   }
 
-  logout() {
+  async logout() {
+    await supabaseService.signOut();
     this.closeModal('modalUserDropdown');
     this.openAuthModal('student');
     this.showToast('You have signed out. Please choose a portal to sign in.', 'info');
@@ -310,7 +453,6 @@ class UniPulseApp {
 
   /* ---------------- Navigation ---------------- */
   navigate(viewName) {
-    // RBAC check on view navigation
     if (viewName === 'organizer' && (!this.currentUser || this.currentUser.role !== 'admin')) {
       this.showToast('🔒 Admin Studio is restricted to Administrators & Club Organizers.', 'error');
       this.openAuthModal('admin');
@@ -470,7 +612,7 @@ class UniPulseApp {
 
   manageEventAsAdmin(eventId) {
     this.navigate('organizer');
-    this.showToast(`Viewing manager controls for event ${eventId}`, 'info');
+    this.showToast(`Managing event ${eventId} in Admin Studio`, 'info');
   }
 
   updateCategoryCounters() {
@@ -736,7 +878,7 @@ class UniPulseApp {
     this.openModal('modalRegistrationForm');
   }
 
-  handleRegistrationSubmit(e) {
+  async handleRegistrationSubmit(e) {
     e.preventDefault();
     const eventId = document.getElementById('regEventId').value;
     const evt = this.events.find(ev => ev.id === eventId);
@@ -754,6 +896,7 @@ class UniPulseApp {
     const newReg = {
       ticketId: newTicketId,
       eventId: evt.id,
+      userId: this.currentUser ? this.currentUser.id : null,
       attendeeName: attendeeName,
       rollNo: rollNo,
       email: email,
@@ -764,11 +907,17 @@ class UniPulseApp {
       isCheckedIn: false
     };
 
+    // Save locally
     this.registrations.unshift(newReg);
     this.saveStorage('unipulse_registrations', this.registrations);
 
     evt.registeredCount = (evt.registeredCount || 0) + 1;
     this.saveStorage('unipulse_events', this.events);
+
+    // Save to Supabase Cloud if connected
+    if (typeof supabaseService !== 'undefined' && supabaseService.isConnected) {
+      await supabaseService.createRegistration(newReg);
+    }
 
     this.closeModal('modalRegistrationForm');
 
@@ -1256,11 +1405,17 @@ class UniPulseApp {
     }).join('');
   }
 
-  toggleCheckInStatus(ticketId) {
+  async toggleCheckInStatus(ticketId) {
     const reg = this.registrations.find(r => r.ticketId === ticketId);
     if (reg) {
       reg.isCheckedIn = !reg.isCheckedIn;
       this.saveStorage('unipulse_registrations', this.registrations);
+
+      // Sync with Supabase if connected
+      if (typeof supabaseService !== 'undefined' && supabaseService.isConnected) {
+        await supabaseService.updateCheckIn(ticketId, reg.isCheckedIn);
+      }
+
       this.renderOrganizerTable();
       this.showToast(`Ticket ${ticketId}: ${reg.isCheckedIn ? 'Checked-in' : 'Pending'}`, 'success');
     }
@@ -1294,7 +1449,7 @@ class UniPulseApp {
     this.openModal('modalCreateEvent');
   }
 
-  handleCreateEventSubmit(e) {
+  async handleCreateEventSubmit(e) {
     e.preventDefault();
     const title = document.getElementById('newEventTitle').value.trim();
     const category = document.getElementById('newEventCategory').value;
@@ -1342,8 +1497,14 @@ class UniPulseApp {
       rules: ["Valid Student ID required upon gate entry."]
     };
 
+    // Save locally
     this.events.unshift(newEvent);
     this.saveStorage('unipulse_events', this.events);
+
+    // Save to Supabase Cloud if connected
+    if (typeof supabaseService !== 'undefined' && supabaseService.isConnected) {
+      await supabaseService.createEvent(newEvent, this.currentUser ? this.currentUser.id : null);
+    }
 
     this.closeModal('modalCreateEvent');
     document.getElementById('createEventForm').reset();
@@ -1364,7 +1525,7 @@ class UniPulseApp {
     this.openModal('modalScanner');
   }
 
-  simulateScanTicket() {
+  async simulateScanTicket() {
     const input = document.getElementById('scanTicketInput');
     const resBox = document.getElementById('scanResultBox');
     if (!input || !resBox) return;
@@ -1380,6 +1541,11 @@ class UniPulseApp {
     if (reg) {
       reg.isCheckedIn = true;
       this.saveStorage('unipulse_registrations', this.registrations);
+
+      if (typeof supabaseService !== 'undefined' && supabaseService.isConnected) {
+        await supabaseService.updateCheckIn(reg.ticketId, true);
+      }
+
       this.renderOrganizerTable();
 
       resBox.style.display = 'block';
