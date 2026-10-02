@@ -1,10 +1,10 @@
 /* ==========================================================
-   🐉 PENGA — BRAND DNA SYSTEM STYLESHEET
-   Bento Grid & System Rules | Clean High-Contrast Palette
-   Light Canvas: #FAF8F3 (Parchment) | Dark Canvas: #1E1C19 (Charcoal)
+   🐉 PENGA BRAND DNA — COMPLETE DESIGN SYSTEM STYLESHEET
+   Bento Grid & System Rules | High-Contrast Warm Terracotta Palette
+   Canvas Light: #FAF8F3 (Parchment) | Canvas Dark: #1E1C19 (Charcoal)
    ========================================================== */
 
-/* ---------------- Design System Variables ---------------- */
+/* ---------------- Design Tokens ---------------- */
 :root {
   --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-heading: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -147,7 +147,7 @@ body {
 }
 
 [data-theme="dark"] body {
-  letter-spacing: 0.025em; /* tracking-wide in dark mode for optimal legibility */
+  letter-spacing: 0.025em;
 }
 
 h1 {
@@ -205,7 +205,7 @@ img {
   display: block;
 }
 
-/* ---------------- Layout Helpers ---------------- */
+/* ---------------- Layout Utilities ---------------- */
 .container {
   max-width: 1240px;
   margin: 0 auto;
@@ -254,7 +254,7 @@ img {
   letter-spacing: 0.5px;
 }
 
-/* ---------------- Site Header & Bento Nav ---------------- */
+/* ---------------- Header & Navbar ---------------- */
 .site-header {
   position: sticky;
   top: 0;
@@ -538,12 +538,23 @@ img {
 
 /* ---------------- Bento Hero Section ---------------- */
 .hero-section {
-  padding: 3.5rem 0 2rem;
+  padding: 3.5rem 0 2.5rem;
   text-align: center;
   position: relative;
 }
 
-.hero-badge {
+.hero-center-container {
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.hero-text-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.hero-tag {
   display: inline-flex;
   align-items: center;
   gap: 0.45rem;
@@ -567,15 +578,104 @@ img {
   letter-spacing: -0.02em;
 }
 
-.hero-subtitle {
+.hero-desc {
   font-size: 1.05rem;
   color: var(--text-secondary);
-  max-width: 650px;
-  margin: 0 auto 2rem;
+  max-width: 680px;
+  margin: 0 auto 1.75rem;
   line-height: 1.6;
 }
 
-/* ---------------- Bento Metric Cards (48px Bold Numbers) ---------------- */
+.hero-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 2.5rem;
+  flex-wrap: wrap;
+}
+
+/* ---------------- Bento Hero Stats (4-Column Modular Cards) ---------------- */
+.hero-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.hero-stats > div {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem 1rem;
+  text-align: center;
+  transition: all var(--transition-fast);
+}
+
+.hero-stats > div:hover {
+  background: var(--bg-surface-alt);
+  border-color: var(--border-strong);
+}
+
+.hero-stat-number {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text-main);
+  letter-spacing: 0.05em;
+  line-height: 1.1;
+  margin-bottom: 0.25rem;
+}
+
+.hero-stat-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+/* ---------------- Filter & Category Pills Section ---------------- */
+.search-filter-section {
+  padding: 1rem 0 2rem;
+}
+
+.category-pills {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.category-pill {
+  min-height: 44px;
+  padding: 0.5rem 1.15rem;
+  border-radius: var(--radius-md);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-strong);
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  transition: all var(--transition-fast);
+}
+
+.category-pill:hover {
+  background: var(--bg-surface-raised);
+  color: var(--text-main);
+}
+
+.category-pill.active {
+  background: var(--accent);
+  color: #FFFFFF;
+  border-color: var(--accent);
+}
+
+/* ---------------- Bento Metric Cards in Admin Studio ---------------- */
 .stats-grid-row {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -625,66 +725,6 @@ img {
   font-weight: 500;
   color: var(--text-secondary);
   margin-top: 2px;
-}
-
-/* ---------------- Filter & Search Bar ---------------- */
-.filter-bar-wrap {
-  background: var(--bg-surface);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-xl);
-  padding: 1rem 1.25rem;
-  margin-bottom: 1.5rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.search-input-wrap {
-  position: relative;
-  flex: 1;
-}
-
-.search-input-wrap i {
-  position: absolute;
-  left: 1rem;
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--text-muted);
-}
-
-.search-input-wrap input {
-  padding-left: 2.5rem;
-}
-
-.category-pills-row {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-}
-
-.category-pill {
-  min-height: 44px;
-  padding: 0.5rem 1rem;
-  border-radius: var(--radius-md);
-  background: var(--bg-canvas);
-  border: 1px solid var(--border-strong);
-  color: var(--text-secondary);
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all var(--transition-fast);
-}
-
-.category-pill:hover {
-  background: var(--bg-surface-raised);
-  color: var(--text-main);
-}
-
-.category-pill.active {
-  background: var(--accent);
-  color: #FFFFFF;
-  border-color: var(--accent);
 }
 
 /* ---------------- Bento Event Cards Grid ---------------- */
@@ -887,7 +927,7 @@ img {
   font-size: 13px;
   color: var(--text-main);
   border-bottom: 1px solid var(--border-subtle);
-  height: 48px; /* 48px row height */
+  height: 48px;
 }
 
 .data-table tbody tr:nth-child(even) {
@@ -900,7 +940,7 @@ img {
   border-left: 3px solid var(--accent);
 }
 
-/* ---------------- Shared Lead & Status Badges ---------------- */
+/* ---------------- Shared Lead & Role Badges ---------------- */
 .role-pill {
   display: inline-flex;
   align-items: center;
@@ -942,11 +982,193 @@ img {
   border: 1px solid rgba(107, 114, 128, 0.2);
 }
 
-/* ---------------- Modals (Bounded Bento Modal) ---------------- */
+/* ---------------- Calendar Hub ---------------- */
+.calendar-wrap {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.calendar-nav-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.5rem;
+}
+
+.calendar-header-day {
+  text-align: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  padding: 0.5rem;
+}
+
+.calendar-day {
+  min-height: 90px;
+  background: var(--bg-surface-alt);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 0.5rem;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.calendar-day:hover {
+  background: var(--bg-surface-raised);
+  border-color: var(--accent);
+}
+
+.calendar-day.active-day {
+  background: var(--accent-light);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.calendar-event-badge {
+  background: var(--accent);
+  color: #fff;
+  padding: 0.15rem 0.35rem;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  margin-top: 0.35rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+}
+
+/* ---------------- Clubs Hub ---------------- */
+.clubs-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+}
+
+.club-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  transition: all var(--transition-fast);
+}
+
+.club-card:hover {
+  background: var(--bg-surface-alt);
+  border-color: var(--border-strong);
+  transform: translateY(-2px);
+}
+
+.club-header {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  margin-bottom: 1rem;
+}
+
+.club-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md);
+  background: var(--accent-light);
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.35rem;
+  flex-shrink: 0;
+}
+
+.club-meta {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: auto;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-subtle);
+}
+
+/* ---------------- Digital E-Pass & Ticket Modal ---------------- */
+.ticket-pass-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+}
+
+.ticket-header-strip {
+  background: var(--accent);
+  color: #fff;
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ticket-body {
+  padding: 1.5rem;
+}
+
+.ticket-qr-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+  background: #FFFFFF;
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-lg);
+  margin-bottom: 1.25rem;
+}
+
+.ticket-info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.85rem;
+  background: var(--bg-surface-alt);
+  padding: 1rem;
+  border-radius: var(--radius-md);
+}
+
+.ticket-info-item .label {
+  font-size: 11px;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+.ticket-info-item .val {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-top: 2px;
+}
+
+/* ---------------- Modals ---------------- */
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(28, 27, 24, 0.6);
+  background: rgba(28, 27, 24, 0.65);
   display: none;
   align-items: center;
   justify-content: center;
@@ -1002,7 +1224,7 @@ img {
   gap: 0.75rem;
 }
 
-/* ---------------- Login Gateway Section ---------------- */
+/* ---------------- Login Gateway ---------------- */
 .login-page-section {
   display: flex;
   align-items: center;
@@ -1152,6 +1374,9 @@ img {
 
 /* ---------------- Responsive ---------------- */
 @media (max-width: 900px) {
+  .hero-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
   .stats-grid-row {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -1161,6 +1386,9 @@ img {
 }
 
 @media (max-width: 640px) {
+  .hero-stats {
+    grid-template-columns: 1fr;
+  }
   .stats-grid-row {
     grid-template-columns: 1fr;
   }
