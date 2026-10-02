@@ -91,6 +91,64 @@ class SupabaseService {
     }
   }
 
+  // Sign Up a new Administrator / Event Organizer
+  async signUpAdmin(email, password, fullName, adminKey, dept) {
+    if (adminKey && adminKey !== "CAMPUS_ADMIN_2026" && adminKey !== "admin123") {
+      return { success: false, error: "Invalid Admin Security PIN / Invitation Code." };
+    }
+
+    if (!this.isConnected) {
+      // Local fallback simulation
+      return {
+        success: true,
+        user: {
+          id: `usr-adm-${Date.now().toString().slice(-4)}`,
+          email: email,
+          name: fullName,
+          role: 'admin',
+          rollNo: 'FAC-' + Math.floor(1000 + Math.random() * 9000),
+          dept: dept || 'Campus Event Council',
+          year: 'Administrator'
+        },
+        mode: 'local'
+      };
+    }
+
+    try {
+      const { data, error } = await this.client.auth.signUp({
+        email: email,
+        password: password,
+        options: {
+          data: {
+            full_name: fullName,
+            role: 'admin',
+            roll_no: 'FAC-8821',
+            dept: dept,
+            year: 'Administrator'
+          }
+        }
+      });
+
+      if (error) throw error;
+
+      return {
+        success: true,
+        user: {
+          id: data.user.id,
+          email: data.user.email,
+          name: fullName,
+          role: 'admin',
+          rollNo: 'FAC-8821',
+          dept: dept,
+          year: 'Administrator'
+        },
+        mode: 'supabase'
+      };
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+  }
+
   // Sign In (Handles both Student and Admin)
   async signIn(email, password, requiredRole = null) {
     if (!this.isConnected) {

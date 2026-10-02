@@ -284,6 +284,60 @@ class UniPulseApp {
     }
   }
 
+  toggleAdminAuthMode(mode) {
+    const signinForm = document.getElementById('adminSignInForm');
+    const signupForm = document.getElementById('adminSignUpForm');
+    const signinBtn = document.getElementById('adminModeSignInBtn');
+    const signupBtn = document.getElementById('adminModeSignUpBtn');
+
+    if (mode === 'signup') {
+      signinForm.classList.add('hidden');
+      signupForm.classList.remove('hidden');
+      signinBtn.classList.remove('active');
+      signupBtn.classList.add('active');
+      signupBtn.style.background = 'linear-gradient(135deg, #059669, #10b981)';
+      signupBtn.style.color = '#fff';
+      signinBtn.style.background = 'var(--bg-surface)';
+      signinBtn.style.color = 'var(--text-main)';
+    } else {
+      signupForm.classList.add('hidden');
+      signinForm.classList.remove('hidden');
+      signupBtn.classList.remove('active');
+      signinBtn.classList.add('active');
+      signinBtn.style.background = 'linear-gradient(135deg, #059669, #10b981)';
+      signinBtn.style.color = '#fff';
+      signupBtn.style.background = 'var(--bg-surface)';
+      signupBtn.style.color = 'var(--text-main)';
+    }
+  }
+
+  async handleAdminSignUp(e) {
+    e.preventDefault();
+    const fullName = document.getElementById('signupAdminFullName').value.trim();
+    const adminKey = document.getElementById('signupAdminKey').value.trim();
+    const email = document.getElementById('signupAdminEmail').value.trim();
+    const dept = document.getElementById('signupAdminDept').value;
+    const pass = document.getElementById('signupAdminPass').value.trim();
+    const btn = document.getElementById('adminSignUpSubmitBtn');
+
+    if (btn) btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Creating Admin Account...';
+
+    const res = await supabaseService.signUpAdmin(email, pass, fullName, adminKey, dept);
+    if (btn) btn.innerHTML = '<i class="fa-solid fa-user-shield"></i> Register Administrator Account';
+
+    if (res.success) {
+      this.currentUser = res.user;
+      this.saveStorage('unipulse_user', this.currentUser);
+      this.closeModal('modalAuth');
+      this.updateUIForRole();
+      this.triggerConfetti();
+      this.showToast(`🛡️ Administrator Account Created! Welcome, ${this.currentUser.name}`, 'success');
+      this.navigate('organizer');
+    } else {
+      this.showToast(`Admin registration failed: ${res.error}`, 'error');
+    }
+  }
+
   loginAsDemoStudent() {
     this.currentUser = { ...this.studentUser };
     this.saveStorage('unipulse_user', this.currentUser);
