@@ -131,10 +131,16 @@ class UniPulseApp {
     if (hostBtn) hostBtn.style.display = isAdmin ? 'inline-flex' : 'none';
 
     if (this.currentUser) {
-      if (navName) navName.textContent = this.currentUser.name;
+      let displayName = this.currentUser.name;
+      if (displayName && displayName.includes('@')) {
+        displayName = displayName.split('@')[0].replace(/[._-]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+      }
+      if (navName) navName.textContent = displayName || 'Student Member';
+
       if (navAvatar) {
-        const initials = this.currentUser.name.split(' ').map(n => n[0]).join('');
-        navAvatar.textContent = initials;
+        let nameToUse = displayName || 'ST';
+        const initials = nameToUse.split(/[\s._-]+/).filter(Boolean).map(n => n[0]).slice(0, 2).join('').toUpperCase();
+        navAvatar.textContent = initials || 'ST';
         navAvatar.style.background = isAdmin 
           ? 'linear-gradient(135deg, #059669, #10b981)' 
           : 'linear-gradient(135deg, #6366f1, #ec4899)';
@@ -143,7 +149,10 @@ class UniPulseApp {
         if (isAdmin) {
           navRole.innerHTML = '<span class="role-pill role-admin">🛡️ Admin Mode</span>';
         } else {
-          navRole.innerHTML = `<span class="role-pill role-student">🎓 ${this.currentUser.rollNo || 'Student'}</span>`;
+          const rollDisplay = (this.currentUser.rollNo && !this.currentUser.rollNo.includes('@')) 
+            ? this.currentUser.rollNo 
+            : 'Student';
+          navRole.innerHTML = `<span class="role-pill role-student">🎓 ${rollDisplay}</span>`;
         }
       }
     }
