@@ -159,6 +159,14 @@ class UniPulseApp {
     } else if (!this.currentUser && this.currentView !== 'login') {
       this.navigate('login');
     }
+
+    this.renderEvents();
+    this.updateRegistrationBadge();
+    if (this.currentView === 'dashboard') this.renderDashboard();
+    if (this.currentView === 'organizer') {
+      this.populateOrgEventDropdown();
+      this.updateOrgAnalytics();
+    }
   }
 
   /* ---------------- Gateway Page Authentication Handlers ---------------- */
@@ -624,7 +632,9 @@ class UniPulseApp {
 
     window.scrollTo({ top: 0, behavior: 'instant' });
 
-    if (viewName === 'dashboard') {
+    if (viewName === 'events') {
+      this.renderEvents();
+    } else if (viewName === 'dashboard') {
       this.renderDashboard();
     } else if (viewName === 'organizer') {
       this.populateOrgEventDropdown();
@@ -687,13 +697,13 @@ class UniPulseApp {
       const isCancelled = !!e.isCancelled || e.status === 'cancelled' || e.is_cancelled === true;
       
       // Determine if current student user is already registered for this event
-      const isRegistered = this.currentUser && this.currentUser.role === 'student'
+      const isRegistered = (this.currentUser && this.currentUser.role === 'student')
         ? this.registrations.some(r => r.eventId === e.id && (
-            r.email === this.currentUser.email || 
-            r.rollNo === this.currentUser.rollNo || 
+            (r.email && this.currentUser.email && r.email.toLowerCase() === this.currentUser.email.toLowerCase()) || 
+            (r.rollNo && this.currentUser.rollNo && r.rollNo.toLowerCase() === this.currentUser.rollNo.toLowerCase()) || 
             (this.currentUser.id && r.userId === this.currentUser.id)
           ))
-        : (!this.currentUser ? false : this.registrations.some(r => r.eventId === e.id));
+        : false;
 
       const fillPercentage = Math.min(100, Math.round((e.registeredCount / e.maxCapacity) * 100));
       const seatsLeft = Math.max(0, e.maxCapacity - e.registeredCount);
