@@ -1,6 +1,6 @@
 -- ==========================================================
 -- UniPulse Campus Portal - Supabase SQL Database Schema
--- Run this script in the Supabase SQL Editor (1-Click Setup)
+-- Safe & Idempotent (Can be run multiple times safely)
 -- ==========================================================
 
 -- 1. PROFILES TABLE (Linked with Supabase Auth users)
@@ -20,16 +20,24 @@ CREATE TABLE IF NOT EXISTS public.profiles (
 -- Enable RLS on profiles
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 
--- Profiles Policies
+-- Profiles Policies (Drop if exists first to avoid conflict)
+DROP POLICY IF EXISTS "Public profiles are viewable by authenticated users" ON public.profiles;
 CREATE POLICY "Public profiles are viewable by authenticated users"
   ON public.profiles FOR SELECT
   TO authenticated
   USING (true);
 
+DROP POLICY IF EXISTS "Users can update their own profile" ON public.profiles;
 CREATE POLICY "Users can update their own profile"
   ON public.profiles FOR UPDATE
   TO authenticated
   USING (auth.uid() = id);
+
+DROP POLICY IF EXISTS "Users can insert their own profile" ON public.profiles;
+CREATE POLICY "Users can insert their own profile"
+  ON public.profiles FOR INSERT
+  TO authenticated
+  WITH CHECK (auth.uid() = id);
 
 -- 2. EVENTS TABLE
 CREATE TABLE IF NOT EXISTS public.events (
@@ -61,10 +69,12 @@ CREATE TABLE IF NOT EXISTS public.events (
 ALTER TABLE public.events ENABLE ROW LEVEL SECURITY;
 
 -- Events Policies (Anyone can read, only Admins can create/edit)
+DROP POLICY IF EXISTS "Anyone can view events" ON public.events;
 CREATE POLICY "Anyone can view events"
   ON public.events FOR SELECT
   USING (true);
 
+DROP POLICY IF EXISTS "Admins can insert events" ON public.events;
 CREATE POLICY "Admins can insert events"
   ON public.events FOR INSERT
   TO authenticated
@@ -75,6 +85,7 @@ CREATE POLICY "Admins can insert events"
     )
   );
 
+DROP POLICY IF EXISTS "Admins can update events" ON public.events;
 CREATE POLICY "Admins can update events"
   ON public.events FOR UPDATE
   TO authenticated
@@ -85,6 +96,7 @@ CREATE POLICY "Admins can update events"
     )
   );
 
+DROP POLICY IF EXISTS "Admins can delete events" ON public.events;
 CREATE POLICY "Admins can delete events"
   ON public.events FOR DELETE
   TO authenticated
@@ -115,6 +127,7 @@ CREATE TABLE IF NOT EXISTS public.registrations (
 ALTER TABLE public.registrations ENABLE ROW LEVEL SECURITY;
 
 -- Registration Policies
+DROP POLICY IF EXISTS "Students can view their own registrations" ON public.registrations;
 CREATE POLICY "Students can view their own registrations"
   ON public.registrations FOR SELECT
   TO authenticated
@@ -126,11 +139,13 @@ CREATE POLICY "Students can view their own registrations"
     )
   );
 
+DROP POLICY IF EXISTS "Authenticated users can create registrations" ON public.registrations;
 CREATE POLICY "Authenticated users can create registrations"
   ON public.registrations FOR INSERT
   TO authenticated
   WITH CHECK (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Admins can update check-in status" ON public.registrations;
 CREATE POLICY "Admins can update check-in status"
   ON public.registrations FOR UPDATE
   TO authenticated
@@ -154,7 +169,14 @@ BEGIN
     COALESCE(new.raw_user_meta_data->>'roll_no', 'STD-' || floor(random() * 9000 + 1000)::text),
     COALESCE(new.raw_user_meta_data->>'dept', 'Computer Science & Eng'),
     COALESCE(new.raw_user_meta_data->>'year', 'Year 3 (Junior)')
-  );
+  )
+  ON CONFLICT (id) DO UPDATE SET
+    email = EXCLUDED.email,
+    full_name = EXCLUDED.full_name,
+    role = EXCLUDED.role,
+    roll_no = EXCLUDED.roll_no,
+    dept = EXCLUDED.dept,
+    year = EXCLUDED.year;
   RETURN new;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
@@ -165,7 +187,7 @@ CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
 
--- 5. SEED INITIAL EVENTS
+-- 5. SEED INITIAL CAMPUS EVENTS
 INSERT INTO public.events (id, title, category, category_name, organizer, organizer_icon, description, event_date, event_time, venue, price, price_text, team_type, max_capacity, registered_count, is_featured, banner, tags, perks)
 VALUES 
 (
