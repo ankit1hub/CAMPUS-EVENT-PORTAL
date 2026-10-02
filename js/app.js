@@ -77,7 +77,6 @@ class UniPulseApp {
     this.initTheme();
     this.initTicker();
     this.updateUIForRole();
-    this.updateSupabaseStatusIndicator();
 
     // Attempt to sync live events from Supabase if connected
     if (typeof supabaseService !== 'undefined' && supabaseService.isConnected) {
@@ -112,81 +111,6 @@ class UniPulseApp {
       localStorage.setItem(key, JSON.stringify(data));
     } catch (e) {
       console.error("Storage save error", e);
-    }
-  }
-
-  /* ---------------- Supabase Cloud Settings Modal ---------------- */
-  openSupabaseModal() {
-    const urlInput = document.getElementById('sbProjectUrl');
-    const keyInput = document.getElementById('sbAnonKey');
-    const alertBox = document.getElementById('supabaseStatusAlert');
-    const statusText = document.getElementById('supabaseStatusText');
-
-    if (urlInput) urlInput.value = supabaseService.supabaseUrl || '';
-    if (keyInput) keyInput.value = supabaseService.supabaseAnonKey || '';
-
-    if (alertBox && statusText) {
-      if (supabaseService.isConnected) {
-        alertBox.style.background = 'rgba(16, 185, 129, 0.15)';
-        alertBox.style.color = '#059669';
-        statusText.innerHTML = `<strong>Connected to Supabase Cloud</strong> (${supabaseService.supabaseUrl.slice(0, 28)}...)`;
-      } else {
-        alertBox.style.background = 'var(--primary-light)';
-        alertBox.style.color = 'var(--primary)';
-        statusText.innerHTML = `<strong>Local Demo Mode Active</strong> (Enter credentials below to connect to live Supabase DB)`;
-      }
-    }
-
-    this.openModal('modalSupabaseConfig');
-  }
-
-  async handleSaveSupabaseConfig(e) {
-    e.preventDefault();
-    const url = document.getElementById('sbProjectUrl').value.trim();
-    const key = document.getElementById('sbAnonKey').value.trim();
-
-    if (!url || !key) {
-      this.showToast('Please enter both Project URL and Anon API Key', 'error');
-      return;
-    }
-
-    const connected = supabaseService.setCredentials(url, key);
-    this.updateSupabaseStatusIndicator();
-    this.closeModal('modalSupabaseConfig');
-
-    if (connected) {
-      this.showToast('🎉 Connected to Supabase Cloud Database!', 'success');
-      // Fetch fresh live events from Supabase
-      const liveEvents = await supabaseService.fetchEvents();
-      if (liveEvents && liveEvents.length > 0) {
-        this.events = liveEvents;
-        this.saveStorage('unipulse_events', this.events);
-        this.renderEvents();
-        this.updateCategoryCounters();
-      }
-    } else {
-      this.showToast('Supabase Client saved. Verify credentials if requests fail.', 'info');
-    }
-  }
-
-  disconnectSupabase() {
-    supabaseService.disconnect();
-    this.updateSupabaseStatusIndicator();
-    this.closeModal('modalSupabaseConfig');
-    this.showToast('Supabase disconnected. Switched back to local demo mode.', 'info');
-  }
-
-  updateSupabaseStatusIndicator() {
-    const icon = document.getElementById('supabaseIcon');
-    const btn = document.getElementById('supabaseStatusBtn');
-    if (!icon || !btn) return;
-
-    if (supabaseService.isConnected) {
-      icon.style.color = 'var(--accent-emerald)';
-      btn.title = `Supabase DB: Connected (${supabaseService.supabaseUrl})`;
-    } else {
-      icon.style.color = 'var(--text-muted)';
-      btn.title = 'Supabase DB: Local Mode (Click to Connect)';
     }
   }
 

@@ -1,12 +1,17 @@
 /* ==========================================================
-   UniPulse - Supabase Client & Backend Authentication Service
+   UniPulse - Supabase Client & Backend Database Service
    ========================================================== */
+
+// Set your Supabase project credentials here:
+const SUPABASE_CONFIG = {
+  url: '',      // e.g. 'https://your-project-ref.supabase.co'
+  anonKey: ''   // e.g. 'eyJhbGciOiJIUzI1Ni...'
+};
 
 class SupabaseService {
   constructor() {
-    // Default placeholder or user-configured credentials from LocalStorage
-    this.supabaseUrl = localStorage.getItem('unipulse_supabase_url') || '';
-    this.supabaseAnonKey = localStorage.getItem('unipulse_supabase_key') || '';
+    this.supabaseUrl = SUPABASE_CONFIG.url || localStorage.getItem('unipulse_supabase_url') || '';
+    this.supabaseAnonKey = SUPABASE_CONFIG.anonKey || localStorage.getItem('unipulse_supabase_key') || '';
     this.client = null;
     this.isConnected = false;
 
@@ -14,13 +19,13 @@ class SupabaseService {
   }
 
   initClient() {
-    if (this.supabaseUrl && this.supabaseAnonKey && window.supabase) {
+    if (this.supabaseUrl && this.supabaseAnonKey && typeof window !== 'undefined' && window.supabase) {
       try {
         this.client = window.supabase.createClient(this.supabaseUrl, this.supabaseAnonKey);
         this.isConnected = true;
-        console.log('✅ Supabase Client initialized successfully');
+        console.log('✅ Supabase Client Connected');
       } catch (err) {
-        console.error('Supabase init failed:', err);
+        console.error('Supabase init error:', err);
         this.client = null;
         this.isConnected = false;
       }
@@ -28,24 +33,6 @@ class SupabaseService {
       this.client = null;
       this.isConnected = false;
     }
-  }
-
-  setCredentials(url, key) {
-    this.supabaseUrl = url.trim();
-    this.supabaseAnonKey = key.trim();
-    localStorage.setItem('unipulse_supabase_url', this.supabaseUrl);
-    localStorage.setItem('unipulse_supabase_key', this.supabaseAnonKey);
-    this.initClient();
-    return this.isConnected;
-  }
-
-  disconnect() {
-    this.supabaseUrl = '';
-    this.supabaseAnonKey = '';
-    localStorage.removeItem('unipulse_supabase_url');
-    localStorage.removeItem('unipulse_supabase_key');
-    this.client = null;
-    this.isConnected = false;
   }
 
   /* ---------------- AUTHENTICATION METHODS ---------------- */
@@ -135,7 +122,7 @@ class SupabaseService {
       if (error) throw error;
 
       // Fetch user profile to verify role
-      const { data: profile, error: profileErr } = await this.client
+      const { data: profile } = await this.client
         .from('profiles')
         .select('*')
         .eq('id', data.user.id)
@@ -190,7 +177,6 @@ class SupabaseService {
 
       if (error) throw error;
 
-      // Map Supabase snake_case columns to app format
       return data.map(e => ({
         id: e.id,
         title: e.title,
@@ -214,7 +200,7 @@ class SupabaseService {
         perks: e.perks || []
       }));
     } catch (err) {
-      console.warn('Failed to fetch from Supabase, using local state:', err);
+      console.warn('Supabase fetch failed, using local state:', err);
       return null;
     }
   }
@@ -272,10 +258,6 @@ class SupabaseService {
       }]).select();
 
       if (error) throw error;
-
-      // Increment registered_count on event
-      await this.client.rpc('increment_event_count', { row_id: regData.eventId }).catch(() => {});
-
       return { success: true, data: data[0] };
     } catch (err) {
       return { success: false, error: err.message };
