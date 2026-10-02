@@ -2336,18 +2336,6 @@ class UniPulseApp {
     }, 2800);
   }
 
-  updateRegistrationBadge() {
-    const badge = document.getElementById('myRegistrationsBadge');
-    if (badge) {
-      if (this.registrations.length > 0) {
-        badge.textContent = this.registrations.length;
-        badge.style.display = 'inline-flex';
-      } else {
-        badge.style.display = 'none';
-      }
-    }
-  }
-
   formatDate(dateStr) {
     if (!dateStr) return '';
     const date = new Date(dateStr + 'T00:00:00');
