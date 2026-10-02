@@ -34,6 +34,15 @@ class UniPulseApp {
     this.initTicker();
     this.updateUIForRole();
 
+    // Direct guests to dedicated login page first; direct logged-in users to their respective portal
+    if (!this.currentUser) {
+      this.navigate('login');
+    } else if (this.currentUser.role === 'admin') {
+      this.navigate('organizer');
+    } else {
+      this.navigate('events');
+    }
+
     // Attempt to sync live events from Supabase if connected
     if (typeof supabaseService !== 'undefined' && supabaseService.isConnected) {
       const liveEvents = await supabaseService.fetchEvents();
@@ -85,11 +94,14 @@ class UniPulseApp {
     const navUserPill = document.getElementById('navUserPill');
     const navAuthBtns = document.getElementById('navAuthBtns');
 
+    const mainNavLinks = document.getElementById('mainNavLinks');
+
     if (tabDashboard) tabDashboard.style.display = isStudent ? 'inline-flex' : 'none';
     if (tabOrganizer) tabOrganizer.style.display = isAdmin ? 'inline-flex' : 'none';
     if (hostBtn) hostBtn.style.display = isAdmin ? 'inline-flex' : 'none';
 
     if (this.currentUser) {
+      if (mainNavLinks) mainNavLinks.style.display = 'flex';
       if (navUserPill) navUserPill.style.display = 'flex';
       if (navAuthBtns) navAuthBtns.style.display = 'none';
 
@@ -118,21 +130,177 @@ class UniPulseApp {
         }
       }
     } else {
-      // Guest state: Show Login/Sign-In buttons, hide user pill
+      // Guest state: Show Login/Sign-In buttons, hide user pill and internal nav tabs
+      if (mainNavLinks) mainNavLinks.style.display = 'none';
       if (navUserPill) navUserPill.style.display = 'none';
       if (navAuthBtns) navAuthBtns.style.display = 'flex';
     }
 
-    if (isStudent && this.currentView === 'organizer') {
+    if (isStudent && (this.currentView === 'organizer' || this.currentView === 'login')) {
       this.navigate('events');
-    } else if (isAdmin && this.currentView === 'dashboard') {
+    } else if (isAdmin && (this.currentView === 'dashboard' || this.currentView === 'login')) {
       this.navigate('organizer');
-    } else if (!this.currentUser && (this.currentView === 'organizer' || this.currentView === 'dashboard')) {
-      this.navigate('events');
+    } else if (!this.currentUser && this.currentView !== 'login') {
+      this.navigate('login');
     }
   }
 
-  /* ---------------- Authentication Handlers ---------------- */
+  /* ---------------- Gateway Page Authentication Handlers ---------------- */
+  switchGatewayTab(tab) {
+    const studentBtn = document.getElementById('gatewayTabStudent');
+    const adminBtn = document.getElementById('gatewayTabAdmin');
+    const studentPanel = document.getElementById('gatewayStudentPanel');
+    const adminPanel = document.getElementById('gatewayAdminPanel');
+
+    if (tab === 'student') {
+      if (studentBtn) studentBtn.classList.add('active');
+      if (adminBtn) adminBtn.classList.remove('active');
+      if (studentPanel) studentPanel.classList.remove('hidden');
+      if (adminPanel) adminPanel.classList.add('hidden');
+    } else {
+      if (adminBtn) adminBtn.classList.add('active');
+      if (studentBtn) studentBtn.classList.remove('active');
+      if (adminPanel) adminPanel.classList.remove('hidden');
+      if (studentPanel) studentPanel.classList.add('hidden');
+    }
+  }
+
+  toggleGatewayStudentMode(mode) {
+    const signinForm = document.getElementById('gatewayStudentSignInForm');
+    const signupForm = document.getElementById('gatewayStudentSignUpForm');
+    const signinBtn = document.getElementById('gatewayStudentSignInBtn');
+    const signupBtn = document.getElementById('gatewayStudentSignUpBtn');
+
+    if (mode === 'signup') {
+      if (signinForm) signinForm.classList.add('hidden');
+      if (signupForm) signupForm.classList.remove('hidden');
+      if (signinBtn) { signinBtn.classList.remove('active'); signinBtn.style.background = 'var(--bg-surface)'; signinBtn.style.color = 'var(--text-main)'; }
+      if (signupBtn) { signupBtn.classList.add('active'); signupBtn.style.background = 'var(--primary)'; signupBtn.style.color = '#fff'; }
+    } else {
+      if (signupForm) signupForm.classList.add('hidden');
+      if (signinForm) signinForm.classList.remove('hidden');
+      if (signupBtn) { signupBtn.classList.remove('active'); signupBtn.style.background = 'var(--bg-surface)'; signupBtn.style.color = 'var(--text-main)'; }
+      if (signinBtn) { signinBtn.classList.add('active'); signinBtn.style.background = 'var(--primary)'; signinBtn.style.color = '#fff'; }
+    }
+  }
+
+  toggleGatewayAdminMode(mode) {
+    const signinForm = document.getElementById('gatewayAdminSignInForm');
+    const signupForm = document.getElementById('gatewayAdminSignUpForm');
+    const signinBtn = document.getElementById('gatewayAdminSignInBtn');
+    const signupBtn = document.getElementById('gatewayAdminSignUpBtn');
+
+    if (mode === 'signup') {
+      if (signinForm) signinForm.classList.add('hidden');
+      if (signupForm) signupForm.classList.remove('hidden');
+      if (signinBtn) { signinBtn.classList.remove('active'); signinBtn.style.background = 'var(--bg-surface)'; signinBtn.style.color = 'var(--text-main)'; }
+      if (signupBtn) { signupBtn.classList.add('active'); signupBtn.style.background = 'linear-gradient(135deg, #059669, #10b981)'; signupBtn.style.color = '#fff'; }
+    } else {
+      if (signupForm) signupForm.classList.add('hidden');
+      if (signinForm) signinForm.classList.remove('hidden');
+      if (signupBtn) { signupBtn.classList.remove('active'); signupBtn.style.background = 'var(--bg-surface)'; signupBtn.style.color = 'var(--text-main)'; }
+      if (signinBtn) { signinBtn.classList.add('active'); signinBtn.style.background = 'linear-gradient(135deg, #059669, #10b981)'; signinBtn.style.color = '#fff'; }
+    }
+  }
+
+  async handleGatewayStudentLogin(e) {
+    e.preventDefault();
+    const email = document.getElementById('gatewayLoginStudentEmail').value.trim();
+    const pass = document.getElementById('gatewayLoginStudentPass').value.trim();
+    const btn = document.getElementById('gatewayStudentSignInSubmitBtn');
+
+    if (btn) btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Authenticating...';
+
+    const res = await supabaseService.signIn(email, pass, 'student');
+    if (btn) btn.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> Sign In to Student Portal';
+
+    if (res.success) {
+      this.currentUser = res.user;
+      this.saveStorage('unipulse_user', this.currentUser);
+      this.updateUIForRole();
+      this.showToast(`🎓 Welcome back, ${this.currentUser.name}!`, 'success');
+      this.navigate('events');
+    } else {
+      this.showToast(`Authentication failed: ${res.error}`, 'error');
+    }
+  }
+
+  async handleGatewayStudentSignUp(e) {
+    e.preventDefault();
+    const fullName = document.getElementById('gatewaySignupFullName').value.trim();
+    const rollNo = document.getElementById('gatewaySignupRollNo').value.trim();
+    const email = document.getElementById('gatewaySignupEmail').value.trim();
+    const dept = document.getElementById('gatewaySignupDept').value;
+    const year = document.getElementById('gatewaySignupYear').value;
+    const pass = document.getElementById('gatewaySignupPass').value.trim();
+    const btn = document.getElementById('gatewayStudentSignUpSubmitBtn');
+
+    if (btn) btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Creating Account...';
+
+    const res = await supabaseService.signUpStudent(email, pass, fullName, rollNo, dept, year);
+    if (btn) btn.innerHTML = '<i class="fa-solid fa-user-plus"></i> Register & Enter Student Portal';
+
+    if (res.success) {
+      this.currentUser = res.user;
+      this.saveStorage('unipulse_user', this.currentUser);
+      this.updateUIForRole();
+      this.triggerConfetti();
+      this.showToast(`🎉 Account Created! Welcome, ${this.currentUser.name}`, 'success');
+      this.navigate('events');
+    } else {
+      this.showToast(`Sign up failed: ${res.error}`, 'error');
+    }
+  }
+
+  async handleGatewayAdminLogin(e) {
+    e.preventDefault();
+    const email = document.getElementById('gatewayLoginAdminEmail').value.trim();
+    const pass = document.getElementById('gatewayLoginAdminPass').value.trim();
+    const btn = document.getElementById('gatewayAdminSignInSubmitBtn');
+
+    if (btn) btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Verifying Admin...';
+
+    const res = await supabaseService.signIn(email, pass, 'admin');
+    if (btn) btn.innerHTML = '<i class="fa-solid fa-lock-open"></i> Login to Admin Studio';
+
+    if (res.success) {
+      this.currentUser = res.user;
+      this.saveStorage('unipulse_user', this.currentUser);
+      this.updateUIForRole();
+      this.showToast(`🛡️ Administrator Access Granted: Welcome, ${this.currentUser.name}!`, 'success');
+      this.navigate('organizer');
+    } else {
+      this.showToast(`Admin verification failed: ${res.error}`, 'error');
+    }
+  }
+
+  async handleGatewayAdminSignUp(e) {
+    e.preventDefault();
+    const fullName = document.getElementById('gatewaySignupAdminFullName').value.trim();
+    const adminKey = document.getElementById('gatewaySignupAdminKey').value.trim();
+    const email = document.getElementById('gatewaySignupAdminEmail').value.trim();
+    const dept = document.getElementById('gatewaySignupAdminDept').value;
+    const pass = document.getElementById('gatewaySignupAdminPass').value.trim();
+    const btn = document.getElementById('gatewayAdminSignUpSubmitBtn');
+
+    if (btn) btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Registering Admin...';
+
+    const res = await supabaseService.signUpAdmin(email, pass, fullName, adminKey, dept);
+    if (btn) btn.innerHTML = '<i class="fa-solid fa-user-shield"></i> Register Administrator Account';
+
+    if (res.success) {
+      this.currentUser = res.user;
+      this.saveStorage('unipulse_user', this.currentUser);
+      this.updateUIForRole();
+      this.triggerConfetti();
+      this.showToast(`🛡️ Administrator Account Created! Welcome, ${this.currentUser.name}`, 'success');
+      this.navigate('organizer');
+    } else {
+      this.showToast(`Admin registration failed: ${res.error}`, 'error');
+    }
+  }
+
+  /* ---------------- Authentication Modal Handlers ---------------- */
   openAuthModal(tab = 'student') {
     this.switchAuthTab(tab);
     this.openModal('modalAuth');
@@ -363,7 +531,7 @@ class UniPulseApp {
     localStorage.removeItem('unipulse_user');
     this.closeModal('modalUserDropdown');
     this.updateUIForRole();
-    this.navigate('events');
+    this.navigate('login');
     this.showToast('You have signed out.', 'info');
   }
 

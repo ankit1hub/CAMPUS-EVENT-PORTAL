@@ -110,11 +110,195 @@
 
   <!-- Main View Container -->
   <main id="mainContainer">
-    
+
     <!-- ==========================================
-         VIEW 1: EXPLORE EVENTS (DEFAULT VIEW)
+         VIEW 0: FULL-PAGE LOGIN / AUTH GATEWAY (DEFAULT FOR GUESTS)
          ========================================== -->
-    <section id="view-events" class="view-section">
+    <section id="view-login" class="view-section">
+      <div class="login-page-section">
+        <div class="login-gateway-card">
+          <!-- Gateway Header -->
+          <div class="gateway-header">
+            <div class="gateway-logo-icon">
+              <i class="fa-solid fa-graduation-cap"></i>
+            </div>
+            <h1 class="gateway-title">Welcome to <span class="brand-gradient">UniPulse</span></h1>
+            <p class="gateway-subtitle">Sign in or create an account to access campus events and organizer studios</p>
+          </div>
+
+          <!-- Role Switcher Tabs -->
+          <div class="auth-role-tabs" style="margin-bottom: 1.25rem;">
+            <button class="auth-role-tab active" id="gatewayTabStudent" onclick="app.switchGatewayTab('student')">
+              <i class="fa-solid fa-user-graduate"></i> Student Portal
+            </button>
+            <button class="auth-role-tab" id="gatewayTabAdmin" onclick="app.switchGatewayTab('admin')">
+              <i class="fa-solid fa-shield-halved"></i> Admin / Host Portal
+            </button>
+          </div>
+
+          <!-- 1. STUDENT AUTH GATEWAY PANEL -->
+          <div id="gatewayStudentPanel">
+            <!-- Mode Switcher: Sign In vs Create Account -->
+            <div style="display: flex; justify-content: center; gap: 0.5rem; margin-bottom: 1.25rem;">
+              <button class="btn btn-secondary btn-sm active" id="gatewayStudentSignInBtn" style="flex: 1;" onclick="app.toggleGatewayStudentMode('signin')">
+                Sign In
+              </button>
+              <button class="btn btn-secondary btn-sm" id="gatewayStudentSignUpBtn" style="flex: 1;" onclick="app.toggleGatewayStudentMode('signup')">
+                Create Account
+              </button>
+            </div>
+
+            <!-- Student Sign In Form -->
+            <form id="gatewayStudentSignInForm" onsubmit="app.handleGatewayStudentLogin(event)">
+              <div class="form-group">
+                <label class="form-label">University Email</label>
+                <input type="email" id="gatewayLoginStudentEmail" class="form-control" required placeholder="name@campus.edu">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Password</label>
+                <input type="password" id="gatewayLoginStudentPass" class="form-control" required placeholder="••••••••">
+              </div>
+              <div class="flex items-center justify-between" style="font-size: 0.8rem; margin-bottom: 1.25rem;">
+                <label style="display: flex; align-items: center; gap: 0.35rem; cursor: pointer;">
+                  <input type="checkbox" checked> Remember me
+                </label>
+                <a href="#" onclick="app.showToast('Please contact campus helpdesk or sign up for a new account.', 'info')">Forgot Password?</a>
+              </div>
+              <button type="submit" class="btn btn-primary w-full" style="width: 100%;" id="gatewayStudentSignInSubmitBtn">
+                <i class="fa-solid fa-right-to-bracket"></i> Sign In to Student Portal
+              </button>
+            </form>
+
+            <!-- Student Sign Up Form -->
+            <form id="gatewayStudentSignUpForm" class="hidden" onsubmit="app.handleGatewayStudentSignUp(event)">
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">Full Name *</label>
+                  <input type="text" id="gatewaySignupFullName" class="form-control" required placeholder="e.g. Alex Rivera">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Roll / Student ID *</label>
+                  <input type="text" id="gatewaySignupRollNo" class="form-control" required placeholder="e.g. 24CS0192">
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">University Email *</label>
+                <input type="email" id="gatewaySignupEmail" class="form-control" required placeholder="e.g. alex.rivera@campus.edu">
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">Department *</label>
+                  <select id="gatewaySignupDept" class="form-control" required>
+                    <option value="Computer Science & Eng">Computer Science & Eng</option>
+                    <option value="Information Technology">Information Technology</option>
+                    <option value="Electronics & Comm">Electronics & Comm</option>
+                    <option value="Mechanical Engineering">Mechanical Engineering</option>
+                    <option value="Business Administration">Business Administration</option>
+                    <option value="Design & Media">Design & Media</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Academic Year *</label>
+                  <select id="gatewaySignupYear" class="form-control" required>
+                    <option value="Year 1 (Freshman)">Year 1 (Freshman)</option>
+                    <option value="Year 2 (Sophomore)">Year 2 (Sophomore)</option>
+                    <option value="Year 3 (Junior)" selected>Year 3 (Junior)</option>
+                    <option value="Year 4 (Senior)">Year 4 (Senior)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Create Password (Min. 6 chars) *</label>
+                <input type="password" id="gatewaySignupPass" class="form-control" required minlength="6" placeholder="••••••••">
+              </div>
+
+              <button type="submit" class="btn btn-primary w-full" style="width: 100%;" id="gatewayStudentSignUpSubmitBtn">
+                <i class="fa-solid fa-user-plus"></i> Register & Enter Student Portal
+              </button>
+            </form>
+          </div>
+
+          <!-- 2. ADMIN AUTH GATEWAY PANEL -->
+          <div id="gatewayAdminPanel" class="hidden">
+            <!-- Mode Switcher: Sign In vs Create Account for Admin -->
+            <div style="display: flex; justify-content: center; gap: 0.5rem; margin-bottom: 1.25rem;">
+              <button class="btn btn-secondary btn-sm active" id="gatewayAdminSignInBtn" style="flex: 1;" onclick="app.toggleGatewayAdminMode('signin')">
+                Sign In
+              </button>
+              <button class="btn btn-secondary btn-sm" id="gatewayAdminSignUpBtn" style="flex: 1;" onclick="app.toggleGatewayAdminMode('signup')">
+                Create Admin Account
+              </button>
+            </div>
+
+            <!-- Admin Sign In Form -->
+            <form id="gatewayAdminSignInForm" onsubmit="app.handleGatewayAdminLogin(event)">
+              <div class="form-group">
+                <label class="form-label">Admin / Organizer Email</label>
+                <input type="email" id="gatewayLoginAdminEmail" class="form-control" required placeholder="admin@campus.edu">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Admin Password</label>
+                <input type="password" id="gatewayLoginAdminPass" class="form-control" required placeholder="••••••••">
+                <div class="form-help">Enter club lead key or faculty admin credentials.</div>
+              </div>
+              <button type="submit" class="btn btn-primary w-full" style="width: 100%; background: linear-gradient(135deg, #059669, #10b981);" id="gatewayAdminSignInSubmitBtn">
+                <i class="fa-solid fa-lock-open"></i> Login to Admin Studio
+              </button>
+            </form>
+
+            <!-- Admin Sign Up Form -->
+            <form id="gatewayAdminSignUpForm" class="hidden" onsubmit="app.handleGatewayAdminSignUp(event)">
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">Admin Full Name *</label>
+                  <input type="text" id="gatewaySignupAdminFullName" class="form-control" required placeholder="e.g. Dr. Robert Vance">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Admin Security Code / PIN *</label>
+                  <input type="text" id="gatewaySignupAdminKey" class="form-control" required placeholder="CAMPUS_ADMIN_2026 or admin123">
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Official Staff / Club Email *</label>
+                <input type="email" id="gatewaySignupAdminEmail" class="form-control" required placeholder="staff.lead@campus.edu">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Department / Society / Committee *</label>
+                <select id="gatewaySignupAdminDept" class="form-control" required>
+                  <option value="Campus Event Council & Student Affairs">Campus Event Council & Student Affairs</option>
+                  <option value="Google Developer Student Club & ACM">Google Developer Student Club & ACM</option>
+                  <option value="Campus Cultural & Music Society">Campus Cultural & Music Society</option>
+                  <option value="AI & Robotics Club (ARC)">AI & Robotics Club (ARC)</option>
+                  <option value="Sports & Athletics Committee">Sports & Athletics Committee</option>
+                  <option value="Esports & Gaming Guild">Esports & Gaming Guild</option>
+                  <option value="Faculty Administration">Faculty Administration</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Create Admin Password (Min. 6 chars) *</label>
+                <input type="password" id="gatewaySignupAdminPass" class="form-control" required minlength="6" placeholder="••••••••">
+              </div>
+
+              <button type="submit" class="btn btn-primary w-full" style="width: 100%; background: linear-gradient(135deg, #059669, #10b981);" id="gatewayAdminSignUpSubmitBtn">
+                <i class="fa-solid fa-user-shield"></i> Register Administrator Account
+              </button>
+            </form>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         VIEW 1: EXPLORE EVENTS (STUDENT VIEW)
+         ========================================== -->
+    <section id="view-events" class="view-section hidden">
       <!-- Hero Banner -->
       <div class="hero-section">
         <div class="container hero-center-container">
