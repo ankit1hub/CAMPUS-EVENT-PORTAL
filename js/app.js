@@ -671,7 +671,16 @@ class UniPulseApp {
 
     grid.innerHTML = filtered.map(e => {
       const isBookmarked = this.bookmarks.includes(e.id);
-      const isRegistered = this.registrations.some(r => r.eventId === e.id);
+      
+      // Determine if current student user is already registered for this event
+      const isRegistered = this.currentUser && this.currentUser.role === 'student'
+        ? this.registrations.some(r => r.eventId === e.id && (
+            r.email === this.currentUser.email || 
+            r.rollNo === this.currentUser.rollNo || 
+            (this.currentUser.id && r.userId === this.currentUser.id)
+          ))
+        : (!this.currentUser ? false : this.registrations.some(r => r.eventId === e.id));
+
       const fillPercentage = Math.min(100, Math.round((e.registeredCount / e.maxCapacity) * 100));
       const seatsLeft = Math.max(0, e.maxCapacity - e.registeredCount);
 
@@ -726,16 +735,14 @@ class UniPulseApp {
                 <i class="fa-regular fa-eye"></i> Details
               </button>
               ${isAdmin ? `
-                <button class="btn btn-secondary btn-sm" style="color: var(--primary); border-color: var(--primary);" onclick="app.manageEventAsAdmin('${e.id}')">
-                  <i class="fa-solid fa-sliders"></i> Manage
-                </button>
+                <!-- Admin sees Details only, no Manage button on cards (all controls inside Admin Studio) -->
               ` : isRegistered ? `
-                <button class="btn btn-secondary btn-sm" style="color: var(--accent-emerald); border-color: var(--accent-emerald);" onclick="app.viewTicketForEvent('${e.id}')">
-                  <i class="fa-solid fa-qrcode"></i> View Pass
+                <button class="btn btn-secondary btn-sm" style="color: var(--accent-emerald); border-color: var(--accent-emerald); background: rgba(16, 185, 129, 0.08); font-weight: 700;" onclick="app.viewTicketForEvent('${e.id}')">
+                  <i class="fa-solid fa-circle-check"></i> Booked
                 </button>
               ` : `
                 <button class="btn btn-primary btn-sm" onclick="app.openRegistrationModal('${e.id}')" ${seatsLeft <= 0 ? 'disabled' : ''}>
-                  <i class="fa-solid fa-ticket"></i> Register
+                  <i class="fa-solid fa-ticket"></i> ${seatsLeft <= 0 ? 'Sold Out' : 'Book Now'}
                 </button>
               `}
             </div>
@@ -743,11 +750,6 @@ class UniPulseApp {
         </div>
       `;
     }).join('');
-  }
-
-  manageEventAsAdmin(eventId) {
-    this.navigate('organizer');
-    this.showToast(`Managing event ${eventId} in Admin Studio`, 'info');
   }
 
   updateCategoryCounters() {
@@ -1115,9 +1117,21 @@ class UniPulseApp {
   }
 
   viewTicketForEvent(eventId) {
-    const reg = this.registrations.find(r => r.eventId === eventId);
+    let reg = null;
+    if (this.currentUser) {
+      reg = this.registrations.find(r => r.eventId === eventId && (
+        r.email === this.currentUser.email || 
+        r.rollNo === this.currentUser.rollNo || 
+        (this.currentUser.id && r.userId === this.currentUser.id)
+      ));
+    }
+    if (!reg) {
+      reg = this.registrations.find(r => r.eventId === eventId);
+    }
     if (reg) {
       this.viewTicket(reg.ticketId);
+    } else {
+      this.showToast('You have booked your seat for this event!', 'success');
     }
   }
 
