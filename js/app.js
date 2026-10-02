@@ -1706,11 +1706,15 @@ class UniPulseApp {
       cellsHtml += `
         <div class="calendar-day-cell ${isToday ? 'today' : ''}" onclick="app.handleCalendarDayClick('${dateString}')">
           <span class="calendar-day-num">${day}</span>
-          ${dayEvents.map(ev => `
-            <div class="calendar-event-pill" title="${ev.title}" onclick="event.stopPropagation(); app.openEventDetails('${ev.id}')">
-              ${ev.title}
-            </div>
-          `).join('')}
+          ${dayEvents.map(ev => {
+            const icon = ev.organizerIcon || (ev.category === 'hackathon' ? '💻' : ev.category === 'cultural' ? '🎸' : ev.category === 'workshop' ? '🔬' : ev.category === 'sports' ? '🏆' : '🎯');
+            return `
+              <div class="calendar-event-pill category-${ev.category || 'tech'}" title="${ev.title} (${ev.time || 'All Day'})" onclick="event.stopPropagation(); app.openEventDetails('${ev.id}')">
+                <span>${icon}</span>
+                <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${ev.title}</span>
+              </div>
+            `;
+          }).join('')}
         </div>
       `;
     }
