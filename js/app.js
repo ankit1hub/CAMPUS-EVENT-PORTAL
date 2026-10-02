@@ -13,62 +13,18 @@ class UniPulseApp {
     
     this.calendarDate = new Date(2026, 9, 1); // October 2026
 
-    // Default Fallback Demo Personas
-    this.studentUser = {
-      id: "usr-std-101",
-      name: "John Doe",
-      rollNo: "23CS0148",
-      email: "john.doe@campus.edu",
-      dept: "Computer Science & Eng",
-      year: "Year 3 (Junior)",
-      role: "student"
-    };
+    // Default state: Guest (No pre-saved persona)
+    this.studentUser = null;
+    this.adminUser = null;
 
-    this.adminUser = {
-      id: "usr-adm-201",
-      name: "Aarav Sharma",
-      rollNo: "FAC-8821",
-      email: "admin@campus.edu",
-      dept: "Campus Event Council & GDSC Lead",
-      year: "Administrator / Faculty Lead",
-      role: "admin"
-    };
-
-    // Load active session (default to student)
-    this.currentUser = this.loadStorage('unipulse_user', this.studentUser);
+    // Load active session (default to guest / null)
+    this.currentUser = this.loadStorage('unipulse_user', null);
 
     // Load datasets
     this.events = this.loadStorage('unipulse_events', INITIAL_EVENTS);
     this.clubs = this.loadStorage('unipulse_clubs', INITIAL_CLUBS);
-    this.bookmarks = this.loadStorage('unipulse_bookmarks', ['evt-101']);
-    this.registrations = this.loadStorage('unipulse_registrations', [
-      {
-        ticketId: "UP-2026-8492",
-        eventId: "evt-101",
-        userId: "usr-std-101",
-        attendeeName: "John Doe",
-        rollNo: "23CS0148",
-        email: "john.doe@campus.edu",
-        dept: "Computer Science & Eng",
-        year: "Year 3 (Junior)",
-        teamName: "ByteBusters",
-        registeredAt: "2026-10-01 14:30",
-        isCheckedIn: true
-      },
-      {
-        ticketId: "UP-2026-3105",
-        eventId: "evt-103",
-        userId: "usr-std-101",
-        attendeeName: "John Doe",
-        rollNo: "23CS0148",
-        email: "john.doe@campus.edu",
-        dept: "Computer Science & Eng",
-        year: "Year 3 (Junior)",
-        teamName: "",
-        registeredAt: "2026-10-02 09:15",
-        isCheckedIn: false
-      }
-    ]);
+    this.bookmarks = this.loadStorage('unipulse_bookmarks', []);
+    this.registrations = this.loadStorage('unipulse_registrations', []);
 
     this.chartInstances = {};
   }
@@ -126,11 +82,17 @@ class UniPulseApp {
     const navRole = document.getElementById('navUserRole');
     const navAvatar = document.getElementById('navAvatar');
 
+    const navUserPill = document.getElementById('navUserPill');
+    const navAuthBtns = document.getElementById('navAuthBtns');
+
     if (tabDashboard) tabDashboard.style.display = isStudent ? 'inline-flex' : 'none';
     if (tabOrganizer) tabOrganizer.style.display = isAdmin ? 'inline-flex' : 'none';
     if (hostBtn) hostBtn.style.display = isAdmin ? 'inline-flex' : 'none';
 
     if (this.currentUser) {
+      if (navUserPill) navUserPill.style.display = 'flex';
+      if (navAuthBtns) navAuthBtns.style.display = 'none';
+
       let displayName = this.currentUser.name;
       if (displayName && displayName.includes('@')) {
         displayName = displayName.split('@')[0].replace(/[._-]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
@@ -155,12 +117,18 @@ class UniPulseApp {
           navRole.innerHTML = `<span class="role-pill role-student">🎓 ${rollDisplay}</span>`;
         }
       }
+    } else {
+      // Guest state: Show Login/Sign-In buttons, hide user pill
+      if (navUserPill) navUserPill.style.display = 'none';
+      if (navAuthBtns) navAuthBtns.style.display = 'flex';
     }
 
     if (isStudent && this.currentView === 'organizer') {
       this.navigate('events');
     } else if (isAdmin && this.currentView === 'dashboard') {
       this.navigate('organizer');
+    } else if (!this.currentUser && (this.currentView === 'organizer' || this.currentView === 'dashboard')) {
+      this.navigate('events');
     }
   }
 
@@ -391,9 +359,12 @@ class UniPulseApp {
 
   async logout() {
     await supabaseService.signOut();
+    this.currentUser = null;
+    localStorage.removeItem('unipulse_user');
     this.closeModal('modalUserDropdown');
-    this.openAuthModal('student');
-    this.showToast('You have signed out. Please choose a portal to sign in.', 'info');
+    this.updateUIForRole();
+    this.navigate('events');
+    this.showToast('You have signed out.', 'info');
   }
 
   handleHostEventClick() {
@@ -850,9 +821,9 @@ class UniPulseApp {
 
     if (subEl) subEl.textContent = `For: ${evt.title} (${evt.priceText || 'Free'})`;
     if (idIn) idIn.value = evt.id;
-    if (nameIn) nameIn.value = this.currentUser ? this.currentUser.name : "John Doe";
-    if (rollIn) rollIn.value = this.currentUser ? this.currentUser.rollNo : "23CS0148";
-    if (emailIn) emailIn.value = this.currentUser ? this.currentUser.email : "john.doe@campus.edu";
+    if (nameIn) nameIn.value = this.currentUser ? this.currentUser.name : "";
+    if (rollIn) rollIn.value = this.currentUser ? (this.currentUser.rollNo || "") : "";
+    if (emailIn) emailIn.value = this.currentUser ? (this.currentUser.email || "") : "";
 
     if (teamWrap) {
       if (evt.teamType && evt.teamType.toLowerCase().includes('team')) {

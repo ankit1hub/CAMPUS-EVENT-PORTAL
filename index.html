@@ -86,22 +86,22 @@
           <i class="fa-solid fa-plus"></i> Host Event
         </button>
 
-        <!-- Logged-in User Profile Dropdown -->
-        <div class="user-menu-btn" id="navUserPill" onclick="app.openUserDropdownModal()" title="User Account">
+        <!-- Logged-in User Profile Dropdown (Shown only when authenticated) -->
+        <div class="user-menu-btn" id="navUserPill" onclick="app.openUserDropdownModal()" title="User Account" style="display: none;">
           <div class="user-avatar" id="navAvatar">JD</div>
           <div class="user-meta">
-            <div class="user-name" id="navUserName">John Doe</div>
+            <div class="user-name" id="navUserName">Student Member</div>
             <div class="user-role-label" id="navUserRole"><span class="role-pill role-student">🎓 Student</span></div>
           </div>
         </div>
 
-        <!-- Logged-out Auth Action Buttons (if guest) -->
-        <div id="navAuthBtns" class="flex items-center gap-2" style="display: none;">
+        <!-- Logged-out Auth Action Buttons (Default for guests) -->
+        <div id="navAuthBtns" class="flex items-center gap-2" style="display: flex;">
           <button class="btn btn-secondary btn-sm" onclick="app.openAuthModal('student')">
             <i class="fa-solid fa-user-graduate"></i> Student Login
           </button>
           <button class="btn btn-primary btn-sm" onclick="app.openAuthModal('admin')">
-            <i class="fa-solid fa-shield-halved"></i> Admin Login
+            <i class="fa-solid fa-shield-halved"></i> Admin Portal
           </button>
         </div>
       </div>
