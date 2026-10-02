@@ -84,6 +84,7 @@ class UniPulseApp {
     const isStudent = this.currentUser && this.currentUser.role === 'student';
     const isAdmin = this.currentUser && this.currentUser.role === 'admin';
 
+    const tabClubs = document.getElementById('navTabClubs');
     const tabDashboard = document.getElementById('navTabDashboard');
     const tabOrganizer = document.getElementById('navTabOrganizer');
     const hostBtn = document.getElementById('navHostEventBtn');
@@ -96,6 +97,7 @@ class UniPulseApp {
 
     const mainNavLinks = document.getElementById('mainNavLinks');
 
+    if (tabClubs) tabClubs.style.display = isStudent ? 'inline-flex' : 'none';
     if (tabDashboard) tabDashboard.style.display = isStudent ? 'inline-flex' : 'none';
     if (tabOrganizer) tabOrganizer.style.display = isAdmin ? 'inline-flex' : 'none';
     if (hostBtn) hostBtn.style.display = isAdmin ? 'inline-flex' : 'none';
@@ -582,6 +584,12 @@ class UniPulseApp {
     if (viewName === 'organizer' && (!this.currentUser || this.currentUser.role !== 'admin')) {
       this.showToast('🔒 Admin Studio is restricted to Administrators & Club Organizers.', 'error');
       this.openAuthModal('admin');
+      return;
+    }
+
+    if ((viewName === 'clubs' || viewName === 'dashboard') && this.currentUser && this.currentUser.role === 'admin') {
+      this.showToast('ℹ️ This feature is exclusively available in Student Mode.', 'info');
+      this.navigate('organizer');
       return;
     }
 

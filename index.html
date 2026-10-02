@@ -46,17 +46,17 @@
 
       <!-- Desktop Navigation Tabs -->
       <nav class="nav-links" id="mainNavLinks">
-        <button class="nav-item-btn active" data-view="events" onclick="app.navigate('events')">
+        <button class="nav-item-btn active" id="navTabEvents" data-view="events" onclick="app.navigate('events')">
           <i class="fa-solid fa-compass"></i> Explore Events
         </button>
-        <button class="nav-item-btn" data-view="calendar" onclick="app.navigate('calendar')">
+        <button class="nav-item-btn" id="navTabCalendar" data-view="calendar" onclick="app.navigate('calendar')">
           <i class="fa-regular fa-calendar-days"></i> Calendar
         </button>
-        <button class="nav-item-btn" data-view="clubs" onclick="app.navigate('clubs')">
+        
+        <!-- Student-Only Tabs -->
+        <button class="nav-item-btn" id="navTabClubs" data-view="clubs" onclick="app.navigate('clubs')">
           <i class="fa-solid fa-people-group"></i> Clubs & Societies
         </button>
-        
-        <!-- Student-Only Tab -->
         <button class="nav-item-btn" id="navTabDashboard" data-view="dashboard" onclick="app.navigate('dashboard')">
           <i class="fa-solid fa-ticket"></i> My Registrations
           <span class="icon-badge" id="myRegistrationsBadge" style="position: static; margin-left: 4px; display: none;">0</span>
