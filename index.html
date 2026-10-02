@@ -514,11 +514,14 @@
               <div style="font-size: 0.8rem; color: var(--text-muted);" id="orgEventScopeSubtext">Showing aggregated campus overview across all events</div>
             </div>
           </div>
-          <div class="flex items-center gap-2" style="min-width: 280px; flex: 1; max-width: 460px;">
-            <label for="orgEventFilterSelect" style="font-size: 0.85rem; font-weight: 600; white-space: nowrap; color: var(--text-muted);"><i class="fa-solid fa-filter"></i> Select Event:</label>
-            <select id="orgEventFilterSelect" class="form-control" style="font-weight: 600; padding: 0.55rem 0.85rem;" onchange="app.handleOrgEventFilterChange(this.value)">
+          <div class="flex items-center gap-2" style="min-width: 280px; flex: 1; max-width: 540px; justify-content: flex-end;">
+            <label for="orgEventFilterSelect" style="font-size: 0.85rem; font-weight: 600; white-space: nowrap; color: var(--text-muted);"><i class="fa-solid fa-filter"></i> Event:</label>
+            <select id="orgEventFilterSelect" class="form-control" style="font-weight: 600; padding: 0.55rem 0.85rem; flex: 1;" onchange="app.handleOrgEventFilterChange(this.value)">
               <option value="all">🌐 All Events (Campus Overview)</option>
             </select>
+            <button id="orgCancelEventBtn" class="btn btn-secondary btn-sm" style="display: none; color: var(--accent-rose); border-color: var(--accent-rose); background: rgba(244, 63, 94, 0.08); font-weight: 700; white-space: nowrap;" onclick="app.toggleCancelEvent(app.selectedOrgEvent)">
+              <i class="fa-solid fa-ban"></i> Cancel Event
+            </button>
           </div>
         </div>
 
@@ -846,7 +849,10 @@
       <div class="modal-footer">
         <button class="btn btn-secondary btn-sm" onclick="app.closeModal('modalEventDetails')">Close</button>
         <button class="btn btn-secondary btn-sm" id="detailShareBtn" onclick="app.shareCurrentEvent()"><i class="fa-solid fa-share-nodes"></i> Share</button>
-        <button class="btn btn-primary btn-sm" id="detailRegisterCtaBtn"><i class="fa-solid fa-ticket"></i> Register Now</button>
+        <button class="btn btn-secondary btn-sm" id="detailAdminCancelBtn" style="display: none; color: var(--accent-rose); border-color: var(--accent-rose); background: rgba(244, 63, 94, 0.08); font-weight: 700;" onclick="app.toggleCancelEvent(app.currentInspectedEvent ? app.currentInspectedEvent.id : null)">
+          <i class="fa-solid fa-ban"></i> Cancel Event
+        </button>
+        <button class="btn btn-primary btn-sm" id="detailRegisterCtaBtn"><i class="fa-solid fa-ticket"></i> Book Now</button>
       </div>
     </div>
   </div>

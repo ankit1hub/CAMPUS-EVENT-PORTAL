@@ -671,6 +671,7 @@ class UniPulseApp {
 
     grid.innerHTML = filtered.map(e => {
       const isBookmarked = this.bookmarks.includes(e.id);
+      const isCancelled = !!e.isCancelled;
       
       // Determine if current student user is already registered for this event
       const isRegistered = this.currentUser && this.currentUser.role === 'student'
@@ -685,10 +686,16 @@ class UniPulseApp {
       const seatsLeft = Math.max(0, e.maxCapacity - e.registeredCount);
 
       return `
-        <div class="event-card">
+        <div class="event-card ${isCancelled ? 'event-cancelled' : ''}" style="${isCancelled ? 'opacity: 0.88;' : ''}">
           <div class="event-card-media">
             <img src="${e.banner}" class="event-card-img" alt="${e.title}" loading="lazy" decoding="async" width="400" height="180">
-            <span class="event-card-category category-${e.category}">${e.categoryName}</span>
+            ${isCancelled ? `
+              <span style="position: absolute; top: 0.85rem; left: 0.85rem; background: #e11d48; color: #fff; padding: 0.25rem 0.65rem; border-radius: var(--radius-sm); font-size: 0.75rem; font-weight: 800; letter-spacing: 0.5px; z-index: 2; box-shadow: 0 2px 8px rgba(225, 29, 72, 0.4);">
+                <i class="fa-solid fa-ban"></i> CANCELLED
+              </span>
+            ` : `
+              <span class="event-card-category category-${e.category}">${e.categoryName}</span>
+            `}
             <button class="event-bookmark-btn ${isBookmarked ? 'bookmarked' : ''}" 
                     title="${isBookmarked ? 'Remove Bookmark' : 'Save Event'}" 
                     onclick="app.toggleBookmark('${e.id}', event)">
@@ -722,11 +729,11 @@ class UniPulseApp {
 
             <div class="event-progress-wrap">
               <div class="progress-header">
-                <span><i class="fa-solid fa-fire" style="color: var(--accent-amber); margin-right: 4px;"></i> ${fillPercentage}% Full</span>
-                <span>${seatsLeft > 0 ? `${seatsLeft} seats left` : '<strong style="color: var(--accent-rose)">SOLD OUT</strong>'}</span>
+                <span><i class="fa-solid fa-fire" style="color: var(--accent-amber); margin-right: 4px;"></i> ${isCancelled ? 'Status: Cancelled' : `${fillPercentage}% Full`}</span>
+                <span>${isCancelled ? '<strong style="color: var(--accent-rose)">EVENT CANCELLED</strong>' : (seatsLeft > 0 ? `${seatsLeft} seats left` : '<strong style="color: var(--accent-rose)">SOLD OUT</strong>')}</span>
               </div>
               <div class="progress-bar-bg">
-                <div class="progress-bar-fill ${fillPercentage > 80 ? 'warning' : ''}" style="width: ${fillPercentage}%"></div>
+                <div class="progress-bar-fill ${isCancelled ? 'bg-rose' : (fillPercentage > 80 ? 'warning' : '')}" style="width: ${isCancelled ? '100%' : `${fillPercentage}%`}; ${isCancelled ? 'background: var(--accent-rose);' : ''}"></div>
               </div>
             </div>
 
@@ -735,7 +742,13 @@ class UniPulseApp {
                 <i class="fa-regular fa-eye"></i> Details
               </button>
               ${isAdmin ? `
-                <!-- Admin sees Details only, no Manage button on cards (all controls inside Admin Studio) -->
+                <button class="btn btn-secondary btn-sm" style="${isCancelled ? 'color: var(--accent-emerald); border-color: var(--accent-emerald); background: rgba(16, 185, 129, 0.08);' : 'color: var(--accent-rose); border-color: var(--accent-rose); background: rgba(244, 63, 94, 0.08);'} font-weight: 600;" onclick="app.toggleCancelEvent('${e.id}')">
+                  <i class="fa-solid ${isCancelled ? 'fa-rotate-left' : 'fa-ban'}"></i> ${isCancelled ? 'Restore' : 'Cancel'}
+                </button>
+              ` : isCancelled ? `
+                <button class="btn btn-secondary btn-sm" style="color: var(--accent-rose); border-color: var(--accent-rose); background: rgba(244, 63, 94, 0.08); font-weight: 700;" disabled>
+                  <i class="fa-solid fa-ban"></i> Cancelled
+                </button>
               ` : isRegistered ? `
                 <button class="btn btn-secondary btn-sm" style="color: var(--accent-emerald); border-color: var(--accent-emerald); background: rgba(16, 185, 129, 0.08); font-weight: 700;" onclick="app.viewTicketForEvent('${e.id}')">
                   <i class="fa-solid fa-circle-check"></i> Booked
@@ -878,11 +891,37 @@ class UniPulseApp {
       catEl.className = `event-card-category category-${evt.category}`;
     }
 
-    const isRegistered = this.registrations.some(r => r.eventId === evt.id);
+    const isRegistered = this.currentUser && this.currentUser.role === 'student'
+      ? this.registrations.some(r => r.eventId === evt.id && (
+          r.email === this.currentUser.email || 
+          r.rollNo === this.currentUser.rollNo || 
+          (this.currentUser.id && r.userId === this.currentUser.id)
+        ))
+      : this.registrations.some(r => r.eventId === evt.id);
+
+    const isAdmin = this.currentUser && this.currentUser.role === 'admin';
+    const isCancelled = !!evt.isCancelled;
 
     bodyEl.innerHTML = `
-      <div style="border-radius: var(--radius-lg); overflow: hidden; margin-bottom: 1.25rem; max-height: 240px; background: #1e293b;">
+      ${isCancelled ? `
+        <div style="background: rgba(244, 63, 94, 0.12); border: 1px solid var(--accent-rose); border-radius: var(--radius-md); padding: 0.85rem 1rem; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.75rem;">
+          <div style="font-size: 1.5rem; color: var(--accent-rose);"><i class="fa-solid fa-circle-exclamation"></i></div>
+          <div>
+            <strong style="color: var(--accent-rose); font-size: 0.95rem;">This event has been cancelled by Campus Administration</strong>
+            <p style="font-size: 0.78rem; color: var(--text-muted); margin-top: 2px;">New registrations are closed. Any confirmed attendee passes have been flagged as cancelled.</p>
+          </div>
+        </div>
+      ` : ''}
+
+      <div style="border-radius: var(--radius-lg); overflow: hidden; margin-bottom: 1.25rem; max-height: 240px; background: #1e293b; position: relative;">
         <img src="${evt.banner}" style="width: 100%; height: 240px; object-fit: cover;" alt="${evt.title}" loading="lazy" decoding="async">
+        ${isCancelled ? `
+          <div style="position: absolute; inset: 0; background: rgba(15, 23, 42, 0.6); display: flex; align-items: center; justify-content: center;">
+            <span style="background: #e11d48; color: #fff; padding: 0.4rem 1.2rem; border-radius: var(--radius-md); font-weight: 800; font-size: 1.1rem; letter-spacing: 1px;">
+              <i class="fa-solid fa-ban"></i> EVENT CANCELLED
+            </span>
+          </div>
+        ` : ''}
       </div>
 
       <div class="flex items-center gap-2" style="margin-bottom: 0.85rem;">
@@ -950,15 +989,43 @@ class UniPulseApp {
       ` : ''}
     `;
 
+    const adminCancelBtn = document.getElementById('detailAdminCancelBtn');
+    if (adminCancelBtn) {
+      if (isAdmin) {
+        adminCancelBtn.style.display = 'inline-flex';
+        adminCancelBtn.innerHTML = isCancelled 
+          ? '<i class="fa-solid fa-rotate-left"></i> Restore Event' 
+          : '<i class="fa-solid fa-ban"></i> Cancel Event';
+        adminCancelBtn.style.color = isCancelled ? 'var(--accent-emerald)' : 'var(--accent-rose)';
+        adminCancelBtn.style.borderColor = isCancelled ? 'var(--accent-emerald)' : 'var(--accent-rose)';
+        adminCancelBtn.style.background = isCancelled ? 'rgba(16, 185, 129, 0.08)' : 'rgba(244, 63, 94, 0.08)';
+      } else {
+        adminCancelBtn.style.display = 'none';
+      }
+    }
+
     if (regBtn) {
-      if (isRegistered) {
+      if (isAdmin) {
+        regBtn.style.display = 'none';
+      } else if (isCancelled) {
+        regBtn.style.display = 'inline-flex';
+        regBtn.className = 'btn btn-secondary btn-sm';
+        regBtn.disabled = true;
+        regBtn.innerHTML = '<i class="fa-solid fa-ban"></i> Event Cancelled';
+      } else if (isRegistered) {
+        regBtn.style.display = 'inline-flex';
+        regBtn.className = 'btn btn-primary btn-sm';
+        regBtn.disabled = false;
         regBtn.innerHTML = '<i class="fa-solid fa-qrcode"></i> View My E-Pass';
         regBtn.onclick = () => {
           this.closeModal('modalEventDetails');
           this.viewTicketForEvent(evt.id);
         };
       } else {
-        regBtn.innerHTML = '<i class="fa-solid fa-ticket"></i> Register Now';
+        regBtn.style.display = 'inline-flex';
+        regBtn.className = 'btn btn-primary btn-sm';
+        regBtn.disabled = false;
+        regBtn.innerHTML = '<i class="fa-solid fa-ticket"></i> Book Now';
         regBtn.onclick = () => {
           this.closeModal('modalEventDetails');
           this.openRegistrationModal(evt.id);
@@ -979,15 +1046,64 @@ class UniPulseApp {
     }
   }
 
+  /* ---------------- Admin Event Cancellation ---------------- */
+  async toggleCancelEvent(eventId) {
+    if (!eventId || eventId === 'all') {
+      this.showToast('Please select a specific event to cancel.', 'info');
+      return;
+    }
+
+    const evt = this.events.find(e => e.id === eventId);
+    if (!evt) return;
+
+    if (!this.currentUser || this.currentUser.role !== 'admin') {
+      this.showToast('Administrator privileges required to cancel events.', 'error');
+      return;
+    }
+
+    const willCancel = !evt.isCancelled;
+    const confirmMsg = willCancel 
+      ? `Are you sure you want to CANCEL "${evt.title}"?\n\nThis will immediately close registrations and mark the event as cancelled.` 
+      : `Do you want to RESTORE and re-activate "${evt.title}"?`;
+
+    if (!confirm(confirmMsg)) return;
+
+    evt.isCancelled = willCancel;
+    this.saveStorage('unipulse_events', this.events);
+
+    // Sync with Supabase if connected
+    if (typeof supabaseService !== 'undefined' && supabaseService.isConnected) {
+      await supabaseService.updateEventStatus(eventId, willCancel ? 'cancelled' : 'active');
+    }
+
+    this.showToast(
+      willCancel 
+        ? `⛔ "${evt.title}" has been cancelled.` 
+        : `✅ "${evt.title}" has been restored and re-activated!`,
+      willCancel ? 'error' : 'success'
+    );
+
+    this.closeModal('modalEventDetails');
+    this.renderEvents();
+    this.renderCalendar();
+    this.updateCategoryCounters();
+    this.updateOrgAnalytics();
+  }
+
   /* ---------------- Registration Flow ---------------- */
   openRegistrationModal(eventId) {
     const evt = this.events.find(e => e.id === eventId);
     if (!evt) return;
 
-    const existing = this.registrations.find(r => r.eventId === eventId);
-    if (existing) {
-      this.showToast('You are already registered for this event!', 'info');
-      this.viewTicket(existing.ticketId);
+    if (evt.isCancelled) {
+      this.showToast('⛔ This event has been cancelled by the administrator. Registrations are closed.', 'error');
+      return;
+    }
+
+    const myExisting = this.getMyRegistrations().find(r => r.eventId === eventId);
+    if (myExisting) {
+      this.showToast('You have already booked a pass for this event!', 'info');
+      this.viewTicket(myExisting.ticketId);
       return;
     }
 
@@ -1021,12 +1137,31 @@ class UniPulseApp {
     const evt = this.events.find(ev => ev.id === eventId);
     if (!evt) return;
 
+    if (evt.isCancelled) {
+      this.closeModal('modalRegistrationForm');
+      this.showToast('⛔ This event has been cancelled by the administrator.', 'error');
+      return;
+    }
+
     const attendeeName = document.getElementById('regFullName').value.trim();
     const rollNo = document.getElementById('regRollNo').value.trim();
     const email = document.getElementById('regEmail').value.trim();
     const dept = document.getElementById('regDept').value;
     const year = document.getElementById('regYear').value;
     const teamName = document.getElementById('regTeamName') ? document.getElementById('regTeamName').value.trim() : '';
+
+    // Prevent duplicate registrations for the same student on the same event
+    const existing = this.registrations.find(r => r.eventId === evt.id && (
+      (this.currentUser && (r.email === this.currentUser.email || r.rollNo === this.currentUser.rollNo || (this.currentUser.id && r.userId === this.currentUser.id))) ||
+      r.email === email || r.rollNo === rollNo
+    ));
+
+    if (existing) {
+      this.closeModal('modalRegistrationForm');
+      this.showToast('ℹ️ You have already booked an E-Pass for this event!', 'info');
+      this.viewTicket(existing.ticketId);
+      return;
+    }
 
     const newTicketId = `UP-2026-${Math.floor(1000 + Math.random() * 9000)}`;
 
@@ -1060,11 +1195,12 @@ class UniPulseApp {
 
     this.triggerConfetti();
 
-    this.showToast('🎉 Registration Successful! E-Pass generated.', 'success');
+    this.showToast('🎉 Booking Confirmed! Digital E-Pass generated.', 'success');
     this.updateRegistrationBadge();
     this.renderEvents();
     this.updateCategoryCounters();
     this.renderOrganizerTable();
+    this.renderDashboard();
 
     setTimeout(() => {
       this.viewTicket(newTicketId);
@@ -1078,6 +1214,43 @@ class UniPulseApp {
         spread: 60,
         origin: { y: 0.6 }
       });
+    }
+  }
+
+  /* ---------------- Student My-Registrations Deduplication ---------------- */
+  getMyRegistrations() {
+    if (!this.currentUser) return [];
+
+    // Filter registrations that belong specifically to the currently logged in student
+    const userRegs = this.registrations.filter(r => {
+      if (this.currentUser.id && r.userId === this.currentUser.id) return true;
+      if (this.currentUser.email && r.email && r.email.toLowerCase() === this.currentUser.email.toLowerCase()) return true;
+      if (this.currentUser.rollNo && r.rollNo && r.rollNo.toLowerCase() === this.currentUser.rollNo.toLowerCase()) return true;
+      return false;
+    });
+
+    // Deduplicate so each event appears exactly once in the student profile
+    const seenEvents = new Set();
+    const uniqueRegs = [];
+    userRegs.forEach(reg => {
+      if (!seenEvents.has(reg.eventId)) {
+        seenEvents.add(reg.eventId);
+        uniqueRegs.push(reg);
+      }
+    });
+
+    return uniqueRegs;
+  }
+
+  updateRegistrationBadge() {
+    const badge = document.getElementById('myRegistrationsBadge');
+    if (!badge) return;
+    const myRegs = this.getMyRegistrations();
+    if (myRegs.length > 0 && this.currentUser && this.currentUser.role === 'student') {
+      badge.textContent = myRegs.length;
+      badge.style.display = 'inline-flex';
+    } else {
+      badge.style.display = 'none';
     }
   }
 
@@ -1109,7 +1282,15 @@ class UniPulseApp {
     if (dtEl) dtEl.textContent = `${this.formatDate(evt.date)}`;
     if (venEl) venEl.textContent = evt.venue;
     if (deptEl) deptEl.textContent = `${reg.dept} (${reg.year.split(' ')[0]})`;
-    if (catPill) catPill.textContent = `${(evt.categoryName || 'CAMPUS PASS').toUpperCase()}`;
+    if (catPill) {
+      if (evt.isCancelled) {
+        catPill.textContent = 'CANCELLED';
+        catPill.style.background = '#e11d48';
+      } else {
+        catPill.textContent = `${(evt.categoryName || 'CAMPUS PASS').toUpperCase()}`;
+        catPill.style.background = 'var(--primary)';
+      }
+    }
 
     this.drawQRCodeCanvas('ticketQrCanvas', `${reg.ticketId}:${reg.rollNo}`);
 
@@ -1205,24 +1386,25 @@ class UniPulseApp {
   }
 
   renderDashboard() {
+    const myRegs = this.getMyRegistrations();
     const tCount = document.getElementById('dashTicketsCount');
     const bCount = document.getElementById('dashBookmarksCount');
     const cCount = document.getElementById('dashCertificatesCount');
 
-    if (tCount) tCount.textContent = this.registrations.length;
+    if (tCount) tCount.textContent = myRegs.length;
     if (bCount) bCount.textContent = this.bookmarks.length;
-    if (cCount) cCount.textContent = this.registrations.filter(r => r.isCheckedIn).length || 1;
+    if (cCount) cCount.textContent = myRegs.filter(r => r.isCheckedIn).length;
 
     const ticketsGrid = document.getElementById('myTicketsGrid');
     const emptyTickets = document.getElementById('emptyTicketsState');
 
-    if (this.registrations.length === 0) {
+    if (myRegs.length === 0) {
       if (ticketsGrid) ticketsGrid.innerHTML = '';
       if (emptyTickets) emptyTickets.style.display = 'block';
     } else {
       if (emptyTickets) emptyTickets.style.display = 'none';
       if (ticketsGrid) {
-        ticketsGrid.innerHTML = this.registrations.map(reg => {
+        ticketsGrid.innerHTML = myRegs.map(reg => {
           const evt = this.events.find(e => e.id === reg.eventId) || {
             title: "Campus Event",
             banner: "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=600&q=75",
@@ -1232,18 +1414,26 @@ class UniPulseApp {
             date: "2026-10-18"
           };
 
+          const isCancelled = !!evt.isCancelled;
+
           return `
-            <div class="event-card">
+            <div class="event-card ${isCancelled ? 'event-cancelled' : ''}" style="${isCancelled ? 'opacity: 0.88;' : ''}">
               <div class="event-card-media" style="height: 150px;">
                 <img src="${evt.banner}" class="event-card-img" alt="${evt.title}" loading="lazy" decoding="async">
-                <span class="event-card-category category-${evt.category}">${evt.categoryName}</span>
-                <span class="event-card-price" style="color: #fff; background: var(--primary);">
+                ${isCancelled ? `
+                  <span style="position: absolute; top: 0.85rem; left: 0.85rem; background: #e11d48; color: #fff; padding: 0.2rem 0.6rem; border-radius: var(--radius-sm); font-size: 0.72rem; font-weight: 800; z-index: 2;">
+                    <i class="fa-solid fa-ban"></i> CANCELLED
+                  </span>
+                ` : `
+                  <span class="event-card-category category-${evt.category}">${evt.categoryName}</span>
+                `}
+                <span class="event-card-price" style="color: #fff; background: ${isCancelled ? '#e11d48' : 'var(--primary)'};">
                   ${reg.ticketId}
                 </span>
               </div>
               <div class="event-card-body">
-                <div style="font-size: 0.72rem; color: var(--accent-emerald); font-weight: 700; margin-bottom: 0.2rem;">
-                  ${reg.isCheckedIn ? '✅ ATTENDANCE LOGGED' : '🎟️ ENTRY CONFIRMED'}
+                <div style="font-size: 0.72rem; color: ${isCancelled ? 'var(--accent-rose)' : 'var(--accent-emerald)'}; font-weight: 700; margin-bottom: 0.2rem;">
+                  ${isCancelled ? '⛔ EVENT CANCELLED BY ADMIN' : (reg.isCheckedIn ? '✅ ATTENDANCE LOGGED' : '🎟️ ENTRY CONFIRMED')}
                 </div>
                 <h3 class="event-card-title">${evt.title}</h3>
                 <div class="event-card-meta-list">
@@ -1255,7 +1445,7 @@ class UniPulseApp {
                   <button class="btn btn-primary btn-sm" onclick="app.viewTicket('${reg.ticketId}')">
                     <i class="fa-solid fa-qrcode"></i> View E-Pass
                   </button>
-                  ${reg.isCheckedIn ? `
+                  ${reg.isCheckedIn && !isCancelled ? `
                     <button class="btn btn-secondary btn-sm" onclick="app.viewCertificate('${reg.ticketId}')">
                       <i class="fa-solid fa-award"></i> Certificate
                     </button>
@@ -1496,8 +1686,10 @@ class UniPulseApp {
     const stat4Val = document.getElementById('orgStatSatisfaction');
     const stat4Label = document.getElementById('orgStat4Label');
     const scopeSubtext = document.getElementById('orgEventScopeSubtext');
+    const cancelBtn = document.getElementById('orgCancelEventBtn');
 
     if (this.selectedOrgEvent === 'all') {
+      if (cancelBtn) cancelBtn.style.display = 'none';
       const totalEvents = this.events.length;
       const totalRegistrations = this.events.reduce((sum, e) => sum + (e.registeredCount || 0), 0) + this.registrations.length;
       const actualChecked = this.registrations.filter(r => r.isCheckedIn).length;
@@ -1516,6 +1708,17 @@ class UniPulseApp {
       const evt = this.events.find(e => e.id === this.selectedOrgEvent);
       if (!evt) return;
 
+      const isCancelled = !!evt.isCancelled;
+      if (cancelBtn) {
+        cancelBtn.style.display = 'inline-flex';
+        cancelBtn.innerHTML = isCancelled 
+          ? '<i class="fa-solid fa-rotate-left"></i> Restore Event' 
+          : '<i class="fa-solid fa-ban"></i> Cancel Event';
+        cancelBtn.style.color = isCancelled ? 'var(--accent-emerald)' : 'var(--accent-rose)';
+        cancelBtn.style.borderColor = isCancelled ? 'var(--accent-emerald)' : 'var(--accent-rose)';
+        cancelBtn.style.background = isCancelled ? 'rgba(16, 185, 129, 0.08)' : 'rgba(244, 63, 94, 0.08)';
+      }
+
       const evtActualRegs = this.registrations.filter(r => r.eventId === evt.id);
       const totalRegs = (evt.registeredCount || 0) + evtActualRegs.length;
       const checkedInCount = evtActualRegs.filter(r => r.isCheckedIn).length;
@@ -1528,9 +1731,11 @@ class UniPulseApp {
       if (stat2Label) stat2Label.textContent = 'Confirmed Registrations';
       if (stat3Val) stat3Val.textContent = Math.min(totalRegs, estimatedChecked).toLocaleString();
       if (stat3Label) stat3Label.textContent = 'Verified / Checked-in';
-      if (stat4Val) stat4Val.textContent = `${fillPercent}%`;
-      if (stat4Label) stat4Label.textContent = 'Slot Fill Rate';
-      if (scopeSubtext) scopeSubtext.textContent = `Live real-time analytics & demographics for ${evt.title}`;
+      if (stat4Val) stat4Val.textContent = isCancelled ? 'CANCELLED' : `${fillPercent}%`;
+      if (stat4Label) stat4Label.textContent = isCancelled ? 'Event Status' : 'Slot Fill Rate';
+      if (scopeSubtext) scopeSubtext.textContent = isCancelled 
+        ? `⛔ "${evt.title}" is currently CANCELLED. Click 'Restore Event' to re-activate.` 
+        : `Live real-time analytics & demographics for ${evt.title}`;
     }
   }
 
