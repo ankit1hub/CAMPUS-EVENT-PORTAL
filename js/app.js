@@ -24,7 +24,6 @@ class UniPulseApp {
     this.events = this.loadStorage('unipulse_events', INITIAL_EVENTS);
     this.clubs = this.loadStorage('unipulse_clubs', INITIAL_CLUBS);
     this.bookmarks = this.loadStorage('unipulse_bookmarks', []);
-    this.joinedClubs = this.loadStorage('unipulse_joined_clubs', []);
     this.registrations = this.loadStorage('unipulse_registrations', typeof INITIAL_REGISTRATIONS !== 'undefined' ? INITIAL_REGISTRATIONS : []);
 
     this.selectedOrgEvent = 'all';
@@ -1513,31 +1512,15 @@ class UniPulseApp {
     this.renderDashboard();
   }
 
-  isCertificateEligible(evt) {
-    if (!evt) return false;
-    const cat = (evt.category || '').toLowerCase();
-    const catName = (evt.categoryName || '').toLowerCase();
-    const title = (evt.title || '').toLowerCase();
-    return cat === 'hackathon' || cat === 'workshop' || 
-           catName.includes('hackathon') || catName.includes('workshop') ||
-           title.includes('hackathon') || title.includes('workshop');
-  }
-
   renderDashboard() {
     const myRegs = this.getMyRegistrations();
     const tCount = document.getElementById('dashTicketsCount');
     const bCount = document.getElementById('dashBookmarksCount');
     const cCount = document.getElementById('dashCertificatesCount');
 
-    const eligibleCertRegs = myRegs.filter(r => {
-      if (!r.isCheckedIn) return false;
-      const evt = this.events.find(e => e.id === r.eventId);
-      return evt && !evt.isCancelled && this.isCertificateEligible(evt);
-    });
-
     if (tCount) tCount.textContent = myRegs.length;
     if (bCount) bCount.textContent = this.bookmarks.length;
-    if (cCount) cCount.textContent = eligibleCertRegs.length;
+    if (cCount) cCount.textContent = myRegs.filter(r => r.isCheckedIn).length;
 
     const ticketsGrid = document.getElementById('myTicketsGrid');
     const emptyTickets = document.getElementById('emptyTicketsState');
@@ -1559,7 +1542,6 @@ class UniPulseApp {
           };
 
           const isCancelled = !!evt.isCancelled;
-          const hasCert = reg.isCheckedIn && !isCancelled && this.isCertificateEligible(evt);
 
           return `
             <div class="event-card ${isCancelled ? 'event-cancelled' : ''}" style="${isCancelled ? 'opacity: 0.88;' : ''}">
@@ -1590,7 +1572,7 @@ class UniPulseApp {
                   <button class="btn btn-primary btn-sm" onclick="app.viewTicket('${reg.ticketId}')">
                     <i class="fa-solid fa-qrcode"></i> View E-Pass
                   </button>
-                  ${hasCert ? `
+                  ${reg.isCheckedIn && !isCancelled ? `
                     <button class="btn btn-secondary btn-sm" onclick="app.viewCertificate('${reg.ticketId}')">
                       <i class="fa-solid fa-award"></i> Certificate
                     </button>
@@ -1641,39 +1623,21 @@ class UniPulseApp {
 
     const certsGrid = document.getElementById('myCertificatesGrid');
     if (certsGrid) {
-      if (eligibleCertRegs.length === 0) {
-        certsGrid.innerHTML = `
-          <div style="grid-column: 1 / -1; text-align: center; padding: 3rem 1.5rem; background: var(--bg-surface); border: 1.5px dashed var(--border-strong); border-radius: var(--radius-xl);">
-            <div style="font-size: 2.5rem; margin-bottom: 0.75rem; color: var(--text-muted);"><i class="fa-solid fa-award"></i></div>
-            <h3 style="font-size: 1.15rem; margin-bottom: 0.35rem; color: var(--text-main);">No Certificates Available Yet</h3>
-            <p style="font-size: 0.85rem; color: var(--text-muted); max-width: 480px; margin: 0 auto;">Official verified certificates are issued exclusively for attending Hackathons and Workshops once attendance is verified.</p>
+      certsGrid.innerHTML = `
+        <div class="event-card" style="border: 2px solid var(--primary);">
+          <div class="event-card-media" style="height: 130px; background: linear-gradient(135deg, #4338ca, #6366f1); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 2.75rem;">
+            <i class="fa-solid fa-award"></i>
           </div>
-        `;
-      } else {
-        certsGrid.innerHTML = eligibleCertRegs.map(reg => {
-          const evt = this.events.find(e => e.id === reg.eventId) || {
-            title: "Campus Hackathon / Workshop",
-            category: "hackathon",
-            categoryName: "Hackathon",
-            organizer: "Campus Organizing Council"
-          };
-          return `
-            <div class="event-card" style="border: 2px solid var(--accent);">
-              <div class="event-card-media" style="height: 130px; background: linear-gradient(135deg, #1C1B18, #C96442); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 2.75rem;">
-                <i class="fa-solid fa-award"></i>
-              </div>
-              <div class="event-card-body">
-                <span style="font-size: 0.7rem; font-weight: 700; color: var(--accent-emerald); text-transform: uppercase;">VERIFIED CREDENTIAL • ${evt.categoryName.toUpperCase()}</span>
-                <h3 class="event-card-title" style="margin-top: 0.2rem;">${evt.title}</h3>
-                <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.85rem;">Issued to ${reg.attendeeName} (${reg.rollNo}) • Verified Attendee</p>
-                <button class="btn btn-primary btn-sm" onclick="app.viewCertificate('${reg.ticketId}')">
-                  <i class="fa-solid fa-download"></i> View & Download Certificate
-                </button>
-              </div>
-            </div>
-          `;
-        }).join('');
-      }
+          <div class="event-card-body">
+            <span style="font-size: 0.7rem; font-weight: 700; color: var(--accent-emerald); text-transform: uppercase;">VERIFIED CREDENTIAL</span>
+            <h3 class="event-card-title" style="margin-top: 0.2rem;">Hands-on Generative AI & Autonomous Agents Workshop</h3>
+            <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.85rem;">Issued by Campus Excellence Council • Fall 2026</p>
+            <button class="btn btn-primary btn-sm" onclick="app.viewCertificate('UP-2026-8492')">
+              <i class="fa-solid fa-download"></i> View & Download Certificate
+            </button>
+          </div>
+        </div>
+      `;
     }
   }
 
@@ -1682,18 +1646,13 @@ class UniPulseApp {
     const reg = this.registrations.find(r => r.ticketId === ticketId) || this.registrations[0];
     const evt = (reg ? this.events.find(e => e.id === reg.eventId) : null) || this.events[0];
 
-    if (!evt || !this.isCertificateEligible(evt)) {
-      this.showToast('ℹ️ Verified certificates are only issued for Hackathons and Workshops.', 'info');
-      return;
-    }
-
     const recName = document.getElementById('certRecipientName');
     const evTitle = document.getElementById('certEventTitle');
     const orgSign = document.getElementById('certOrganizerSign');
 
     if (recName) recName.textContent = reg ? reg.attendeeName : (this.currentUser ? this.currentUser.name : "John Doe");
     if (evTitle) evTitle.textContent = evt.title;
-    if (orgSign) orgSign.innerHTML = `${(evt.organizer || 'Organizing Committee').split('&')[0]}<br>Lead Club Convener`;
+    if (orgSign) orgSign.innerHTML = `${evt.organizer.split('&')[0]}<br>Lead Club Convener`;
 
     this.openModal('modalCertificate');
   }
@@ -1742,20 +1701,34 @@ class UniPulseApp {
       const dateString = `${year}-${monthFormatted}-${dayFormatted}`;
 
       const dayEvents = this.events.filter(e => e.date === dateString);
-      const isToday = (day === 2 && month === 9 && year === 2026);
+      const isToday = (day === 3 && month === 9 && year === 2026);
 
       cellsHtml += `
-        <div class="calendar-day-cell ${isToday ? 'today' : ''}" onclick="app.handleCalendarDayClick('${dateString}')">
-          <span class="calendar-day-num">${day}</span>
-          ${dayEvents.map(ev => {
-            const icon = ev.organizerIcon || (ev.category === 'hackathon' ? '💻' : ev.category === 'cultural' ? '🎸' : ev.category === 'workshop' ? '🔬' : ev.category === 'sports' ? '🏆' : '🎯');
-            return `
-              <div class="calendar-event-pill category-${ev.category || 'tech'}" title="${ev.title} (${ev.time || 'All Day'})" onclick="event.stopPropagation(); app.openEventDetails('${ev.id}')">
-                <span>${icon}</span>
-                <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${ev.title}</span>
-              </div>
-            `;
-          }).join('')}
+        <div class="calendar-day-cell ${isToday ? 'today' : ''} ${dayEvents.length > 0 ? 'has-events' : ''}" onclick="app.handleCalendarDayClick('${dateString}')">
+          <div class="calendar-day-header">
+            <span class="calendar-day-num ${isToday ? 'today-badge' : ''}">${day}</span>
+            ${dayEvents.length > 0 ? `<span class="calendar-day-events-count">${dayEvents.length} event${dayEvents.length > 1 ? 's' : ''}</span>` : ''}
+          </div>
+          <div class="calendar-events-container">
+            ${dayEvents.map(ev => {
+              const catClass = `cal-cat-${ev.category || 'tech'}`;
+              const isCanc = !!ev.isCancelled || ev.status === 'cancelled';
+              const icon = ev.organizerIcon || '📅';
+              const timeShort = ev.time ? ev.time.split('-')[0].trim() : '';
+              const venueShort = ev.venue ? ev.venue.split('&')[0].trim() : '';
+              return `
+                <div class="calendar-event-pill ${catClass} ${isCanc ? 'cal-cancelled' : ''}" 
+                     title="${ev.title} (${ev.time} at ${ev.venue})" 
+                     onclick="event.stopPropagation(); app.openEventDetails('${ev.id}')">
+                  <span class="cal-pill-icon">${icon}</span>
+                  <div class="cal-pill-info">
+                    <span class="cal-pill-title">${isCanc ? '[Cancelled] ' : ''}${ev.title}</span>
+                    <span class="cal-pill-time">${timeShort} • ${venueShort}</span>
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
         </div>
       `;
     }
@@ -1787,52 +1760,28 @@ class UniPulseApp {
     const grid = document.getElementById('clubsGrid');
     if (!grid) return;
 
-    if (!this.joinedClubs) this.joinedClubs = this.loadStorage('unipulse_joined_clubs', []);
-
-    grid.innerHTML = this.clubs.map(club => {
-      const isJoined = this.joinedClubs.includes(club.name);
-      return `
-        <div class="club-card ${isJoined ? 'club-card-joined' : ''}">
-          <div class="club-avatar" style="background: ${club.bgGradient}; color: white;">
-            ${club.icon}
-          </div>
-          <div style="display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; margin-bottom: 0.25rem;">
-            <h3 class="club-title" style="margin: 0;">${club.name}</h3>
-            ${isJoined ? '<span class="role-pill role-admin" style="font-size: 0.72rem; white-space: nowrap;"><i class="fa-solid fa-circle-check"></i> Member</span>' : ''}
-          </div>
-          <div class="club-dept">${club.category} • ${club.members} Members</div>
-          <p class="club-desc">${club.description}</p>
-          <div class="flex items-center gap-2" style="margin-top: auto; width: 100%;">
-            <button class="btn btn-secondary btn-sm" style="flex: 1;" onclick="app.filterByClub('${club.name}')">
-              <i class="fa-solid fa-calendar-check"></i> ${club.eventsCount} Events
-            </button>
-            <button class="btn ${isJoined ? 'btn-secondary' : 'btn-primary'} btn-sm" style="flex: 1; ${isJoined ? 'color: var(--accent-emerald); border-color: var(--accent-emerald);' : ''}" onclick="app.joinClub('${club.name}')">
-              ${isJoined ? '<i class="fa-solid fa-check"></i> Joined' : '<i class="fa-solid fa-plus"></i> Join Club'}
-            </button>
-          </div>
+    grid.innerHTML = this.clubs.map(club => `
+      <div class="club-card">
+        <div class="club-avatar" style="background: ${club.bgGradient}; color: white;">
+          ${club.icon}
         </div>
-      `;
-    }).join('');
+        <h3 class="club-title">${club.name}</h3>
+        <div class="club-dept">${club.category} • ${club.members} Members</div>
+        <p class="club-desc">${club.description}</p>
+        <div class="flex items-center gap-2" style="margin-top: auto; width: 100%;">
+          <button class="btn btn-secondary btn-sm" style="flex: 1;" onclick="app.filterByClub('${club.name}')">
+            <i class="fa-solid fa-calendar-check"></i> ${club.eventsCount} Events
+          </button>
+          <button class="btn btn-primary btn-sm" style="flex: 1;" onclick="app.joinClub('${club.name}')">
+            <i class="fa-solid fa-plus"></i> Join Club
+          </button>
+        </div>
+      </div>
+    `).join('');
   }
 
   joinClub(clubName) {
-    if (!this.joinedClubs) this.joinedClubs = [];
-    const index = this.joinedClubs.indexOf(clubName);
-    const club = this.clubs.find(c => c.name === clubName);
-
-    if (index > -1) {
-      this.joinedClubs.splice(index, 1);
-      if (club && club.members > 0) club.members--;
-      this.showToast(`Left ${clubName}`, 'info');
-    } else {
-      this.joinedClubs.push(clubName);
-      if (club) club.members = (club.members || 0) + 1;
-      this.showToast(`🎉 You are now an official member of ${clubName}!`, 'success');
-    }
-
-    this.saveStorage('unipulse_joined_clubs', this.joinedClubs);
-    this.saveStorage('unipulse_clubs', this.clubs);
-    this.renderClubs();
+    this.showToast(`🎉 Application sent to join ${clubName}!`, 'success');
   }
 
   filterByClub(clubName) {
