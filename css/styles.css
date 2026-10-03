@@ -575,6 +575,15 @@ img {
   line-height: 1.6;
 }
 
+.hero-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 2.75rem;
+  flex-wrap: wrap;
+}
+
 /* ---------------- Bento Metric Cards (48px Bold Numbers) ---------------- */
 .stats-grid-row {
   display: grid;
@@ -585,12 +594,14 @@ img {
 
 .stat-card {
   background: var(--bg-surface);
-  border: 1px solid var(--border-subtle);
+  border: 1px solid var(--border-strong);
   border-radius: var(--radius-lg);
-  padding: 1.25rem;
+  padding: 1.25rem 1.5rem;
   display: flex;
   align-items: center;
   gap: 1rem;
+  text-align: left;
+  box-shadow: var(--shadow-sm);
   transition: all var(--transition-fast);
 }
 
