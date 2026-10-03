@@ -543,26 +543,15 @@ img {
   position: relative;
 }
 
-.hero-center-container {
-  max-width: 1000px;
-  margin: 0 auto;
-}
-
-.hero-text-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.hero-tag, .hero-badge {
+.hero-badge {
   display: inline-flex;
   align-items: center;
   gap: 0.45rem;
-  padding: 0.4rem 1rem;
+  padding: 0.35rem 0.85rem;
   border-radius: var(--radius-full);
   background: var(--accent-light);
   color: var(--accent);
-  font-size: 12.5px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.025em;
   margin-bottom: 1.25rem;
@@ -573,16 +562,15 @@ img {
   font-size: 2.75rem;
   font-weight: 800;
   line-height: 1.2;
-  margin-bottom: 1.1rem;
+  margin-bottom: 1rem;
   color: var(--text-main);
   letter-spacing: -0.02em;
-  max-width: 850px;
 }
 
-.hero-desc, .hero-subtitle {
+.hero-subtitle {
   font-size: 1.05rem;
   color: var(--text-secondary);
-  max-width: 680px;
+  max-width: 650px;
   margin: 0 auto 2rem;
   line-height: 1.6;
 }
@@ -592,56 +580,11 @@ img {
   align-items: center;
   justify-content: center;
   gap: 1rem;
-  flex-wrap: wrap;
   margin-bottom: 2.5rem;
+  flex-wrap: wrap;
 }
 
-/* ---------------- Bento Metric Cards (48px / 36px Bold Numbers) ---------------- */
-.hero-stats {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 1rem;
-  width: 100%;
-  max-width: 960px;
-  margin: 0.5rem auto 0;
-}
-
-.hero-stat-card, .hero-stats > div {
-  background: var(--bg-surface);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-lg);
-  padding: 1.25rem 1rem;
-  text-align: center;
-  box-shadow: var(--shadow-sm);
-  transition: all var(--transition-fast);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-
-.hero-stat-card:hover, .hero-stats > div:hover {
-  background: var(--bg-surface-alt);
-  border-color: var(--border-strong);
-  transform: translateY(-2px);
-}
-
-.hero-stat-number {
-  font-size: 32px;
-  font-weight: 800;
-  color: var(--text-main);
-  letter-spacing: 0.05em;
-  line-height: 1.1;
-  margin-bottom: 0.35rem;
-}
-
-.hero-stat-label {
-  font-size: 12.5px;
-  font-weight: 600;
-  color: var(--text-secondary);
-  letter-spacing: 0.01em;
-}
-
+/* ---------------- Bento Metric Cards (48px Bold Numbers) ---------------- */
 .stats-grid-row {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -1474,9 +1417,6 @@ img {
 
 /* ---------------- Responsive ---------------- */
 @media (max-width: 900px) {
-  .hero-stats {
-    grid-template-columns: repeat(2, 1fr);
-  }
   .stats-grid-row {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -1486,9 +1426,6 @@ img {
 }
 
 @media (max-width: 640px) {
-  .hero-stats {
-    grid-template-columns: 1fr;
-  }
   .hero-actions {
     flex-direction: column;
     width: 100%;
