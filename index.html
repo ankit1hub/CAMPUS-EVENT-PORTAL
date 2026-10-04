@@ -316,7 +316,7 @@
               <button class="btn btn-primary btn-lg" onclick="document.getElementById('exploreSection').scrollIntoView({behavior: 'smooth'})">
                 <i class="fa-solid fa-fire"></i> Explore Trending Events
               </button>
-              <button class="btn btn-secondary btn-lg" id="heroHostBtn" onclick="app.handleHostEventClick()">
+              <button class="btn btn-secondary btn-lg" id="heroHostBtn" style="display: none;" onclick="app.handleHostEventClick()">
                 <i class="fa-solid fa-bullhorn"></i> Submit Club Event
               </button>
             </div>
@@ -522,6 +522,7 @@
           </div>
           <div class="flex gap-2">
             <button class="btn btn-secondary btn-sm" onclick="app.openScannerModal()"><i class="fa-solid fa-qrcode"></i> Gate QR Scanner</button>
+            <button class="btn btn-secondary btn-sm" onclick="app.openCreateEventModal()"><i class="fa-solid fa-bullhorn"></i> Submit Club Event</button>
             <button class="btn btn-primary btn-sm" onclick="app.openCreateEventModal()"><i class="fa-solid fa-plus"></i> Create New Event</button>
           </div>
         </div>
@@ -854,6 +855,9 @@
         </div>
 
         <div class="flex flex-col gap-2">
+          <button class="btn btn-primary" id="modalUserSubmitEventBtn" style="justify-content: flex-start; display: none;" onclick="app.closeModal('modalUserDropdown'); app.openCreateEventModal();">
+            <i class="fa-solid fa-bullhorn"></i> Submit Club Event
+          </button>
           <button class="btn btn-secondary" style="justify-content: flex-start;" onclick="app.closeModal('modalUserDropdown'); app.openAuthModal('student');">
             <i class="fa-solid fa-user-graduate"></i> Switch to Student Login
           </button>

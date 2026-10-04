@@ -102,6 +102,7 @@ class UniPulseApp {
     const tabDashboard = document.getElementById('navTabDashboard');
     const tabOrganizer = document.getElementById('navTabOrganizer');
     const hostBtn = document.getElementById('navHostEventBtn');
+    const heroHostBtn = document.getElementById('heroHostBtn');
     const notifBtn = document.getElementById('navNotifBtn');
     const navName = document.getElementById('navUserName');
     const navRole = document.getElementById('navUserRole');
@@ -116,6 +117,7 @@ class UniPulseApp {
     if (tabDashboard) tabDashboard.style.display = isStudent ? 'inline-flex' : 'none';
     if (tabOrganizer) tabOrganizer.style.display = isAdmin ? 'inline-flex' : 'none';
     if (hostBtn) hostBtn.style.display = isAdmin ? 'inline-flex' : 'none';
+    if (heroHostBtn) heroHostBtn.style.display = isAdmin ? 'inline-flex' : 'none';
     if (notifBtn) notifBtn.style.display = isStudent ? 'inline-flex' : 'none';
 
     if (this.currentUser) {
@@ -546,6 +548,10 @@ class UniPulseApp {
         badge.innerHTML = this.currentUser.role === 'admin'
           ? '<span class="role-pill role-admin">🛡️ Administrator Account</span>'
           : '<span class="role-pill role-student">🎓 Enrolled Student Account</span>';
+      }
+      const modalHostBtn = document.getElementById('modalUserSubmitEventBtn');
+      if (modalHostBtn) {
+        modalHostBtn.style.display = this.currentUser.role === 'admin' ? 'flex' : 'none';
       }
     }
     this.openModal('modalUserDropdown');
