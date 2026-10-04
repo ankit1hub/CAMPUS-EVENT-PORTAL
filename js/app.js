@@ -1211,7 +1211,7 @@ class UniPulseApp {
     if (subEl) subEl.textContent = `For: ${evt.title} (${evt.priceText || (evt.price === 0 ? 'Free' : '₹' + evt.price)})`;
     if (idIn) idIn.value = evt.id;
     if (nameIn) nameIn.value = this.currentUser ? this.currentUser.name : "";
-    if (rollIn) rollIn.value = this.currentUser ? (this.currentUser.rollNo || "") : "";
+    if (rollIn) rollIn.value = ""; // Do not auto-fill roll number field
     if (emailIn) emailIn.value = this.currentUser ? (this.currentUser.email || "") : "";
 
     if (teamWrap) {
