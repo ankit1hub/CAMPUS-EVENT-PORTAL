@@ -643,6 +643,14 @@ img {
   margin-top: 2px;
 }
 
+.stat-subtext {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--accent);
+  margin-top: 3px;
+  letter-spacing: 0.01em;
+}
+
 /* Hero Stats Fallback & Compatibility */
 .hero-stats {
   display: grid;
