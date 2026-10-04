@@ -543,7 +543,8 @@ img {
   position: relative;
 }
 
-.hero-badge {
+.hero-badge,
+.hero-tag {
   display: inline-flex;
   align-items: center;
   gap: 0.45rem;
@@ -567,12 +568,22 @@ img {
   letter-spacing: -0.02em;
 }
 
-.hero-subtitle {
+.hero-subtitle,
+.hero-desc {
   font-size: 1.05rem;
   color: var(--text-secondary);
   max-width: 650px;
   margin: 0 auto 2rem;
   line-height: 1.6;
+}
+
+.hero-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 2.5rem;
+  flex-wrap: wrap;
 }
 
 /* ---------------- Bento Metric Cards (48px Bold Numbers) ---------------- */
@@ -581,6 +592,11 @@ img {
   grid-template-columns: repeat(4, 1fr);
   gap: 1rem;
   margin-bottom: 2rem;
+}
+
+.hero-stats-grid {
+  margin-top: 2.5rem;
+  text-align: left;
 }
 
 .stat-card {
@@ -625,6 +641,46 @@ img {
   font-weight: 500;
   color: var(--text-secondary);
   margin-top: 2px;
+}
+
+/* Hero Stats Fallback & Compatibility */
+.hero-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin-top: 2.5rem;
+  text-align: left;
+}
+
+.hero-stats > div {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  transition: all var(--transition-fast);
+}
+
+.hero-stats > div:hover {
+  background: var(--bg-surface-alt);
+  border-color: var(--border-strong);
+}
+
+.hero-stat-number {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--text-main);
+  letter-spacing: 0.05em;
+  line-height: 1.1;
+}
+
+.hero-stat-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-top: 4px;
 }
 
 /* ---------------- Filter & Search Bar ---------------- */
@@ -1408,7 +1464,8 @@ img {
 
 /* ---------------- Responsive ---------------- */
 @media (max-width: 900px) {
-  .stats-grid-row {
+  .stats-grid-row,
+  .hero-stats {
     grid-template-columns: repeat(2, 1fr);
   }
   .footer-grid {
@@ -1417,7 +1474,15 @@ img {
 }
 
 @media (max-width: 640px) {
-  .stats-grid-row {
+  .hero-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+  .hero-actions .btn {
+    width: 100%;
+  }
+  .stats-grid-row,
+  .hero-stats {
     grid-template-columns: 1fr;
   }
   .footer-grid {
