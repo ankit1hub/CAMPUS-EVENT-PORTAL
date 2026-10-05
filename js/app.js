@@ -90,6 +90,32 @@ class UniPulseApp {
     this.renderDashboard();
     this.renderOrganizerTable();
     this.updateCategoryCounters();
+
+    // Modal backdrop click and keyboard escape handlers
+    document.querySelectorAll('.modal-overlay').forEach(overlay => {
+      overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) {
+          if (overlay.id === 'modalScanner') {
+            this.closeScannerModal();
+          } else {
+            this.closeModal(overlay.id);
+          }
+        }
+      });
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        const scannerModal = document.getElementById('modalScanner');
+        if (scannerModal && scannerModal.classList.contains('active')) {
+          this.closeScannerModal();
+        }
+      }
+    });
+
+    window.addEventListener('beforeunload', () => {
+      this.stopCameraScanner();
+    });
   }
 
   /* ---------------- Local Storage Helpers ---------------- */
@@ -2545,7 +2571,7 @@ class UniPulseApp {
 
     if (typeof Html5Qrcode === 'undefined') {
       readerEl.innerHTML = `
-        <div style="padding: 1.5rem; color: #94a3b8; font-size: 0.85rem;">
+        <div style="padding: 1.5rem; color: #94a3b8; font-size: 0.85rem; text-align: center;">
           <i class="fa-solid fa-spinner fa-spin fa-2x" style="color: var(--accent); margin-bottom: 0.5rem;"></i><br>
           Camera engine loading... Please use manual pass lookup below.
         </div>
@@ -2553,9 +2579,17 @@ class UniPulseApp {
       return;
     }
 
+    // Clean up any stale scanner instance before starting
     if (this.html5QrCode) {
-      return;
+      this.stopCameraScanner();
     }
+
+    readerEl.innerHTML = `
+      <div id="cameraLoadingMsg" style="color: #94a3b8; font-size: 0.88rem; padding: 1.5rem; text-align: center;">
+        <i class="fa-solid fa-spinner fa-spin fa-2x" style="color: var(--accent); margin-bottom: 0.5rem;"></i><br>
+        <span style="display: inline-block;">Starting Live Camera Scanner...</span>
+      </div>
+    `;
 
     try {
       this.html5QrCode = new Html5Qrcode("qrScannerReader");
@@ -2568,26 +2602,19 @@ class UniPulseApp {
           if (!decodedText) return;
           const input = document.getElementById('scanTicketInput');
           if (input) input.value = decodedText;
-          this.processScannedTicket(decodedText);
 
-          // Brief cooldown pause so camera doesn't re-scan continuously
-          if (this.html5QrCode && this.html5QrCode.isScanning) {
-            try {
-              this.html5QrCode.pause();
-              setTimeout(() => {
-                if (this.html5QrCode) {
-                  try { this.html5QrCode.resume(); } catch (e) {}
-                }
-              }, 2500);
-            } catch (e) {}
-          }
+          // 1. Immediately shut down camera feed, release hardware device & turn off camera LED
+          this.stopCameraScanner();
+
+          // 2. Process and display verified registration
+          this.processScannedTicket(decodedText);
         },
         () => {}
       ).catch(err => {
         console.warn('Camera feed not accessible:', err);
         if (readerEl) {
           readerEl.innerHTML = `
-            <div style="padding: 1.5rem; color: #94a3b8; font-size: 0.85rem;">
+            <div style="padding: 1.5rem; color: #94a3b8; font-size: 0.85rem; text-align: center;">
               <i class="fa-solid fa-video-slash fa-2x" style="color: var(--accent); margin-bottom: 0.5rem;"></i><br>
               Camera permission required or no webcam found.<br>
               <button class="btn btn-secondary btn-sm" style="margin-top: 0.75rem;" onclick="app.switchScannerMode('manual')">
@@ -2603,17 +2630,58 @@ class UniPulseApp {
   }
 
   stopCameraScanner() {
+    // 1. Force-stop all MediaStream video tracks directly on the DOM to turn off device camera light
+    try {
+      const readerEl = document.getElementById('qrScannerReader');
+      if (readerEl) {
+        const videoEls = readerEl.querySelectorAll('video');
+        videoEls.forEach(v => {
+          if (v.srcObject) {
+            const stream = v.srcObject;
+            if (stream && stream.getTracks) {
+              stream.getTracks().forEach(track => {
+                try {
+                  track.stop();
+                } catch (e) {}
+              });
+            }
+            v.srcObject = null;
+          }
+        });
+      }
+    } catch (e) {}
+
+    // 2. Stop and clear Html5Qrcode instance
     if (this.html5QrCode) {
+      const scanner = this.html5QrCode;
+      this.html5QrCode = null;
       try {
-        this.html5QrCode.stop().then(() => {
-          try { this.html5QrCode.clear(); } catch (e) {}
-          this.html5QrCode = null;
-        }).catch(() => {
-          this.html5QrCode = null;
+        scanner.stop().then(() => {
+          try { scanner.clear(); } catch (e) {}
+        }).catch(err => {
+          console.warn('Scanner stop note:', err);
+          try { scanner.clear(); } catch (e) {}
         });
       } catch (e) {
-        this.html5QrCode = null;
+        try { scanner.clear(); } catch (err) {}
       }
+    }
+
+    // 3. Update viewfinder display indicating camera is off with easy restart button
+    const readerEl = document.getElementById('qrScannerReader');
+    if (readerEl) {
+      readerEl.innerHTML = `
+        <div style="padding: 1.5rem 1rem; color: #94a3b8; font-size: 0.88rem; text-align: center; width: 100%;">
+          <div style="width: 44px; height: 44px; border-radius: 50%; background: rgba(16, 185, 129, 0.15); color: var(--accent-emerald); display: flex; align-items: center; justify-content: center; margin: 0 auto 0.6rem auto; font-size: 1.2rem;">
+            <i class="fa-solid fa-camera-slash"></i>
+          </div>
+          <strong style="color: #fff; font-size: 0.95rem; display: block; margin-bottom: 0.25rem;">Camera Turned Off</strong>
+          <span style="font-size: 0.78rem; color: #94a3b8; display: block; margin-bottom: 0.85rem;">Pass processed. Camera feed shut down to save battery.</span>
+          <button type="button" class="btn btn-primary btn-sm" style="display: inline-flex; align-items: center; gap: 0.4rem; margin: 0 auto; background: linear-gradient(135deg, #6366f1, #8b5cf6); border: none;" onclick="app.startCameraScanner()">
+            <i class="fa-solid fa-camera"></i> Turn Camera Back On / Scan Next
+          </button>
+        </div>
+      `;
     }
   }
 
@@ -2794,8 +2862,9 @@ class UniPulseApp {
             Event: <strong>${evt.title}</strong><br>
             Venue: ${evt.venue || 'Campus Hall'} • Dept: ${reg.dept}
           </div>
-          <div style="font-size: 0.75rem; color: #b45309; margin-top: 0.4rem; font-weight: 700;">
-            ⚠️ This pass was already checked in.
+          <div style="font-size: 0.75rem; color: #b45309; margin-top: 0.5rem; font-weight: 700; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.4rem;">
+            <span>⚠️ This pass was already checked in.</span>
+            <button class="btn btn-secondary btn-sm" style="font-size: 0.75rem; padding: 0.25rem 0.55rem;" onclick="app.startCameraScanner()"><i class="fa-solid fa-camera"></i> Scan Next</button>
           </div>
         `;
         this.showToast(`Pass for ${reg.attendeeName} is already checked in.`, 'warning');
@@ -2815,8 +2884,9 @@ class UniPulseApp {
             Event: <strong>${evt.title}</strong><br>
             Ticket ID: <span style="font-family: monospace; font-weight: 700;">${reg.ticketId}</span> • Dept: ${reg.dept}
           </div>
-          <div style="font-size: 0.75rem; color: #047857; margin-top: 0.4rem; font-weight: 700;">
-            ⚡ Attendance successfully logged at ${reg.checkedInAt}. Welcome!
+          <div style="font-size: 0.75rem; color: #047857; margin-top: 0.5rem; font-weight: 700; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.4rem;">
+            <span>⚡ Attendance logged at ${reg.checkedInAt}. Welcome!</span>
+            <button class="btn btn-primary btn-sm" style="font-size: 0.75rem; padding: 0.25rem 0.6rem; background: linear-gradient(135deg, #10b981, #059669); border: none;" onclick="app.startCameraScanner()"><i class="fa-solid fa-camera"></i> Scan Next</button>
           </div>
         `;
         this.showToast(`✅ Verified attendee ${reg.attendeeName}!`, 'success');
@@ -2830,7 +2900,10 @@ class UniPulseApp {
       resBox.innerHTML = `
         <div style="font-size: 1.15rem; font-weight: 800; margin-bottom: 0.35rem;"><i class="fa-solid fa-circle-xmark"></i> INVALID PASS</div>
         <div style="color: var(--text-main); font-size: 0.88rem;">No registration found matching "${rawInput}".</div>
-        <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.3rem;">Please verify the Ticket ID or student Roll Number and try again.</div>
+        <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.4rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.4rem;">
+          <span>Please verify the Ticket ID or Roll No and try again.</span>
+          <button class="btn btn-secondary btn-sm" style="font-size: 0.75rem; padding: 0.25rem 0.55rem;" onclick="app.startCameraScanner()"><i class="fa-solid fa-camera"></i> Try Again</button>
+        </div>
       `;
       this.showToast('Ticket invalid or not found', 'error');
     }
@@ -2863,6 +2936,9 @@ class UniPulseApp {
   }
 
   closeModal(modalId) {
+    if (modalId === 'modalScanner') {
+      this.stopCameraScanner();
+    }
     const m = document.getElementById(modalId);
     if (m) {
       m.classList.remove('active');

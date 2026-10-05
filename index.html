@@ -1327,9 +1327,14 @@
               <i class="fa-solid fa-spinner fa-spin fa-2x" style="color: var(--accent);"></i><br><span style="margin-top: 8px; display: inline-block;">Starting Live Camera Scanner...</span>
             </div>
           </div>
-          <p style="font-size: 0.78rem; color: var(--text-muted); margin-top: 0.6rem;">
-            <i class="fa-solid fa-circle-info"></i> Point your device camera directly at the student's E-Pass QR code.
-          </p>
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 0.6rem; flex-wrap: wrap; gap: 0.4rem;">
+            <p style="font-size: 0.78rem; color: var(--text-muted); margin: 0;">
+              <i class="fa-solid fa-circle-info"></i> Point camera directly at the student's QR pass.
+            </p>
+            <button type="button" class="btn btn-secondary btn-sm" id="btnStopCameraFeed" style="font-size: 0.72rem; padding: 0.2rem 0.55rem;" onclick="app.stopCameraScanner()">
+              <i class="fa-solid fa-camera-slash"></i> Turn Camera Off
+            </button>
+          </div>
         </div>
 
         <!-- 2. Manual Lookup Section -->
