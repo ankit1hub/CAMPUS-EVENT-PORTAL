@@ -21,6 +21,12 @@
   <!-- Canvas Confetti for Celebrations -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
   
+  <!-- Real QR Code Generator for E-Passes -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  
+  <!-- Live Camera QR Code Scanner Engine -->
+  <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+  
   <!-- Supabase JS Client -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   
@@ -1296,25 +1302,51 @@
     </div>
   </div>
 
-  <!-- SCANNER SIMULATOR MODAL (FOR ORGANIZERS) -->
+  <!-- SCANNER MODAL (FOR ORGANIZERS) -->
   <div class="modal-overlay" id="modalScanner">
-    <div class="modal-box" style="max-width: 460px; text-align: center;">
+    <div class="modal-box" style="max-width: 480px; text-align: center;">
       <div class="modal-header">
-        <h3 style="font-size: 1.2rem;"><i class="fa-solid fa-qrcode"></i> Gate Check-in Simulator</h3>
-        <button class="modal-close-btn" onclick="app.closeModal('modalScanner')"><i class="fa-solid fa-xmark"></i></button>
+        <h3 style="font-size: 1.15rem;"><i class="fa-solid fa-qrcode"></i> Gate QR Scanner & Verification</h3>
+        <button class="modal-close-btn" onclick="app.closeScannerModal()"><i class="fa-solid fa-xmark"></i></button>
       </div>
-      <div class="modal-body">
-        <div style="background: var(--bg-subtle); padding: 1.5rem; border-radius: var(--radius-lg); border: 2px dashed var(--primary); margin-bottom: 1.25rem;">
-          <div style="font-size: 2.5rem; color: var(--primary); margin-bottom: 0.35rem;"><i class="fa-solid fa-expand"></i></div>
-          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.85rem;">Enter Ticket ID or click below to simulate scan</p>
-          <input type="text" id="scanTicketInput" class="form-control" placeholder="e.g. UP-2026-8492" style="text-align: center; font-weight: 700; font-family: monospace; font-size: 1.05rem; margin-bottom: 0.85rem;">
-          <button class="btn btn-primary w-full" style="width: 100%;" onclick="app.simulateScanTicket()"><i class="fa-solid fa-camera"></i> Verify & Check-in Ticket</button>
+      <div class="modal-body" style="padding-top: 1rem;">
+        <!-- Scanner Mode Tabs -->
+        <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem; background: var(--bg-surface-alt); padding: 4px; border-radius: var(--radius-lg); border: 1px solid var(--border-subtle);">
+          <button type="button" class="btn btn-sm active" id="scannerTabCamera" style="flex: 1; border: none;" onclick="app.switchScannerMode('camera')">
+            <i class="fa-solid fa-camera"></i> Live Camera
+          </button>
+          <button type="button" class="btn btn-sm" id="scannerTabManual" style="flex: 1; border: none; background: transparent; color: var(--text-secondary);" onclick="app.switchScannerMode('manual')">
+            <i class="fa-solid fa-keyboard"></i> Manual Pass / ID
+          </button>
         </div>
 
-        <div id="scanResultBox" style="display: none; padding: 0.85rem; border-radius: var(--radius-md); font-weight: 600;"></div>
+        <!-- 1. Live Camera Viewfinder -->
+        <div id="scannerCameraSection">
+          <div id="qrScannerReader" style="width: 100%; border-radius: var(--radius-lg); overflow: hidden; background: #000; min-height: 240px; display: flex; align-items: center; justify-content: center; position: relative;">
+            <div id="cameraLoadingMsg" style="color: #94a3b8; font-size: 0.88rem; padding: 1rem;">
+              <i class="fa-solid fa-spinner fa-spin fa-2x" style="color: var(--accent);"></i><br><span style="margin-top: 8px; display: inline-block;">Starting Live Camera Scanner...</span>
+            </div>
+          </div>
+          <p style="font-size: 0.78rem; color: var(--text-muted); margin-top: 0.6rem;">
+            <i class="fa-solid fa-circle-info"></i> Point your device camera directly at the student's E-Pass QR code.
+          </p>
+        </div>
+
+        <!-- 2. Manual Lookup Section -->
+        <div id="scannerManualSection" class="hidden">
+          <div style="background: var(--bg-surface-alt); padding: 1.25rem; border-radius: var(--radius-lg); border: 2px dashed var(--accent); margin-bottom: 0.75rem;">
+            <div style="font-size: 2rem; color: var(--accent); margin-bottom: 0.35rem;"><i class="fa-solid fa-id-card"></i></div>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.75rem;">Enter Ticket ID, Roll / Student ID, or Email</p>
+            <input type="text" id="scanTicketInput" class="form-control" placeholder="e.g. UP-2026-8492 or Roll No" style="text-align: center; font-weight: 700; font-family: monospace; font-size: 1.05rem; margin-bottom: 0.75rem;" onkeydown="if(event.key==='Enter'){event.preventDefault(); app.simulateScanTicket();}">
+            <button class="btn btn-primary w-full" style="width: 100%;" onclick="app.simulateScanTicket()"><i class="fa-solid fa-magnifying-glass"></i> Verify & Check-in Pass</button>
+          </div>
+        </div>
+
+        <!-- Scan Result Card -->
+        <div id="scanResultBox" style="display: none; padding: 1rem; border-radius: var(--radius-lg); font-weight: 600; margin-top: 0.85rem; text-align: left;"></div>
       </div>
       <div class="modal-footer">
-        <button class="btn btn-secondary btn-sm" onclick="app.closeModal('modalScanner')">Done</button>
+        <button class="btn btn-secondary btn-sm" onclick="app.closeScannerModal()">Done</button>
       </div>
     </div>
   </div>

@@ -64,6 +64,23 @@ class UniPulseApp {
       } catch (err) {
         console.warn('Live events sync error:', err);
       }
+
+      try {
+        const liveRegs = await supabaseService.fetchRegistrations();
+        if (liveRegs && liveRegs.length > 0) {
+          liveRegs.forEach(lr => {
+            const idx = this.registrations.findIndex(r => r.ticketId === lr.ticketId);
+            if (idx >= 0) {
+              this.registrations[idx] = { ...this.registrations[idx], ...lr };
+            } else {
+              this.registrations.unshift(lr);
+            }
+          });
+          this.saveStorage('unipulse_registrations', this.registrations);
+        }
+      } catch (err) {
+        console.warn('Live registrations sync error:', err);
+      }
     }
 
     this.renderEvents();
@@ -1297,7 +1314,7 @@ class UniPulseApp {
       year: year,
       teamName: teamName,
       registeredAt: new Date().toISOString().replace('T', ' ').substring(0, 16),
-      isCheckedIn: true,
+      isCheckedIn: false,
       aiVerified: true,
       aiConfidence: 99.9,
       aiAudit: 'Instant AI Clearance: Student ID & Payment Validated',
@@ -1425,7 +1442,7 @@ class UniPulseApp {
       }
     }
 
-    this.drawQRCodeCanvas('ticketQrCanvas', `${reg.ticketId}:${reg.rollNo}`);
+    this.drawQRCodeCanvas('ticketQrWrapper', reg.ticketId);
 
     this.openModal('modalTicketPass');
   }
@@ -1449,13 +1466,37 @@ class UniPulseApp {
     }
   }
 
-  drawQRCodeCanvas(canvasId, payload) {
-    const canvas = document.getElementById(canvasId);
-    if (!canvas) return;
+  drawQRCodeCanvas(wrapperId, payload) {
+    const wrapper = document.getElementById(wrapperId) || document.getElementById('ticketQrWrapper');
+    if (!wrapper) return;
+    wrapper.innerHTML = '';
+
+    // Standard high-reliability QRCode generator
+    if (typeof QRCode !== 'undefined') {
+      try {
+        new QRCode(wrapper, {
+          text: payload,
+          width: 120,
+          height: 120,
+          colorDark: '#0f172a',
+          colorLight: '#ffffff',
+          correctLevel: QRCode.CorrectLevel.M
+        });
+        return;
+      } catch (err) {
+        console.warn('QRCode library error, using fallback:', err);
+      }
+    }
+
+    // High contrast canvas fallback
+    const canvas = document.createElement('canvas');
+    canvas.id = 'ticketQrCanvas';
+    canvas.width = 120;
+    canvas.height = 120;
+    wrapper.appendChild(canvas);
     const ctx = canvas.getContext('2d');
     const size = canvas.width;
     ctx.clearRect(0, 0, size, size);
-
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(0, 0, size, size);
 
@@ -2460,30 +2501,271 @@ class UniPulseApp {
     this.navigate('events');
   }
 
-  /* ---------------- Scanner Simulator ---------------- */
+  /* ---------------- Gate QR Scanner & Attendance Verification ---------------- */
   openScannerModal() {
     const resBox = document.getElementById('scanResultBox');
     if (resBox) resBox.style.display = 'none';
     const input = document.getElementById('scanTicketInput');
     if (input) input.value = '';
     this.openModal('modalScanner');
+    this.switchScannerMode('camera');
   }
 
-  async simulateScanTicket() {
-    const input = document.getElementById('scanTicketInput');
-    const resBox = document.getElementById('scanResultBox');
-    if (!input || !resBox) return;
+  closeScannerModal() {
+    this.stopCameraScanner();
+    this.closeModal('modalScanner');
+  }
 
-    let searchId = input.value.trim().toUpperCase();
-    if (!searchId && this.registrations.length > 0) {
-      searchId = this.registrations[0].ticketId;
-      input.value = searchId;
+  switchScannerMode(mode) {
+    const camTab = document.getElementById('scannerTabCamera');
+    const manTab = document.getElementById('scannerTabManual');
+    const camSec = document.getElementById('scannerCameraSection');
+    const manSec = document.getElementById('scannerManualSection');
+
+    if (mode === 'camera') {
+      if (camTab) { camTab.classList.add('active'); camTab.style.background = 'var(--bg-surface)'; camTab.style.color = 'var(--text-main)'; }
+      if (manTab) { manTab.classList.remove('active'); manTab.style.background = 'transparent'; manTab.style.color = 'var(--text-secondary)'; }
+      if (camSec) camSec.classList.remove('hidden');
+      if (manSec) manSec.classList.add('hidden');
+      this.startCameraScanner();
+    } else {
+      if (manTab) { manTab.classList.add('active'); manTab.style.background = 'var(--bg-surface)'; manTab.style.color = 'var(--text-main)'; }
+      if (camTab) { camTab.classList.remove('active'); camTab.style.background = 'transparent'; camTab.style.color = 'var(--text-secondary)'; }
+      if (manSec) manSec.classList.remove('hidden');
+      if (camSec) camSec.classList.add('hidden');
+      this.stopCameraScanner();
+      const input = document.getElementById('scanTicketInput');
+      if (input) input.focus();
+    }
+  }
+
+  startCameraScanner() {
+    const readerEl = document.getElementById('qrScannerReader');
+    if (!readerEl) return;
+
+    if (typeof Html5Qrcode === 'undefined') {
+      readerEl.innerHTML = `
+        <div style="padding: 1.5rem; color: #94a3b8; font-size: 0.85rem;">
+          <i class="fa-solid fa-spinner fa-spin fa-2x" style="color: var(--accent); margin-bottom: 0.5rem;"></i><br>
+          Camera engine loading... Please use manual pass lookup below.
+        </div>
+      `;
+      return;
     }
 
-    const reg = this.registrations.find(r => r.ticketId.toUpperCase() === searchId);
+    if (this.html5QrCode) {
+      return;
+    }
+
+    try {
+      this.html5QrCode = new Html5Qrcode("qrScannerReader");
+      const config = { fps: 10, qrbox: { width: 220, height: 220 } };
+
+      this.html5QrCode.start(
+        { facingMode: "environment" },
+        config,
+        (decodedText) => {
+          if (!decodedText) return;
+          const input = document.getElementById('scanTicketInput');
+          if (input) input.value = decodedText;
+          this.processScannedTicket(decodedText);
+
+          // Brief cooldown pause so camera doesn't re-scan continuously
+          if (this.html5QrCode && this.html5QrCode.isScanning) {
+            try {
+              this.html5QrCode.pause();
+              setTimeout(() => {
+                if (this.html5QrCode) {
+                  try { this.html5QrCode.resume(); } catch (e) {}
+                }
+              }, 2500);
+            } catch (e) {}
+          }
+        },
+        () => {}
+      ).catch(err => {
+        console.warn('Camera feed not accessible:', err);
+        if (readerEl) {
+          readerEl.innerHTML = `
+            <div style="padding: 1.5rem; color: #94a3b8; font-size: 0.85rem;">
+              <i class="fa-solid fa-video-slash fa-2x" style="color: var(--accent); margin-bottom: 0.5rem;"></i><br>
+              Camera permission required or no webcam found.<br>
+              <button class="btn btn-secondary btn-sm" style="margin-top: 0.75rem;" onclick="app.switchScannerMode('manual')">
+                <i class="fa-solid fa-keyboard"></i> Use Manual ID Lookup
+              </button>
+            </div>
+          `;
+        }
+      });
+    } catch (e) {
+      console.warn('HTML5QrCode setup catch:', e);
+    }
+  }
+
+  stopCameraScanner() {
+    if (this.html5QrCode) {
+      try {
+        this.html5QrCode.stop().then(() => {
+          try { this.html5QrCode.clear(); } catch (e) {}
+          this.html5QrCode = null;
+        }).catch(() => {
+          this.html5QrCode = null;
+        });
+      } catch (e) {
+        this.html5QrCode = null;
+      }
+    }
+  }
+
+  playScannerSound(success = true) {
+    try {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      if (success) {
+        osc.frequency.setValueAtTime(880, ctx.currentTime);
+        osc.frequency.setValueAtTime(1174.66, ctx.currentTime + 0.08);
+        gain.gain.setValueAtTime(0.18, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.28);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.28);
+      } else {
+        osc.frequency.setValueAtTime(260, ctx.currentTime);
+        gain.gain.setValueAtTime(0.18, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.3);
+      }
+    } catch (e) {}
+  }
+
+  extractTicketLookupKeys(rawInput) {
+    if (!rawInput) return [];
+    let text = String(rawInput).trim();
+    const keys = new Set();
+    keys.add(text);
+    keys.add(text.toUpperCase());
+    keys.add(text.toLowerCase());
+
+    // 1. JSON payload: {"ticketId":"UP-2026-1547", ...}
+    if (text.startsWith('{') && text.endsWith('}')) {
+      try {
+        const obj = JSON.parse(text);
+        if (obj.ticketId) keys.add(obj.ticketId.trim().toUpperCase());
+        if (obj.rollNo) keys.add(obj.rollNo.trim().toUpperCase());
+        if (obj.email) keys.add(obj.email.trim().toLowerCase());
+      } catch (e) {}
+    }
+
+    // 2. Colon-separated payload: UP-2026-1547:43 or UP-2026-1547:23CS0148
+    if (text.includes(':')) {
+      const parts = text.split(':');
+      if (parts[0]) keys.add(parts[0].trim().toUpperCase());
+      if (parts[1]) keys.add(parts[1].trim().toUpperCase());
+    }
+
+    // 3. URL format: ...?ticket=UP-2026-1547
+    if (text.includes('ticket=')) {
+      const match = text.match(/ticket=([A-Za-z0-9_-]+)/i);
+      if (match) keys.add(match[1].trim().toUpperCase());
+    }
+
+    return Array.from(keys);
+  }
+
+  findRegistration(lookupKeys) {
+    for (const key of lookupKeys) {
+      const upper = key.toUpperCase();
+      const lower = key.toLowerCase();
+      const reg = this.registrations.find(r => 
+        (r.ticketId && r.ticketId.toUpperCase() === upper) ||
+        (r.rollNo && r.rollNo.toUpperCase() === upper) ||
+        (r.email && r.email.toLowerCase() === lower) ||
+        (r.attendeeName && r.attendeeName.toLowerCase() === lower)
+      );
+      if (reg) return reg;
+    }
+    return null;
+  }
+
+  async lookupRegistrationInCloud(lookupKeys) {
+    if (typeof supabaseService === 'undefined' || !supabaseService.isConnected) return null;
+    try {
+      for (const key of lookupKeys) {
+        const upper = key.toUpperCase();
+        const { data, error } = await supabaseService.client
+          .from('registrations')
+          .select('*')
+          .or(`ticket_id.eq.${upper},roll_no.eq.${upper}`)
+          .limit(1);
+
+        if (!error && data && data.length > 0) {
+          const r = data[0];
+          const mapped = {
+            ticketId: r.ticket_id,
+            eventId: r.event_id,
+            userId: r.user_id,
+            attendeeName: r.attendee_name,
+            rollNo: r.roll_no,
+            email: r.email,
+            dept: r.dept,
+            year: r.year,
+            teamName: r.team_name,
+            registeredAt: r.created_at || new Date().toISOString(),
+            isCheckedIn: !!r.is_checked_in,
+            aiVerified: true,
+            aiConfidence: 99.9,
+            aiAudit: 'Verified Campus Attendance Entry',
+            isPaid: false,
+            amountPaid: 0,
+            paymentMethod: 'Verified Pass',
+            paymentTxn: 'PASS-CONFIRMED'
+          };
+          this.registrations.unshift(mapped);
+          this.saveStorage('unipulse_registrations', this.registrations);
+          return mapped;
+        }
+      }
+    } catch (e) {
+      console.warn('Cloud registration lookup notice:', e);
+    }
+    return null;
+  }
+
+  async processScannedTicket(rawInput) {
+    const resBox = document.getElementById('scanResultBox');
+    if (!resBox) return;
+
+    if (!rawInput) {
+      resBox.style.display = 'block';
+      resBox.style.background = 'rgba(244, 63, 94, 0.12)';
+      resBox.style.border = '1px solid var(--accent-rose)';
+      resBox.style.color = 'var(--accent-rose)';
+      resBox.innerHTML = `
+        <div style="font-size: 1.15rem; font-weight: 800;"><i class="fa-solid fa-circle-exclamation"></i> PLEASE ENTER A PASS OR SCAN A QR CODE</div>
+      `;
+      this.playScannerSound(false);
+      return;
+    }
+
+    const keys = this.extractTicketLookupKeys(rawInput);
+    let reg = this.findRegistration(keys);
+
+    if (!reg) {
+      reg = await this.lookupRegistrationInCloud(keys);
+    }
 
     if (reg) {
+      const evt = this.events.find(e => e.id === reg.eventId) || { title: 'Campus Flagship Event', venue: 'Campus Auditorium' };
+      const alreadyCheckedIn = !!reg.isCheckedIn;
+
       reg.isCheckedIn = true;
+      reg.checkedInAt = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
       this.saveStorage('unipulse_registrations', this.registrations);
 
       if (typeof supabaseService !== 'undefined' && supabaseService.isConnected) {
@@ -2491,26 +2773,77 @@ class UniPulseApp {
       }
 
       this.renderOrganizerTable();
+      this.updateOrgAnalytics();
+
+      this.playScannerSound(true);
 
       resBox.style.display = 'block';
-      resBox.style.background = 'rgba(16, 185, 129, 0.15)';
-      resBox.style.color = '#10b981';
-      resBox.innerHTML = `
-        <div style="font-size: 1.35rem; margin-bottom: 0.2rem;">✅ ENTRY VERIFIED</div>
-        <div>Attendee: <strong>${reg.attendeeName}</strong> (${reg.rollNo})</div>
-        <div style="font-size: 0.78rem; margin-top: 0.2rem;">Department: ${reg.dept} • Pass: VALID</div>
-      `;
-      this.showToast(`Verified attendee ${reg.attendeeName}!`, 'success');
+      if (alreadyCheckedIn) {
+        resBox.style.background = 'rgba(245, 158, 11, 0.15)';
+        resBox.style.border = '1.5px solid #f59e0b';
+        resBox.style.color = '#d97706';
+        resBox.innerHTML = `
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.4rem;">
+            <strong style="font-size: 1.15rem;"><i class="fa-solid fa-triangle-exclamation"></i> ALREADY CHECKED IN</strong>
+            <span style="font-size: 0.72rem; background: #f59e0b; color: #fff; padding: 2px 8px; border-radius: 999px; font-weight: 800;">DUPLICATE PASS</span>
+          </div>
+          <div style="font-size: 0.95rem; color: var(--text-main); margin-bottom: 0.35rem;">
+            Attendee: <strong>${reg.attendeeName}</strong> (Roll: <strong>${reg.rollNo}</strong>)
+          </div>
+          <div style="font-size: 0.8rem; color: var(--text-secondary);">
+            Event: <strong>${evt.title}</strong><br>
+            Venue: ${evt.venue || 'Campus Hall'} • Dept: ${reg.dept}
+          </div>
+          <div style="font-size: 0.75rem; color: #b45309; margin-top: 0.4rem; font-weight: 700;">
+            ⚠️ This pass was already checked in.
+          </div>
+        `;
+        this.showToast(`Pass for ${reg.attendeeName} is already checked in.`, 'warning');
+      } else {
+        resBox.style.background = 'rgba(16, 185, 129, 0.15)';
+        resBox.style.border = '1.5px solid #10b981';
+        resBox.style.color = '#059669';
+        resBox.innerHTML = `
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.4rem;">
+            <strong style="font-size: 1.15rem;"><i class="fa-solid fa-circle-check"></i> ENTRY VERIFIED & GRANTED</strong>
+            <span style="font-size: 0.72rem; background: #10b981; color: #fff; padding: 2px 8px; border-radius: 999px; font-weight: 800;">VALID PASS</span>
+          </div>
+          <div style="font-size: 0.95rem; color: var(--text-main); margin-bottom: 0.35rem;">
+            Attendee: <strong>${reg.attendeeName}</strong> (Roll: <strong>${reg.rollNo}</strong>)
+          </div>
+          <div style="font-size: 0.8rem; color: var(--text-secondary);">
+            Event: <strong>${evt.title}</strong><br>
+            Ticket ID: <span style="font-family: monospace; font-weight: 700;">${reg.ticketId}</span> • Dept: ${reg.dept}
+          </div>
+          <div style="font-size: 0.75rem; color: #047857; margin-top: 0.4rem; font-weight: 700;">
+            ⚡ Attendance successfully logged at ${reg.checkedInAt}. Welcome!
+          </div>
+        `;
+        this.showToast(`✅ Verified attendee ${reg.attendeeName}!`, 'success');
+      }
     } else {
+      this.playScannerSound(false);
       resBox.style.display = 'block';
-      resBox.style.background = 'rgba(244, 63, 94, 0.15)';
-      resBox.style.color = '#f43f5e';
+      resBox.style.background = 'rgba(244, 63, 94, 0.12)';
+      resBox.style.border = '1.5px solid #f43f5e';
+      resBox.style.color = '#e11d48';
       resBox.innerHTML = `
-        <div style="font-size: 1.35rem; margin-bottom: 0.2rem;">❌ INVALID PASS</div>
-        <div>Ticket ID "${searchId}" not found in database.</div>
+        <div style="font-size: 1.15rem; font-weight: 800; margin-bottom: 0.35rem;"><i class="fa-solid fa-circle-xmark"></i> INVALID PASS</div>
+        <div style="color: var(--text-main); font-size: 0.88rem;">No registration found matching "${rawInput}".</div>
+        <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.3rem;">Please verify the Ticket ID or student Roll Number and try again.</div>
       `;
       this.showToast('Ticket invalid or not found', 'error');
     }
+  }
+
+  async simulateScanTicket() {
+    const input = document.getElementById('scanTicketInput');
+    let val = input ? input.value.trim() : '';
+    if (!val && this.registrations.length > 0) {
+      val = this.registrations[0].ticketId;
+      if (input) input.value = val;
+    }
+    await this.processScannedTicket(val);
   }
 
   showNotificationsModal() {
