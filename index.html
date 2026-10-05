@@ -164,7 +164,12 @@
               </div>
               <div class="form-group">
                 <label class="form-label">Password</label>
-                <input type="password" id="gatewayLoginStudentPass" class="form-control" required placeholder="••••••••">
+                <div class="password-wrapper">
+                  <input type="password" id="gatewayLoginStudentPass" class="form-control" required placeholder="••••••••">
+                  <button type="button" class="password-toggle-btn" onclick="app.togglePasswordVisibility('gatewayLoginStudentPass', this)" aria-label="Show password" title="Show password" tabindex="-1">
+                    <i class="fa-regular fa-eye"></i>
+                  </button>
+                </div>
               </div>
               <div class="flex items-center justify-between" style="font-size: 0.8rem; margin-bottom: 1.25rem;">
                 <label style="display: flex; align-items: center; gap: 0.35rem; cursor: pointer;">
@@ -220,7 +225,12 @@
 
               <div class="form-group">
                 <label class="form-label">Create Password (Min. 6 chars) *</label>
-                <input type="password" id="gatewaySignupPass" class="form-control" required minlength="6" placeholder="••••••••">
+                <div class="password-wrapper">
+                  <input type="password" id="gatewaySignupPass" class="form-control" required minlength="6" placeholder="••••••••">
+                  <button type="button" class="password-toggle-btn" onclick="app.togglePasswordVisibility('gatewaySignupPass', this)" aria-label="Show password" title="Show password" tabindex="-1">
+                    <i class="fa-regular fa-eye"></i>
+                  </button>
+                </div>
               </div>
 
               <button type="submit" class="btn btn-primary w-full" style="width: 100%;" id="gatewayStudentSignUpSubmitBtn">
@@ -249,7 +259,12 @@
               </div>
               <div class="form-group">
                 <label class="form-label">Admin Password</label>
-                <input type="password" id="gatewayLoginAdminPass" class="form-control" required placeholder="••••••••">
+                <div class="password-wrapper">
+                  <input type="password" id="gatewayLoginAdminPass" class="form-control" required placeholder="••••••••">
+                  <button type="button" class="password-toggle-btn" onclick="app.togglePasswordVisibility('gatewayLoginAdminPass', this)" aria-label="Show password" title="Show password" tabindex="-1">
+                    <i class="fa-regular fa-eye"></i>
+                  </button>
+                </div>
                 <div class="form-help">Enter club lead key or faculty admin credentials.</div>
               </div>
               <button type="submit" class="btn btn-primary w-full" style="width: 100%; background: linear-gradient(135deg, #059669, #10b981);" id="gatewayAdminSignInSubmitBtn">
@@ -290,7 +305,12 @@
 
               <div class="form-group">
                 <label class="form-label">Create Admin Password (Min. 6 chars) *</label>
-                <input type="password" id="gatewaySignupAdminPass" class="form-control" required minlength="6" placeholder="••••••••">
+                <div class="password-wrapper">
+                  <input type="password" id="gatewaySignupAdminPass" class="form-control" required minlength="6" placeholder="••••••••">
+                  <button type="button" class="password-toggle-btn" onclick="app.togglePasswordVisibility('gatewaySignupAdminPass', this)" aria-label="Show password" title="Show password" tabindex="-1">
+                    <i class="fa-regular fa-eye"></i>
+                  </button>
+                </div>
               </div>
 
               <button type="submit" class="btn btn-primary w-full" style="width: 100%; background: linear-gradient(135deg, #059669, #10b981);" id="gatewayAdminSignUpSubmitBtn">
@@ -704,7 +724,12 @@
             </div>
             <div class="form-group">
               <label class="form-label">Password</label>
-              <input type="password" id="loginStudentPass" class="form-control" required placeholder="••••••••">
+              <div class="password-wrapper">
+                <input type="password" id="loginStudentPass" class="form-control" required placeholder="••••••••">
+                <button type="button" class="password-toggle-btn" onclick="app.togglePasswordVisibility('loginStudentPass', this)" aria-label="Show password" title="Show password" tabindex="-1">
+                  <i class="fa-regular fa-eye"></i>
+                </button>
+              </div>
             </div>
             <div class="flex items-center justify-between" style="font-size: 0.8rem; margin-bottom: 1.25rem;">
               <label style="display: flex; align-items: center; gap: 0.35rem; cursor: pointer;">
@@ -760,7 +785,12 @@
 
             <div class="form-group">
               <label class="form-label">Create Password (Min. 6 chars) *</label>
-              <input type="password" id="signupPass" class="form-control" required minlength="6" placeholder="••••••••">
+              <div class="password-wrapper">
+                <input type="password" id="signupPass" class="form-control" required minlength="6" placeholder="••••••••">
+                <button type="button" class="password-toggle-btn" onclick="app.togglePasswordVisibility('signupPass', this)" aria-label="Show password" title="Show password" tabindex="-1">
+                  <i class="fa-regular fa-eye"></i>
+                </button>
+              </div>
             </div>
 
             <button type="submit" class="btn btn-primary w-full" style="width: 100%;" id="studentSignUpSubmitBtn">
@@ -789,7 +819,12 @@
             </div>
             <div class="form-group">
               <label class="form-label">Admin Security Key / Password</label>
-              <input type="password" id="loginAdminPass" class="form-control" required placeholder="••••••••">
+              <div class="password-wrapper">
+                <input type="password" id="loginAdminPass" class="form-control" required placeholder="••••••••">
+                <button type="button" class="password-toggle-btn" onclick="app.togglePasswordVisibility('loginAdminPass', this)" aria-label="Show password" title="Show password" tabindex="-1">
+                  <i class="fa-regular fa-eye"></i>
+                </button>
+              </div>
               <div class="form-help">Enter club lead key or faculty admin credentials.</div>
             </div>
             <button type="submit" class="btn btn-primary w-full" style="width: 100%; background: linear-gradient(135deg, #059669, #10b981);" id="adminSignInSubmitBtn">
@@ -830,7 +865,12 @@
 
             <div class="form-group">
               <label class="form-label">Create Admin Password (Min. 6 chars) *</label>
-              <input type="password" id="signupAdminPass" class="form-control" required minlength="6" placeholder="••••••••">
+              <div class="password-wrapper">
+                <input type="password" id="signupAdminPass" class="form-control" required minlength="6" placeholder="••••••••">
+                <button type="button" class="password-toggle-btn" onclick="app.togglePasswordVisibility('signupAdminPass', this)" aria-label="Show password" title="Show password" tabindex="-1">
+                  <i class="fa-regular fa-eye"></i>
+                </button>
+              </div>
             </div>
 
             <button type="submit" class="btn btn-primary w-full" style="width: 100%; background: linear-gradient(135deg, #059669, #10b981);" id="adminSignUpSubmitBtn">

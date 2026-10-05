@@ -371,6 +371,31 @@ class UniPulseApp {
     }
   }
 
+  /* ---------------- Password Visibility Toggle ---------------- */
+  togglePasswordVisibility(inputId, btnEl) {
+    const input = document.getElementById(inputId);
+    if (!input) return;
+    const isPassword = input.type === 'password';
+    input.type = isPassword ? 'text' : 'password';
+
+    const icon = btnEl ? (btnEl.querySelector('i') || btnEl) : null;
+    if (icon) {
+      if (isPassword) {
+        icon.className = 'fa-regular fa-eye-slash';
+        if (btnEl) {
+          btnEl.setAttribute('aria-label', 'Hide password');
+          btnEl.setAttribute('title', 'Hide password');
+        }
+      } else {
+        icon.className = 'fa-regular fa-eye';
+        if (btnEl) {
+          btnEl.setAttribute('aria-label', 'Show password');
+          btnEl.setAttribute('title', 'Show password');
+        }
+      }
+    }
+  }
+
   /* ---------------- Authentication Modal Handlers ---------------- */
   openAuthModal(tab = 'student') {
     this.switchAuthTab(tab);
