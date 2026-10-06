@@ -1,4 +1,4 @@
-# 🎓 CAMPUS-EVENT-PORTAL (UniPulse)
+# 🎓 CAMPUS-EVENT-PORTAL (UNIBuzz)
 
 A centralized, responsive, full-featured web portal for campus event discovery, student registrations, digital E-Pass generation with QR barcodes, verifiable certificates, club directory, academic calendar, and real-time Organizer Studio with Supabase PostgreSQL database & JWT authentication.
 
