@@ -165,7 +165,7 @@ class SupabaseService {
           role: role,
           rollNo: role === 'admin' ? 'FAC-8821' : '23CS0148',
           dept: role === 'admin' ? 'Campus Event Council' : 'Computer Science & Eng',
-          year: role === 'admin' ? 'Administrator' : 'Year 3 (Junior)'
+          year: role === 'admin' ? 'Administrator' : 'Year 3'
         },
         mode: 'local'
       };
