@@ -1,4 +1,4 @@
-# UniPulse Campus Event Portal - Backend API
+# UNIBuzz Campus Event Portal - Backend API
 
 A production-ready Flask REST API backend integrated with **Supabase Database (PostgreSQL)** and **JWT Authentication** for Student & Admin authentication, event publishing, and gate check-in registration workflows.
 
