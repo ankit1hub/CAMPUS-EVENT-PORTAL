@@ -326,6 +326,25 @@ class SupabaseService {
     }
   }
 
+  // Delete an event completely from Supabase
+  async deleteEvent(eventId) {
+    if (!this.isConnected) return { success: true, mode: 'local' };
+    try {
+      const { error } = await this.client
+        .from('events')
+        .delete()
+        .eq('id', eventId);
+
+      if (error) {
+        console.warn('Supabase event delete warning:', error.message);
+      }
+      return { success: !error };
+    } catch (err) {
+      console.warn('Supabase event delete error:', err);
+      return { success: false, error: err.message };
+    }
+  }
+
   // Fetch all registrations from Supabase
   async fetchRegistrations() {
     if (!this.isConnected) return null;

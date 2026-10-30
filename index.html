@@ -574,6 +574,9 @@
             <button id="orgCancelEventBtn" class="btn btn-secondary btn-sm" style="display: none; color: var(--accent-rose); border-color: var(--accent-rose); background: rgba(244, 63, 94, 0.08); font-weight: 700; white-space: nowrap;" onclick="app.toggleCancelEvent(app.selectedOrgEvent)">
               <i class="fa-solid fa-ban"></i> Cancel Event
             </button>
+            <button id="orgDeleteEventBtn" class="btn btn-secondary btn-sm" style="display: none; color: var(--accent-rose); border-color: rgba(225, 29, 72, 0.4); background: rgba(244, 63, 94, 0.08); font-weight: 700; white-space: nowrap;" onclick="app.deleteEvent(app.selectedOrgEvent)">
+              <i class="fa-solid fa-trash-can"></i> Delete Event
+            </button>
           </div>
         </div>
 
@@ -936,6 +939,9 @@
         <button class="btn btn-secondary btn-sm" id="detailShareBtn" onclick="app.shareCurrentEvent()"><i class="fa-solid fa-share-nodes"></i> Share</button>
         <button class="btn btn-secondary btn-sm" id="detailAdminCancelBtn" style="display: none; color: var(--accent-rose); border-color: var(--accent-rose); background: rgba(244, 63, 94, 0.08); font-weight: 700;" onclick="app.toggleCancelEvent(app.currentInspectedEvent ? app.currentInspectedEvent.id : null)">
           <i class="fa-solid fa-ban"></i> Cancel Event
+        </button>
+        <button class="btn btn-secondary btn-sm" id="detailAdminDeleteBtn" style="display: none; color: var(--accent-rose); border-color: rgba(225, 29, 72, 0.4); background: rgba(244, 63, 94, 0.08); font-weight: 700;" onclick="app.deleteEvent(app.currentInspectedEvent ? app.currentInspectedEvent.id : null)">
+          <i class="fa-solid fa-trash-can"></i> Delete Event
         </button>
         <button class="btn btn-primary btn-sm" id="detailRegisterCtaBtn"><i class="fa-solid fa-ticket"></i> Book Now</button>
       </div>

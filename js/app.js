@@ -44,11 +44,23 @@ class UniPulseApp {
       this.navigate('events');
     }
 
+    // Purge removed / test events (e.g. Free Fire test event) from local cache
+    this.events = this.events.filter(e => {
+      if (!e) return false;
+      const t = (e.title || '').toLowerCase();
+      return !t.includes('free fire') && !t.includes('esports mania') && e.id !== 'evt-2798' && e.id !== 'evt-3972';
+    });
+    this.saveStorage('unipulse_events', this.events);
+
     // Attempt to sync live events from Supabase if connected
     if (typeof supabaseService !== 'undefined' && supabaseService.isConnected) {
       try {
-        const liveEvents = await supabaseService.fetchEvents();
-        if (liveEvents && liveEvents.length > 0) {
+        const rawLiveEvents = await supabaseService.fetchEvents();
+        if (rawLiveEvents && rawLiveEvents.length > 0) {
+          const liveEvents = rawLiveEvents.filter(le => {
+            const t = (le.title || '').toLowerCase();
+            return !t.includes('free fire') && !t.includes('esports mania') && le.id !== 'evt-2798' && le.id !== 'evt-3972';
+          });
           // Merge with current state to preserve any cancellation overrides
           this.events = liveEvents.map(le => {
             const localMatch = this.events.find(e => e.id === le.id);
@@ -59,6 +71,14 @@ class UniPulseApp {
             }
             return le;
           });
+          // Preserve static initial events if not yet published to Supabase
+          if (typeof INITIAL_EVENTS !== 'undefined') {
+            INITIAL_EVENTS.forEach(initEvt => {
+              if (!this.events.some(e => e.id === initEvt.id)) {
+                this.events.push(initEvt);
+              }
+            });
+          }
           this.saveStorage('unipulse_events', this.events);
         }
       } catch (err) {
@@ -843,8 +863,11 @@ class UniPulseApp {
                 <i class="fa-regular fa-eye"></i> Details
               </button>
               ${isAdmin ? `
-                <button class="btn btn-secondary btn-sm" style="${isCancelled ? 'color: var(--accent-emerald); border-color: var(--accent-emerald); background: rgba(16, 185, 129, 0.12);' : 'color: var(--accent-rose); border-color: var(--accent-rose); background: rgba(244, 63, 94, 0.12);'} font-weight: 700;" onclick="app.toggleCancelEvent('${e.id}')">
-                  <i class="fa-solid ${isCancelled ? 'fa-rotate-left' : 'fa-ban'}"></i> ${isCancelled ? 'Restore Event' : 'Cancel Event'}
+                <button class="btn btn-secondary btn-sm" style="${isCancelled ? 'color: var(--accent-emerald); border-color: var(--accent-emerald); background: rgba(16, 185, 129, 0.12);' : 'color: var(--accent-rose); border-color: var(--accent-rose); background: rgba(244, 63, 94, 0.12);'} font-weight: 700;" onclick="app.toggleCancelEvent('${e.id}')" title="${isCancelled ? 'Restore event' : 'Cancel event'}">
+                  <i class="fa-solid ${isCancelled ? 'fa-rotate-left' : 'fa-ban'}"></i> ${isCancelled ? 'Restore' : 'Cancel'}
+                </button>
+                <button class="btn btn-secondary btn-sm" style="color: var(--accent-rose); border-color: rgba(225, 29, 72, 0.35); background: rgba(244, 63, 94, 0.08); font-weight: 700;" onclick="app.deleteEvent('${e.id}')" title="Permanently delete this event">
+                  <i class="fa-solid fa-trash-can"></i>
                 </button>
               ` : isCancelled ? `
                 <button class="btn btn-secondary btn-sm" style="color: var(--accent-rose); border-color: var(--accent-rose); background: rgba(244, 63, 94, 0.08); font-weight: 700;" disabled>
@@ -1105,6 +1128,11 @@ class UniPulseApp {
       }
     }
 
+    const adminDeleteBtn = document.getElementById('detailAdminDeleteBtn');
+    if (adminDeleteBtn) {
+      adminDeleteBtn.style.display = isAdmin ? 'inline-flex' : 'none';
+    }
+
     if (regBtn) {
       if (isAdmin) {
         regBtn.style.display = 'none';
@@ -1192,6 +1220,60 @@ class UniPulseApp {
     );
 
     this.closeModal('modalEventDetails');
+    this.renderEvents();
+    this.renderCalendar();
+    this.renderDashboard();
+    this.renderOrganizerTable();
+    this.updateCategoryCounters();
+    this.updateOrgAnalytics();
+  }
+
+  /* ---------------- Admin Permanent Event Deletion ---------------- */
+  async deleteEvent(eventId) {
+    if (!eventId || eventId === 'all') {
+      this.showToast('Please select a specific event to delete.', 'info');
+      return;
+    }
+
+    const evt = this.events.find(e => e.id === eventId);
+    if (!evt) return;
+
+    if (!this.currentUser || this.currentUser.role !== 'admin') {
+      this.showToast('Administrator privileges required to delete events.', 'error');
+      return;
+    }
+
+    const confirmMsg = `Are you sure you want to PERMANENTLY DELETE "${evt.title}"?\n\nThis will remove the event completely from the portal. This action cannot be undone.`;
+    if (!confirm(confirmMsg)) return;
+
+    // 1. Remove from local memory array
+    this.events = this.events.filter(e => e.id !== eventId);
+    this.saveStorage('unipulse_events', this.events);
+
+    // 2. Remove associated registrations
+    this.registrations = this.registrations.filter(r => r.eventId !== eventId);
+    this.saveStorage('unipulse_registrations', this.registrations);
+
+    // 3. Remove from bookmarks if any
+    this.bookmarks = this.bookmarks.filter(id => id !== eventId);
+    this.saveStorage('unipulse_bookmarks', this.bookmarks);
+
+    // 4. Delete from Supabase Cloud if connected
+    try {
+      if (typeof supabaseService !== 'undefined' && supabaseService.isConnected) {
+        await supabaseService.deleteEvent(eventId);
+      }
+    } catch (err) {
+      console.warn('Supabase event deletion notice:', err);
+    }
+
+    this.showToast(`🗑️ "${evt.title}" has been permanently removed!`, 'success');
+
+    this.closeModal('modalEventDetails');
+    if (this.selectedOrgEvent === eventId) {
+      this.selectedOrgEvent = 'all';
+    }
+    this.populateOrgEventDropdown();
     this.renderEvents();
     this.renderCalendar();
     this.renderDashboard();
@@ -1931,8 +2013,10 @@ class UniPulseApp {
     const scopeSubtext = document.getElementById('orgEventScopeSubtext');
     const cancelBtn = document.getElementById('orgCancelEventBtn');
 
+    const delBtn = document.getElementById('orgDeleteEventBtn');
     if (this.selectedOrgEvent === 'all') {
       if (cancelBtn) cancelBtn.style.display = 'none';
+      if (delBtn) delBtn.style.display = 'none';
       const totalEvents = this.events.length;
       const totalRegistrations = this.events.reduce((sum, e) => sum + (e.registeredCount || 0), 0) + this.registrations.length;
       const actualChecked = this.registrations.filter(r => r.isCheckedIn).length;
@@ -1960,6 +2044,9 @@ class UniPulseApp {
         cancelBtn.style.color = isCancelled ? 'var(--accent-emerald)' : 'var(--accent-rose)';
         cancelBtn.style.borderColor = isCancelled ? 'var(--accent-emerald)' : 'var(--accent-rose)';
         cancelBtn.style.background = isCancelled ? 'rgba(16, 185, 129, 0.08)' : 'rgba(244, 63, 94, 0.08)';
+      }
+      if (delBtn) {
+        delBtn.style.display = 'inline-flex';
       }
 
       const evtActualRegs = this.registrations.filter(r => r.eventId === evt.id);
