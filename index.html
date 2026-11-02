@@ -1337,8 +1337,55 @@
           </div>
 
           <div class="form-group">
-            <label class="form-label">Cover Banner Image URL</label>
-            <input type="url" id="newEventBanner" class="form-control" placeholder="https://images.unsplash.com/... (optional)">
+            <label class="form-label" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+              <span><i class="fa-solid fa-image" style="color: var(--primary);"></i> Cover Banner Image</span>
+              <span style="font-size: 0.72rem; color: var(--text-muted); font-weight: 500;">Gallery upload or Web URL</span>
+            </label>
+
+            <!-- Mode Switcher Tabs -->
+            <div style="display: flex; gap: 0.5rem; margin-bottom: 0.65rem;">
+              <button type="button" class="btn btn-secondary btn-sm" id="btnBannerUploadMode" onclick="app.setBannerInputMode('file')" style="flex: 1; font-weight: 700; padding: 0.4rem 0.6rem; font-size: 0.78rem; background: var(--bg-surface); border-color: var(--primary); color: var(--primary);">
+                <i class="fa-solid fa-cloud-arrow-up"></i> Upload from Gallery / Device
+              </button>
+              <button type="button" class="btn btn-secondary btn-sm" id="btnBannerUrlMode" onclick="app.setBannerInputMode('url')" style="flex: 1; font-weight: 600; padding: 0.4rem 0.6rem; font-size: 0.78rem; background: transparent; border-color: var(--border-subtle); color: var(--text-muted);">
+                <i class="fa-solid fa-link"></i> Paste Image URL
+              </button>
+            </div>
+
+            <!-- 1. Photo Upload / Gallery Dropzone -->
+            <div id="bannerUploadArea" style="border: 2px dashed var(--border-subtle); border-radius: var(--radius-lg); padding: 1.25rem 1rem; text-align: center; background: var(--bg-surface); cursor: pointer; transition: all 0.2s;" onclick="document.getElementById('newEventBannerFile').click()" ondragover="event.preventDefault(); this.style.borderColor='var(--primary)';" ondragleave="this.style.borderColor='var(--border-subtle)';" ondrop="event.preventDefault(); this.style.borderColor='var(--border-subtle)'; app.handleBannerFileDrop(event);">
+              <input type="file" id="newEventBannerFile" accept="image/*" style="display: none;" onchange="app.handleBannerFileSelect(event)">
+              
+              <div id="bannerUploadPrompt">
+                <div style="width: 48px; height: 48px; border-radius: 50%; background: rgba(99, 102, 241, 0.12); color: var(--primary); display: inline-flex; align-items: center; justify-content: center; font-size: 1.35rem; margin-bottom: 0.5rem;">
+                  <i class="fa-solid fa-camera"></i>
+                </div>
+                <div style="font-size: 0.88rem; font-weight: 700; color: var(--text-main);">Click to choose photo from gallery</div>
+                <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 3px;">Supports PNG, JPG, WEBP • Auto-optimized for crisp display</div>
+              </div>
+
+              <!-- Live Photo Preview -->
+              <div id="bannerPreviewContainer" style="display: none; position: relative;">
+                <img id="bannerImagePreview" src="" alt="Banner Preview" style="width: 100%; height: 165px; object-fit: cover; border-radius: var(--radius-md); box-shadow: var(--shadow-sm); border: 1px solid var(--border-subtle);">
+                <div style="margin-top: 0.5rem; display: flex; justify-content: center; gap: 0.5rem;">
+                  <button type="button" class="btn btn-secondary btn-sm" style="font-size: 0.74rem; padding: 0.25rem 0.65rem;" onclick="event.stopPropagation(); document.getElementById('newEventBannerFile').click();">
+                    <i class="fa-solid fa-camera-rotate"></i> Change Photo
+                  </button>
+                  <button type="button" class="btn btn-secondary btn-sm" style="font-size: 0.74rem; padding: 0.25rem 0.65rem; color: var(--accent-rose); border-color: rgba(244, 63, 94, 0.3);" onclick="event.stopPropagation(); app.removeSelectedBanner();">
+                    <i class="fa-solid fa-trash"></i> Remove
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- 2. Web URL input fallback -->
+            <div id="bannerUrlArea" style="display: none;">
+              <input type="url" id="newEventBanner" class="form-control" placeholder="https://images.unsplash.com/... (optional)" oninput="app.handleBannerUrlInput(this.value)">
+              <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 4px;">Paste an Unsplash or direct image link.</div>
+            </div>
+
+            <!-- Final banner image container -->
+            <input type="hidden" id="finalBannerData" value="">
           </div>
         </div>
         <div class="modal-footer">

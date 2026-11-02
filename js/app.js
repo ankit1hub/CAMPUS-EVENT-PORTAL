@@ -2568,7 +2568,130 @@ class UniPulseApp {
       this.openAuthModal('admin');
       return;
     }
+    this.removeSelectedBanner();
+    this.setBannerInputMode('file');
     this.openModal('modalCreateEvent');
+  }
+
+  /* ---------------- Event Cover Banner Gallery Upload & Optimization ---------------- */
+  setBannerInputMode(mode) {
+    const btnFile = document.getElementById('btnBannerUploadMode');
+    const btnUrl = document.getElementById('btnBannerUrlMode');
+    const uploadArea = document.getElementById('bannerUploadArea');
+    const urlArea = document.getElementById('bannerUrlArea');
+
+    if (mode === 'url') {
+      if (btnFile) {
+        btnFile.style.background = 'transparent';
+        btnFile.style.borderColor = 'var(--border-subtle)';
+        btnFile.style.color = 'var(--text-muted)';
+      }
+      if (btnUrl) {
+        btnUrl.style.background = 'var(--bg-surface)';
+        btnUrl.style.borderColor = 'var(--primary)';
+        btnUrl.style.color = 'var(--primary)';
+      }
+      if (uploadArea) uploadArea.style.display = 'none';
+      if (urlArea) urlArea.style.display = 'block';
+    } else {
+      if (btnUrl) {
+        btnUrl.style.background = 'transparent';
+        btnUrl.style.borderColor = 'var(--border-subtle)';
+        btnUrl.style.color = 'var(--text-muted)';
+      }
+      if (btnFile) {
+        btnFile.style.background = 'var(--bg-surface)';
+        btnFile.style.borderColor = 'var(--primary)';
+        btnFile.style.color = 'var(--primary)';
+      }
+      if (urlArea) urlArea.style.display = 'none';
+      if (uploadArea) uploadArea.style.display = 'block';
+    }
+  }
+
+  handleBannerFileSelect(event) {
+    const file = event.target.files && event.target.files[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      this.showToast('Please select a valid image file (PNG, JPG, WEBP).', 'warning');
+      return;
+    }
+
+    if (file.size > 15 * 1024 * 1024) {
+      this.showToast('Image file size must be under 15MB.', 'warning');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const rawDataUrl = e.target.result;
+      
+      // Auto-compress and scale to 1200x675 max via off-screen canvas for speed & crisp rendering
+      const img = new Image();
+      img.onload = () => {
+        const maxWidth = 1200;
+        const maxHeight = 675;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > maxWidth || height > maxHeight) {
+          const ratio = Math.min(maxWidth / width, maxHeight / height);
+          width = Math.round(width * ratio);
+          height = Math.round(height * ratio);
+        }
+
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.84);
+
+        const previewImg = document.getElementById('bannerImagePreview');
+        const previewContainer = document.getElementById('bannerPreviewContainer');
+        const promptContainer = document.getElementById('bannerUploadPrompt');
+        const finalInput = document.getElementById('finalBannerData');
+
+        if (previewImg) previewImg.src = compressedDataUrl;
+        if (previewContainer) previewContainer.style.display = 'block';
+        if (promptContainer) promptContainer.style.display = 'none';
+        if (finalInput) finalInput.value = compressedDataUrl;
+
+        this.showToast('Photo uploaded from gallery & optimized!', 'success');
+      };
+      img.src = rawDataUrl;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  handleBannerFileDrop(event) {
+    if (event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files[0]) {
+      const fakeEvent = { target: { files: event.dataTransfer.files } };
+      this.handleBannerFileSelect(fakeEvent);
+    }
+  }
+
+  removeSelectedBanner() {
+    const previewImg = document.getElementById('bannerImagePreview');
+    const previewContainer = document.getElementById('bannerPreviewContainer');
+    const promptContainer = document.getElementById('bannerUploadPrompt');
+    const finalInput = document.getElementById('finalBannerData');
+    const fileInput = document.getElementById('newEventBannerFile');
+    const urlInput = document.getElementById('newEventBanner');
+
+    if (previewImg) previewImg.src = '';
+    if (previewContainer) previewContainer.style.display = 'none';
+    if (promptContainer) promptContainer.style.display = 'block';
+    if (finalInput) finalInput.value = '';
+    if (fileInput) fileInput.value = '';
+    if (urlInput) urlInput.value = '';
+  }
+
+  handleBannerUrlInput(val) {
+    const finalInput = document.getElementById('finalBannerData');
+    if (finalInput) finalInput.value = val.trim();
   }
 
   async handleCreateEventSubmit(e) {
@@ -2583,7 +2706,11 @@ class UniPulseApp {
     const price = parseInt(document.getElementById('newEventPrice').value, 10) || 0;
     const teamType = document.getElementById('newEventTeamType').value;
     const desc = document.getElementById('newEventDesc').value.trim();
-    const banner = document.getElementById('newEventBanner').value.trim() || 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=600&q=75';
+    const finalBannerEl = document.getElementById('finalBannerData');
+    const urlBannerEl = document.getElementById('newEventBanner');
+    const banner = (finalBannerEl && finalBannerEl.value.trim()) ||
+                   (urlBannerEl && urlBannerEl.value.trim()) ||
+                   'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=600&q=75';
 
     const categoryNames = {
       hackathon: 'Hackathon',
@@ -2629,6 +2756,7 @@ class UniPulseApp {
     }
 
     this.closeModal('modalCreateEvent');
+    this.removeSelectedBanner();
     document.getElementById('createEventForm').reset();
 
     this.showToast(`🎉 "${title}" published by ${this.currentUser.name}!`, 'success');
