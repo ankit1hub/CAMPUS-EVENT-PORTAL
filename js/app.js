@@ -1363,6 +1363,8 @@ class UniPulseApp {
     if (nameIn) nameIn.value = this.currentUser ? this.currentUser.name : "";
     if (rollIn) rollIn.value = ""; // Do not auto-fill roll number field
     if (emailIn) emailIn.value = this.currentUser ? (this.currentUser.email || "") : "";
+    const yearIn = document.getElementById('regYear');
+    if (yearIn) yearIn.value = (this.currentUser && this.currentUser.year) ? this.currentUser.year : "";
 
     if (teamWrap) {
       if (evt.teamType && evt.teamType.toLowerCase().includes('team')) {
