@@ -35,14 +35,20 @@ class UniPulseApp {
     this.initTicker();
     this.updateUIForRole();
 
-    // Direct guests to dedicated login page first; direct logged-in users to their respective portal
-    if (!this.currentUser) {
-      this.navigate('login');
-    } else if (this.currentUser.role === 'admin') {
+    // Direct guests & students to explore events; direct logged-in admin to organizer portal
+    if (this.currentUser && this.currentUser.role === 'admin') {
       this.navigate('organizer');
     } else {
       this.navigate('events');
     }
+
+    this.renderEvents();
+    this.renderClubs();
+    this.renderCalendar();
+    this.updateRegistrationBadge();
+    this.renderDashboard();
+    this.renderOrganizerTable();
+    this.updateCategoryCounters();
 
     // Purge removed / test events (e.g. Free Fire test event) from local cache
     this.events = this.events.filter(e => {
@@ -183,8 +189,9 @@ class UniPulseApp {
     if (heroHostBtn) heroHostBtn.style.display = isAdmin ? 'inline-flex' : 'none';
     if (notifBtn) notifBtn.style.display = isStudent ? 'inline-flex' : 'none';
 
+    if (mainNavLinks) mainNavLinks.style.display = 'flex';
+
     if (this.currentUser) {
-      if (mainNavLinks) mainNavLinks.style.display = 'flex';
       if (navUserPill) navUserPill.style.display = 'flex';
       if (navAuthBtns) navAuthBtns.style.display = 'none';
 
@@ -213,8 +220,7 @@ class UniPulseApp {
         }
       }
     } else {
-      // Guest state: Show Login/Sign-In buttons, hide user pill and internal nav tabs
-      if (mainNavLinks) mainNavLinks.style.display = 'none';
+      // Guest state: Show Login/Sign-In buttons, hide user pill
       if (navUserPill) navUserPill.style.display = 'none';
       if (navAuthBtns) navAuthBtns.style.display = 'flex';
     }
@@ -223,8 +229,8 @@ class UniPulseApp {
       this.navigate('events');
     } else if (isAdmin && (this.currentView === 'dashboard' || this.currentView === 'login')) {
       this.navigate('organizer');
-    } else if (!this.currentUser && this.currentView !== 'login') {
-      this.navigate('login');
+    } else if (!this.currentUser && (this.currentView === 'organizer' || this.currentView === 'dashboard')) {
+      this.navigate('events');
     }
 
     this.renderEvents();
@@ -651,7 +657,7 @@ class UniPulseApp {
     localStorage.removeItem('unipulse_user');
     this.closeModal('modalUserDropdown');
     this.updateUIForRole();
-    this.navigate('login');
+    this.navigate('events');
     this.showToast('You have signed out.', 'info');
   }
 
@@ -3220,6 +3226,10 @@ class UniPulseApp {
 
 // Global instance setup
 const app = new UniPulseApp();
-document.addEventListener('DOMContentLoaded', () => {
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => {
+    app.init();
+  });
+} else {
   app.init();
-});
+}
