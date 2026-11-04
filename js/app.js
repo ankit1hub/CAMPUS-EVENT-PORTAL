@@ -493,7 +493,7 @@ class UniPulseApp {
       this.saveStorage('unipulse_user', this.currentUser);
       this.closeModal('modalAuth');
       this.updateUIForRole();
-      this.showToast(`🎓 Welcome back, ${this.currentUser.name}! (${res.mode === 'supabase' ? 'Supabase Live' : 'Demo Session'})`, 'success');
+      this.showToast(`🎓 Welcome back, ${this.currentUser.name}!`, 'success');
       this.navigate('events');
     } else {
       this.showToast(`Authentication failed: ${res.error}`, 'error');
@@ -521,7 +521,7 @@ class UniPulseApp {
       this.closeModal('modalAuth');
       this.updateUIForRole();
       this.triggerConfetti();
-      this.showToast(`🎉 Account Created! Welcome, ${this.currentUser.name} (${res.mode === 'supabase' ? 'Saved to Supabase DB' : 'Demo Mode'})`, 'success');
+      this.showToast(`🎉 Account Created! Welcome, ${this.currentUser.name}`, 'success');
       this.navigate('events');
     } else {
       this.showToast(`Sign up failed: ${res.error}`, 'error');
