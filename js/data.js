@@ -10,7 +10,7 @@ const INITIAL_EVENTS = [
     categoryName: "Hackathon",
     organizer: "Google Developer Student Club & ACM",
     organizerIcon: "💻",
-    description: "Gear up for the biggest university-wide hackathon! Solve real-world challenges across Web3, AI/ML, Climate Tech, and Open Innovation with $5,000+ in prize pool, free food, mentor workshops, and exclusive swags.",
+    description: "Gear up for the biggest university-wide hackathon! Solve real-world challenges across Web3, AI/ML, Climate Tech, and Open Innovation with ₹5,00,000+ in prize pool, free food, mentor workshops, and exclusive swags.",
     date: "2026-10-18",
     time: "09:00 AM - Oct 19, 09:00 PM",
     venue: "Main Campus Auditorium & Tech Innovation Lab",
@@ -92,7 +92,7 @@ const INITIAL_EVENTS = [
     isFeatured: false,
     banner: "https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&w=600&q=75",
     tags: ["AI/ML", "Hands-on", "Python", "Certificate"],
-    perks: ["Hands-on Project Repo", "Free Cloud API Credits ($25)", "Official Skill Certificate", "Attendance Credit"],
+    perks: ["Hands-on Project Repo", "Free Cloud API Credits (₹2,000)", "Official Skill Certificate", "Attendance Credit"],
     agenda: [
       { time: "02:00 PM", title: "Introduction to Agentic Architecture & LLM Foundations" },
       { time: "03:00 PM", title: "Live Coding: Building your First Autonomous Agent" },
@@ -273,7 +273,7 @@ const INITIAL_CLUBS = [
 const INITIAL_ANNOUNCEMENTS = [
   "⚡ Registration for HackPulse '26 is 85% full! Secure your team slot today.",
   "🎉 Euphoria Cultural Fest wristband pickup starts this Thursday at Student Center.",
-  "🤖 Free AI Workshop cloud credits ($25) sponsored by Tech Innovation Lab."
+  "🤖 Free AI Workshop cloud credits (₹2,000) sponsored by Tech Innovation Lab."
 ];
 
 const INITIAL_REGISTRATIONS = [

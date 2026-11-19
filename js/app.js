@@ -56,6 +56,15 @@ class UniPulseApp {
       const t = (e.title || '').toLowerCase();
       return !t.includes('free fire') && !t.includes('esports mania') && e.id !== 'evt-2798' && e.id !== 'evt-3972';
     });
+    // Convert any legacy dollar amounts to INR in cached events
+    this.events.forEach(e => {
+      if (e && e.description) {
+        e.description = e.description.replace(/\$5,000\+/g, '₹5,00,000+').replace(/\$25/g, '₹2,000');
+      }
+      if (e && e.perks && Array.isArray(e.perks)) {
+        e.perks = e.perks.map(p => p.replace(/\$25/g, '₹2,000'));
+      }
+    });
     this.saveStorage('unipulse_events', this.events);
 
     // Attempt to sync live events from Supabase if connected
