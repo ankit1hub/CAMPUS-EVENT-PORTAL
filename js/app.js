@@ -194,7 +194,7 @@ class UniPulseApp {
     if (tabClubs) tabClubs.style.display = isStudent ? 'inline-flex' : 'none';
     if (tabDashboard) tabDashboard.style.display = isStudent ? 'inline-flex' : 'none';
     if (tabOrganizer) tabOrganizer.style.display = isAdmin ? 'inline-flex' : 'none';
-    if (hostBtn) hostBtn.style.display = isAdmin ? 'inline-flex' : 'none';
+    if (hostBtn) hostBtn.style.display = 'none';
     if (heroHostBtn) heroHostBtn.style.display = isAdmin ? 'inline-flex' : 'none';
     if (notifBtn) notifBtn.style.display = isStudent ? 'inline-flex' : 'none';
 
