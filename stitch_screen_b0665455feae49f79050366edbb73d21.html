@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>UNIBuzz - Campus Event Portal</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            obsidian: '#050505',
+            teal: {
+              DEFAULT: '#1B9AAA',
+              hover: '#168290',
+              tint: 'rgba(27, 154, 170, 0.12)',
+              glow: 'rgba(27, 154, 170, 0.35)',
+              ring: 'rgba(27, 154, 170, 0.22)'
+            },
+            alabaster: '#DDDBCB',
+            eggshell: '#F5F1E3',
+            snow: '#FFFFFF'
+          },
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    /* 5-Color System Custom Rules */
+    :root {
+      --color-obsidian: #050505;
+      --color-teal: #1B9AAA;
+      --color-teal-hover: #168290;
+      --color-alabaster: #DDDBCB;
+      --color-eggshell: #F5F1E3;
+      --color-snow: #FFFFFF;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: var(--color-eggshell);
+      color: var(--color-obsidian);
+      background-image: radial-gradient(circle at 15% 10%, rgba(221, 219, 203, 0.45) 0%, transparent 45%),
+                        radial-gradient(circle at 85% 65%, rgba(27, 154, 170, 0.08) 0%, transparent 40%);
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    html.dark body {
+      background-color: var(--color-obsidian);
+      color: var(--color-snow);
+      background-image: radial-gradient(circle at 20% 20%, rgba(27, 154, 170, 0.15) 0%, transparent 40%),
+                        radial-gradient(circle at 80% 80%, rgba(221, 219, 203, 0.05) 0%, transparent 50%);
+    }
+
+    html.dark .bg-white {
+      background-color: #0b0b0b !important;
+      color: #FFFFFF !important;
+      border-color: rgba(221, 219, 203, 0.2) !important;
+    }
+    html.dark .text-\[\#050505\] {
+      color: #FFFFFF !important;
+    }
+    html.dark .text-\[\#050505\]\/70,
+    html.dark .text-\[\#050505\]\/65,
+    html.dark .text-\[\#050505\]\/60 {
+      color: rgba(255, 255, 255, 0.7) !important;
+    }
+    html.dark .border-\[\#DDDBCB\] {
+      border-color: rgba(221, 219, 203, 0.25) !important;
+    }
+    html.dark header {
+      background-color: rgba(5, 5, 5, 0.9) !important;
+      border-color: rgba(221, 219, 203, 0.2) !important;
+    }
+    html.dark .filter-pill {
+      background-color: #121212;
+      color: rgba(255, 255, 255, 0.8);
+      border-color: rgba(221, 219, 203, 0.2);
+    }
+    html.dark .filter-pill.active {
+      background-color: #1B9AAA;
+      color: #FFFFFF;
+      border-color: #1B9AAA;
+    }
+    html.dark .styled-input {
+      background-color: #121212;
+      color: #FFFFFF;
+      border-color: rgba(221, 219, 203, 0.25);
+    }
+    html.dark .btn-secondary {
+      background-color: #161616;
+      color: #FFFFFF;
+      border-color: rgba(221, 219, 203, 0.25);
+    }
+    html.dark .btn-secondary:hover {
+      background-color: #222222;
+      border-color: #1B9AAA;
+    }
+    html.dark .modal-dialog {
+      background-color: #101010;
+      border-color: rgba(221, 219, 203, 0.2);
+      color: #FFFFFF;
+    }
+    html.dark footer {
+      background-color: #050505 !important;
+      border-color: rgba(221, 219, 203, 0.2) !important;
+    }
+
+    /* Tactile Interactive Buttons */
+    .btn-primary {
+      background-color: var(--color-teal);
+      color: var(--color-snow);
+      font-weight: 700;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 4px 12px rgba(27, 154, 170, 0.25);
+    }
+    .btn-primary:hover {
+      background-color: var(--color-teal-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 18px rgba(27, 154, 170, 0.35);
+    }
+    .btn-primary:active {
+      transform: scale(0.97);
+    }
+
+    .btn-secondary {
+      background-color: var(--color-snow);
+      color: var(--color-obsidian);
+      border: 1px solid var(--color-alabaster);
+      font-weight: 600;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .btn-secondary:hover {
+      background-color: var(--color-alabaster);
+      border-color: var(--color-teal);
+      transform: translateY(-2px);
+    }
+    .btn-secondary:active {
+      transform: scale(0.97);
+    }
+
+    .btn-booked {
+      background-color: rgba(27, 154, 170, 0.12);
+      color: var(--color-teal);
+      border: 1px solid rgba(27, 154, 170, 0.35);
+      font-weight: 700;
+      transition: all 0.2s ease;
+    }
+    .btn-booked:hover {
+      background-color: rgba(27, 154, 170, 0.18);
+    }
+
+    /* Filter Pills */
+    .filter-pill {
+      background-color: var(--color-snow);
+      border: 1px solid var(--color-alabaster);
+      color: rgba(5, 5, 5, 0.75);
+      font-weight: 600;
+      transition: all 0.15s ease;
+    }
+    .filter-pill:hover {
+      transform: translateY(-2px);
+      border-color: var(--color-teal);
+      color: var(--color-obsidian);
+    }
+    .filter-pill.active {
+      background-color: var(--color-teal);
+      border-color: var(--color-teal);
+      color: var(--color-snow);
+      box-shadow: 0 4px 14px rgba(27, 154, 170, 0.35);
+    }
+
+    /* Event Cards */
+    .event-card {
+      background-color: var(--color-snow);
+      border: 1px solid var(--color-alabaster);
+      border-radius: 18px;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .event-card:hover {
+      transform: translateY(-6px);
+      border-color: var(--color-teal);
+      box-shadow: 0 16px 32px rgba(5, 5, 5, 0.08);
+    }
+
+    /* Inputs */
+    .styled-input {
+      background-color: var(--color-snow);
+      color: var(--color-obsidian);
+      border: 1px solid var(--color-alabaster);
+      transition: all 0.2s ease;
+    }
+    .styled-input:focus {
+      outline: none;
+      border-color: var(--color-teal);
+      box-shadow: 0 0 0 3px rgba(27, 154, 170, 0.22);
+    }
+    .styled-input::placeholder {
+      color: rgba(5, 5, 5, 0.4);
+    }
+
+    /* Modals & Backdrop */
+    .modal-backdrop {
+      background-color: rgba(5, 5, 5, 0.65);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+    }
+    .modal-dialog {
+      background-color: var(--color-snow);
+      border: 1px solid var(--color-alabaster);
+      box-shadow: 0 25px 60px rgba(5, 5, 5, 0.25);
+    }
+
+    /* Custom Ticker Scroll */
+    @keyframes ticker {
+      0% { transform: translate3d(0, 0, 0); }
+      100% { transform: translate3d(-50%, 0, 0); }
+    }
+    .ticker-content {
+      animation: ticker 32s linear infinite;
+    }
+    .ticker-content:hover {
+      animation-play-state: paused;
+    }
+  </style>
+</head>
+<body class="selection:bg-[#1B9AAA] selection:text-[#FFFFFF]">
+<!-- 1. TOP TICKER ANNOUNCEMENT BAR (FULL WIDTH) -->
+<div class="w-full bg-[#050505] text-[#FFFFFF] text-xs py-2.5 px-4 overflow-hidden border-b border-[#DDDBCB]/20">
+<div class="max-w-7xl mx-auto flex items-center gap-3">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-[#1B9AAA] text-[#FFFFFF] shrink-0 shadow-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
+        Live Buzz
+      </span>
+<div class="overflow-hidden whitespace-nowrap relative w-full flex">
+<div class="ticker-content inline-flex gap-10 text-xs font-medium tracking-wide">
+<span>⚡ Spring Hackathon registrations close in 3 hrs!</span>
+<span>🎷 Jazz Society Annual Gala tickets available now</span>
+<span>🚀 AI Founders Mixer with Dean Chen @ Student Union</span>
+<span>🏆 Inter-faculty Basketball Championship finals this Thursday</span>
+<span>⚡ Spring Hackathon registrations close in 3 hrs!</span>
+<span>🎷 Jazz Society Annual Gala tickets available now</span>
+<span>🚀 AI Founders Mixer with Dean Chen @ Student Union</span>
+<span>🏆 Inter-faculty Basketball Championship finals this Thursday</span>
+</div>
+</div>
+</div>
+</div>
+<!-- 2. STICKY DESKTOP SITE-HEADER NAVBAR (max-w-7xl) -->
+<header class="sticky top-0 z-40 w-full bg-[#F5F1E3]/95 backdrop-blur-md border-b border-[#DDDBCB] transition-colors shadow-sm">
+<div class="max-w-7xl mx-auto px-6 py-3.5 flex items-center justify-between">
+<!-- Brand Logo -->
+<a class="flex items-center gap-3 group shrink-0" href="#">
+<div class="w-10 h-10 rounded-xl bg-[#1B9AAA] flex items-center justify-center text-white shadow-sm shadow-[#1B9AAA]/30 group-hover:scale-105 transition-transform">
+<svg class="w-5 h-5 fill-current" viewbox="0 0 24 24">
+<path d="M12 3L1 9L12 15L21 10.09V17H23V9M5 13.18V17.18L12 21L19 17.18V13.18L12 17L5 13.18Z"></path>
+</svg>
+</div>
+<div class="flex items-baseline">
+<span class="text-2xl font-black tracking-tight text-[#050505]">UNI</span>
+<span class="text-2xl font-black tracking-tight text-[#1B9AAA]">Buzz</span>
+</div>
+</a>
+<!-- Desktop Navigation Center Links -->
+<nav class="hidden md:flex items-center gap-1.5 text-xs font-semibold">
+<a class="px-4 py-2 rounded-xl bg-[#050505] text-[#FFFFFF] shadow-sm" href="#explore">Explore Events</a>
+<a class="px-4 py-2 rounded-xl text-[#050505]/75 hover:bg-[#DDDBCB]/50 hover:text-[#050505] transition-all" href="#calendar">Calendar</a>
+<a class="px-4 py-2 rounded-xl text-[#050505]/75 hover:bg-[#DDDBCB]/50 hover:text-[#050505] transition-all" href="#clubs">Clubs &amp; Societies</a>
+<a class="px-4 py-2 rounded-xl text-[#050505]/75 hover:bg-[#DDDBCB]/50 hover:text-[#050505] transition-all" href="#registrations">My Registrations</a>
+<button class="px-4 py-2 rounded-xl text-[#050505]/75 hover:bg-[#DDDBCB]/50 hover:text-[#050505] transition-all" onclick="openModal('adminModal')">Admin Studio</button>
+</nav>
+<!-- Desktop Right Utility Actions -->
+<div class="flex items-center gap-3">
+<!-- Theme Toggle Button -->
+<button aria-label="Toggle Theme" class="w-10 h-10 rounded-xl bg-white border border-[#DDDBCB] flex items-center justify-center text-[#050505] hover:border-[#1B9AAA] hover:text-[#1B9AAA] transition-all shadow-sm" id="themeToggleBtn" onclick="toggleTheme()">
+<svg class="w-5 h-5" fill="none" id="themeIcon" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+<!-- Student Login Button -->
+<button class="btn-primary min-h-[42px] px-4 py-2 rounded-xl text-xs flex items-center gap-2" onclick="openModal('loginModal')">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>Student Login</span>
+</button>
+<!-- Admin Studio Quick Modal Button -->
+<button class="btn-secondary min-h-[42px] px-3 py-2 rounded-xl text-xs flex items-center" onclick="openModal('adminModal')" title="Club Admin Studio">
+<svg class="w-4 h-4 text-[#050505]" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+<path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+</div>
+</div>
+</header>
+<!-- MAIN DESKTOP CONTENT CONTAINER -->
+<main class="max-w-7xl mx-auto px-6 py-8 space-y-10">
+<!-- 2. DESKTOP HERO & METRICS (2-COLUMN / WIDE LAYOUT) -->
+<section class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center bg-white/60 backdrop-blur-sm border border-[#DDDBCB] rounded-3xl p-8 lg:p-10 shadow-sm">
+<!-- Left Hero Text & CTA -->
+<div class="lg:col-span-7 space-y-4">
+<div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#1B9AAA]/10 text-xs font-bold text-[#1B9AAA] uppercase tracking-wider border border-[#1B9AAA]/20">
+<span class="w-2 h-2 rounded-full bg-[#1B9AAA] animate-ping"></span>
+          Campus Pulse &amp; Happenings
+        </div>
+<h1 class="text-3xl md:text-5xl font-black text-[#050505] tracking-tight leading-tight">
+          What's buzzing across campus this week?
+        </h1>
+<p class="text-sm md:text-base text-[#050505]/75 font-medium max-w-xl leading-relaxed">
+          Discover, RSVP, and coordinate with over 12,000 active students and faculty societies. From all-night hackathons to live conservatories, never miss university moments.
+        </p>
+<div class="flex flex-wrap items-center gap-3 pt-2">
+<a class="btn-primary min-h-[46px] px-6 rounded-xl flex items-center justify-center gap-2 text-xs font-bold" href="#events-grid">
+<span>Explore Trending Events</span>
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</a>
+<button class="btn-secondary min-h-[46px] px-5 rounded-xl text-xs font-semibold" onclick="openModal('loginModal')">
+            Check Passes
+          </button>
+</div>
+</div>
+<!-- Right 3-Stat Metric Cards -->
+<div class="lg:col-span-5 grid grid-cols-3 gap-3.5">
+<div class="bg-white border border-[#DDDBCB] rounded-2xl p-5 flex flex-col justify-between shadow-sm hover:border-[#1B9AAA] transition-colors">
+<div class="w-10 h-10 rounded-xl bg-[#1B9AAA]/10 text-[#1B9AAA] flex items-center justify-center mb-3">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
+<div>
+<span class="text-2xl font-black text-[#050505] leading-none block">48</span>
+<span class="text-[11px] text-[#050505]/65 font-bold uppercase tracking-wider mt-1 block">Events Live</span>
+</div>
+</div>
+<div class="bg-white border border-[#DDDBCB] rounded-2xl p-5 flex flex-col justify-between shadow-sm hover:border-[#1B9AAA] transition-colors">
+<div class="w-10 h-10 rounded-xl bg-[#1B9AAA]/10 text-[#1B9AAA] flex items-center justify-center mb-3">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
+<div>
+<span class="text-2xl font-black text-[#050505] leading-none block">3.4k</span>
+<span class="text-[11px] text-[#050505]/65 font-bold uppercase tracking-wider mt-1 block">RSVPs Today</span>
+</div>
+</div>
+<div class="bg-white border border-[#DDDBCB] rounded-2xl p-5 flex flex-col justify-between shadow-sm hover:border-[#1B9AAA] transition-colors">
+<div class="w-10 h-10 rounded-xl bg-[#1B9AAA]/10 text-[#1B9AAA] flex items-center justify-center mb-3">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
+<div>
+<span class="text-2xl font-black text-[#050505] leading-none block">36</span>
+<span class="text-[11px] text-[#050505]/65 font-bold uppercase tracking-wider mt-1 block">Clubs Active</span>
+</div>
+</div>
+</div>
+</section>
+<!-- 3. DESKTOP SEARCH, SORT & CATEGORY FILTERS -->
+<section class="space-y-4">
+<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+<!-- Wide Search Input with Integrated Icon -->
+<div class="relative flex-1 max-w-xl">
+<div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-[#050505]/45">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
+<input class="styled-input w-full min-h-[48px] pl-11 pr-4 rounded-xl text-xs md:text-sm font-medium shadow-sm" placeholder="Search hackathons, sports, guest speakers, parties..." type="text"/>
+</div>
+<!-- Section Title & Sort Dropdown -->
+<div class="flex items-center justify-between lg:justify-end gap-4 shrink-0">
+<h2 class="text-sm md:text-base font-extrabold uppercase tracking-wider text-[#050505] flex items-center gap-2">
+            Featured Gatherings
+            <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#1B9AAA]/10 text-[#1B9AAA] border border-[#1B9AAA]/20">4 Urgent</span>
+</h2>
+<div class="flex items-center gap-1.5 text-xs text-[#1B9AAA] font-bold bg-white px-3 py-2 rounded-xl border border-[#DDDBCB] cursor-pointer hover:border-[#1B9AAA] transition-colors shadow-sm">
+<span>Sort: Upcoming</span>
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
+</div>
+</div>
+<!-- Category Filter Chips Horizontally Arranged -->
+<div class="flex items-center gap-2.5 overflow-x-auto pb-1 pt-1 no-scrollbar">
+<button class="filter-pill active min-h-[40px] px-4 py-2 rounded-xl text-xs shrink-0 flex items-center gap-2">
+<span>🔥</span> All Buzz
+        </button>
+<button class="filter-pill min-h-[40px] px-4 py-2 rounded-xl text-xs shrink-0 flex items-center gap-2">
+<span>💻</span> Tech &amp; Coding
+        </button>
+<button class="filter-pill min-h-[40px] px-4 py-2 rounded-xl text-xs shrink-0 flex items-center gap-2">
+<span>🎨</span> Arts &amp; Music
+        </button>
+<button class="filter-pill min-h-[40px] px-4 py-2 rounded-xl text-xs shrink-0 flex items-center gap-2">
+<span>⚽</span> Sports &amp; Wellness
+        </button>
+<button class="filter-pill min-h-[40px] px-4 py-2 rounded-xl text-xs shrink-0 flex items-center gap-2">
+<span>💼</span> Career &amp; Startup
+        </button>
+</div>
+</section>
+<!-- 4. 3-COLUMN DESKTOP EVENT CARDS GRID -->
+<section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="events-grid">
+<!-- Card 1: Hackathon (Open / Register Now) -->
+<article class="event-card overflow-hidden flex flex-col justify-between">
+<div>
+<!-- Banner Image Area -->
+<div class="relative h-52 w-full bg-[#050505] overflow-hidden">
+<img alt="Nexus Hackathon" class="w-full h-full object-cover opacity-90 hover:scale-105 transition-transform duration-500" src="https://lh3.googleusercontent.com/aida/ALJJyrC8MZ6ZB01xxjjeUfIPa2TOPYVo2Ocd84AmA_NIYCuyxsYIJWnb57uWkkFXl9K76dCaSB5PiSWfXEanGEoMPK6-f0TKuKcSLB1ZdMDHl-GzQzhhQuoR9beEV6-hSmMMuvVne3cw0HDARqromKEOgF3kQG8YY-hTaF0Xax97Vi63QfMWVFg8Wg9w5wB6MBXbNVHSILV-huFbfuc7FoLXR2k26TZvoZd30TsiUEPAfEZE"/>
+<!-- Category Tag -->
+<span class="absolute top-3.5 left-3.5 bg-white/95 backdrop-blur-sm text-[#050505] text-[11px] font-bold px-2.5 py-1 rounded-lg border border-[#DDDBCB] shadow-sm">
+              Tech &amp; Hackathon
+            </span>
+<!-- Bookmark Button -->
+<button aria-label="Bookmark" class="absolute top-3.5 right-3.5 w-8 h-8 rounded-lg bg-white border border-[#DDDBCB] text-[#050505] hover:text-[#1B9AAA] hover:border-[#1B9AAA] flex items-center justify-center transition-colors shadow-sm">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+<!-- Price Badge -->
+<div class="absolute bottom-3.5 left-3.5 bg-[#050505] text-white text-[11px] font-bold px-3 py-1 rounded-full border border-white/20 shadow-sm">
+              Free with Student ID
+            </div>
+</div>
+<!-- Card Body -->
+<div class="p-5 space-y-3.5">
+<div class="space-y-1.5">
+<div class="flex items-center gap-1.5 text-xs font-bold text-[#1B9AAA]">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>Fri, Apr 18 • 6:00 PM EST</span>
+</div>
+<h3 class="text-base font-bold text-[#050505] leading-snug line-clamp-2">
+                Nexus 24hr Campus Hack: Generative AI &amp; Web3
+              </h3>
+</div>
+<!-- Metadata Rows -->
+<div class="space-y-2 text-xs text-[#050505]/70">
+<div class="flex items-center gap-2">
+<svg class="w-4 h-4 text-[#1B9AAA] shrink-0" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+<path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span class="truncate">Engineering Atrium (Hall B &amp; Lab 4)</span>
+</div>
+<div class="flex items-center gap-2">
+<svg class="w-4 h-4 text-[#1B9AAA] shrink-0" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span class="truncate">Hosted by ACM Student Chapter</span>
+</div>
+</div>
+<!-- Progress Bar Capacity -->
+<div class="space-y-1.5 pt-1">
+<div class="flex justify-between text-[11px] font-semibold">
+<span class="text-[#050505]/65">Seats Claimed</span>
+<span class="text-[#1B9AAA] font-bold">184 / 200 (92%)</span>
+</div>
+<div class="w-full h-1.5 bg-[#DDDBCB] rounded-full overflow-hidden">
+<div class="h-full bg-[#1B9AAA] rounded-full" style="width: 92%"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Card Actions (Register Now + Details) -->
+<div class="p-5 pt-0 flex items-center gap-2.5">
+<button class="btn-primary flex-1 min-h-[44px] rounded-xl text-xs font-bold flex items-center justify-center gap-1.5" onclick="registerEvent(this)">
+<span>Register Now</span>
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M14 5l7 7m0 0l-7 7m7-7H3" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+<button class="btn-secondary min-h-[44px] px-4 rounded-xl text-xs font-semibold" onclick="openModal('detailsModal1')">
+            Details
+          </button>
+</div>
+</article>
+<!-- Card 2: Arts / Jazz Gala (Booked State Example) -->
+<article class="event-card overflow-hidden flex flex-col justify-between">
+<div>
+<div class="relative h-52 w-full bg-[#050505] overflow-hidden">
+<img alt="Jazz Showcase" class="w-full h-full object-cover opacity-90 hover:scale-105 transition-transform duration-500" src="https://lh3.googleusercontent.com/aida/ALJJyrDBVeUcoiLicJvlkRJyCsDjAi8PCYhG2fwWit7odxN06G8GEqIkxLL9uvzxvVn2NXmWar7LRkY43MzVlRz9Ox5LW19a3O5Nw2F-jkqlUG6_9AwDE5zByQG_qCsfAf1ZbXpjAQbf5oTz6BwhGO6m3YWllAEbvmZmUtFcCw79qA97aGrDw1HQy0zpbUH2k1Sar8eH5TEttGaaB98w_YqYG99tUfBLRZiSaDIUQRIu7PE-"/>
+<span class="absolute top-3.5 left-3.5 bg-white/95 backdrop-blur-sm text-[#050505] text-[11px] font-bold px-2.5 py-1 rounded-lg border border-[#DDDBCB] shadow-sm">
+              Arts &amp; Performance
+            </span>
+<button aria-label="Bookmarked" class="absolute top-3.5 right-3.5 w-8 h-8 rounded-lg bg-white border border-[#1B9AAA] text-[#1B9AAA] flex items-center justify-center transition-colors shadow-sm">
+<svg class="w-4 h-4 fill-[#1B9AAA]" viewbox="0 0 24 24">
+<path d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"></path>
+</svg>
+</button>
+<div class="absolute bottom-3.5 left-3.5 bg-[#050505] text-white text-[11px] font-bold px-3 py-1 rounded-full border border-white/20 shadow-sm">
+              $5 Early Bird
+            </div>
+</div>
+<div class="p-5 space-y-3.5">
+<div class="space-y-1.5">
+<div class="flex items-center gap-1.5 text-xs font-bold text-[#1B9AAA]">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>Sat, Apr 19 • 8:00 PM EST</span>
+</div>
+<h3 class="text-base font-bold text-[#050505] leading-snug line-clamp-2">
+                Spring Twilight Jazz Gala &amp; Brass Showcase
+              </h3>
+</div>
+<div class="space-y-2 text-xs text-[#050505]/70">
+<div class="flex items-center gap-2">
+<svg class="w-4 h-4 text-[#1B9AAA] shrink-0" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+<path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span class="truncate">Fine Arts Conservatory Auditorium</span>
+</div>
+<div class="flex items-center gap-2">
+<svg class="w-4 h-4 text-[#1B9AAA] shrink-0" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span class="truncate">Hosted by University Jazz Ensemble</span>
+</div>
+</div>
+<div class="space-y-1.5 pt-1">
+<div class="flex justify-between text-[11px] font-semibold">
+<span class="text-[#050505]/65">Seats Claimed</span>
+<span class="text-[#1B9AAA] font-bold">120 / 120 (Sold Out)</span>
+</div>
+<div class="w-full h-1.5 bg-[#DDDBCB] rounded-full overflow-hidden">
+<div class="h-full bg-[#1B9AAA] rounded-full" style="width: 100%"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Booked State Button (Already Registered) -->
+<div class="p-5 pt-0 flex items-center gap-2.5">
+<button class="btn-booked flex-1 min-h-[44px] rounded-xl text-xs flex items-center justify-center gap-1.5">
+<svg class="w-4 h-4 text-[#1B9AAA]" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg>
+<span>Pass Confirmed #BZ-492</span>
+</button>
+<button class="btn-secondary min-h-[44px] px-4 rounded-xl text-xs font-semibold" onclick="openModal('detailsModal2')">
+            Details
+          </button>
+</div>
+</article>
+<!-- Card 3: Career Fair / Founder Mixer -->
+<article class="event-card overflow-hidden flex flex-col justify-between">
+<div>
+<div class="relative h-52 w-full bg-[#050505] overflow-hidden">
+<img alt="Founder Roundtable" class="w-full h-full object-cover opacity-90 hover:scale-105 transition-transform duration-500" src="https://lh3.googleusercontent.com/aida/ALJJyrDMzoJ40ObBnoPMB-Mbjb6va60FVWgJxg8D95YGyZ7i__FuiStCjyPX-zpzbd5Posndpo0AkA3i33Z6opxB3HI11iKKkTNwPEYKDsUlsTUUaRPSfT6u9gUrG373tmwqJ5TAVf5acqIfDabKE22OaPxQiDu7eanR8TOi1h70NJTXE07YpTW9a0ge7ksESvcRGBiXsZAKp--VESGVnmeF-OdKKisogrNbMqIcMES4P0g8"/>
+<span class="absolute top-3.5 left-3.5 bg-white/95 backdrop-blur-sm text-[#050505] text-[11px] font-bold px-2.5 py-1 rounded-lg border border-[#DDDBCB] shadow-sm">
+              Career &amp; Startup
+            </span>
+<button aria-label="Bookmark" class="absolute top-3.5 right-3.5 w-8 h-8 rounded-lg bg-white border border-[#DDDBCB] text-[#050505] hover:text-[#1B9AAA] hover:border-[#1B9AAA] flex items-center justify-center transition-colors shadow-sm">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+<div class="absolute bottom-3.5 left-3.5 bg-[#050505] text-white text-[11px] font-bold px-3 py-1 rounded-full border border-white/20 shadow-sm">
+              Free RSVP
+            </div>
+</div>
+<div class="p-5 space-y-3.5">
+<div class="space-y-1.5">
+<div class="flex items-center gap-1.5 text-xs font-bold text-[#1B9AAA]">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>Tue, Apr 22 • 5:30 PM EST</span>
+</div>
+<h3 class="text-base font-bold text-[#050505] leading-snug line-clamp-2">
+                Alumni Venture Roundtable: Pitch to Seed Angels
+              </h3>
+</div>
+<div class="space-y-2 text-xs text-[#050505]/70">
+<div class="flex items-center gap-2">
+<svg class="w-4 h-4 text-[#1B9AAA] shrink-0" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+<path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span class="truncate">Student Union Sky Lounge (4th Fl)</span>
+</div>
+<div class="flex items-center gap-2">
+<svg class="w-4 h-4 text-[#1B9AAA] shrink-0" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span class="truncate">Hosted by Campus Founders Club</span>
+</div>
+</div>
+<div class="space-y-1.5 pt-1">
+<div class="flex justify-between text-[11px] font-semibold">
+<span class="text-[#050505]/65">Seats Claimed</span>
+<span class="text-[#1B9AAA] font-bold">64 / 85 (75%)</span>
+</div>
+<div class="w-full h-1.5 bg-[#DDDBCB] rounded-full overflow-hidden">
+<div class="h-full bg-[#1B9AAA] rounded-full" style="width: 75%"></div>
+</div>
+</div>
+</div>
+</div>
+<div class="p-5 pt-0 flex items-center gap-2.5">
+<button class="btn-primary flex-1 min-h-[44px] rounded-xl text-xs font-bold flex items-center justify-center gap-1.5" onclick="registerEvent(this)">
+<span>Register Now</span>
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M14 5l7 7m0 0l-7 7m7-7H3" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+<button class="btn-secondary min-h-[44px] px-4 rounded-xl text-xs font-semibold" onclick="openModal('detailsModal3')">
+            Details
+          </button>
+</div>
+</article>
+</section>
+</main>
+<!-- 5. DESKTOP FULL FOOTER -->
+<footer class="mt-16 bg-[#FFFFFF] border-t border-[#DDDBCB] pt-12 pb-8">
+<div class="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 pb-10 border-b border-[#DDDBCB]">
+<!-- Brand & Summary -->
+<div class="lg:col-span-2 space-y-4">
+<div class="flex items-center gap-2.5">
+<div class="w-9 h-9 rounded-xl bg-[#1B9AAA] flex items-center justify-center text-white">
+<svg class="w-5 h-5 fill-current" viewbox="0 0 24 24">
+<path d="M12 3L1 9L12 15L21 10.09V17H23V9M5 13.18V17.18L12 21L19 17.18V13.18L12 17L5 13.18Z"></path>
+</svg>
+</div>
+<div class="flex items-baseline">
+<span class="text-xl font-black tracking-tight text-[#050505]">UNI</span>
+<span class="text-xl font-black tracking-tight text-[#1B9AAA]">Buzz</span>
+</div>
+</div>
+<p class="text-xs text-[#050505]/70 max-w-sm leading-relaxed">
+          The centralized campus event lifecycle platform. Connecting student organizations, societies, faculties, and attendees across 14 academic departments.
+        </p>
+<div class="flex items-center gap-2 pt-1">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-[#1B9AAA]/10 text-[#1B9AAA]">
+<span class="w-2 h-2 rounded-full bg-[#1B9AAA]"></span>
+            System Status: All Systems Operational
+          </span>
+</div>
+</div>
+<!-- Quick Links -->
+<div class="space-y-3">
+<h4 class="text-xs font-extrabold uppercase tracking-wider text-[#050505]">Navigation</h4>
+<ul class="space-y-2 text-xs text-[#050505]/70 font-medium">
+<li><a class="hover:text-[#1B9AAA] transition-colors" href="#explore">Explore Events</a></li>
+<li><a class="hover:text-[#1B9AAA] transition-colors" href="#calendar">Academic Calendar</a></li>
+<li><a class="hover:text-[#1B9AAA] transition-colors" href="#clubs">Clubs &amp; Societies Directory</a></li>
+<li><a class="hover:text-[#1B9AAA] transition-colors" href="#registrations">My Tickets &amp; Passes</a></li>
+</ul>
+</div>
+<!-- Campus Life -->
+<div class="space-y-3">
+<h4 class="text-xs font-extrabold uppercase tracking-wider text-[#050505]">Campus Life</h4>
+<ul class="space-y-2 text-xs text-[#050505]/70 font-medium">
+<li><a class="hover:text-[#1B9AAA] transition-colors" href="#">Student Union Hub</a></li>
+<li><a class="hover:text-[#1B9AAA] transition-colors" href="#">Engineering Atrium Labs</a></li>
+<li><a class="hover:text-[#1B9AAA] transition-colors" href="#">Fine Arts Conservatory</a></li>
+<li><a class="hover:text-[#1B9AAA] transition-colors" href="#">Athletics &amp; Recreation</a></li>
+</ul>
+</div>
+<!-- Resources & Admin -->
+<div class="space-y-3">
+<h4 class="text-xs font-extrabold uppercase tracking-wider text-[#050505]">Lead &amp; Admin</h4>
+<ul class="space-y-2 text-xs text-[#050505]/70 font-medium">
+<li><a class="hover:text-[#1B9AAA] transition-colors" href="#" onclick="openModal('adminModal')">Society Lead Studio</a></li>
+<li><a class="hover:text-[#1B9AAA] transition-colors" href="#">Event Publishing Guidelines</a></li>
+<li><a class="hover:text-[#1B9AAA] transition-colors" href="#">Venue Reservation Desk</a></li>
+<li><a class="hover:text-[#1B9AAA] transition-colors" href="#">Security &amp; QR Pass Verification</a></li>
+</ul>
+</div>
+</div>
+<!-- Bottom Copyright Bar -->
+<div class="max-w-7xl mx-auto px-6 pt-6 flex flex-col sm:flex-row items-center justify-between text-xs text-[#050505]/60 gap-4">
+<p>© 2025 UNIBuzz Campus Systems. Built with tactile precision in 5-color harmony.</p>
+<div class="flex items-center gap-6">
+<a class="hover:text-[#1B9AAA] transition-colors" href="#">Student Code of Conduct</a>
+<a class="hover:text-[#1B9AAA] transition-colors" href="#">Privacy Policy</a>
+<a class="hover:text-[#1B9AAA] transition-colors" href="#">Campus IT Helpdesk</a>
+</div>
+</div>
+</footer>
+<!-- MODAL 1: STUDENT LOGIN MODAL -->
+<div class="hidden fixed inset-0 z-50 flex items-center justify-center p-4" id="loginModal">
+<div class="modal-backdrop absolute inset-0" onclick="closeModal('loginModal')"></div>
+<div class="modal-dialog relative w-full max-w-sm rounded-2xl p-6 space-y-4 z-10">
+<!-- Modal Header -->
+<div class="flex items-center justify-between pb-3 border-b border-[#DDDBCB]">
+<div class="flex items-center gap-2.5">
+<div class="w-8 h-8 rounded-lg bg-[#1B9AAA] text-white flex items-center justify-center">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
+<h3 class="text-sm font-bold text-[#050505]">Campus Single Sign-On</h3>
+</div>
+<!-- Modal Close Button -->
+<button class="w-8 h-8 rounded-lg bg-[#F5F1E3] border border-[#DDDBCB] text-[#050505] flex items-center justify-center hover:border-[#1B9AAA] transition-colors" onclick="closeModal('loginModal')">
+          ✕
+        </button>
+</div>
+<!-- Login Form with Password Toggle -->
+<form class="space-y-3.5 pt-1" onsubmit="event.preventDefault(); closeModal('loginModal');">
+<div>
+<label class="block text-[11px] font-bold text-[#050505] uppercase tracking-wider mb-1">University Email / ID</label>
+<input class="styled-input w-full min-h-[42px] px-3.5 rounded-xl text-xs font-medium" placeholder="student.name@university.edu" required="" type="email"/>
+</div>
+<div>
+<label class="block text-[11px] font-bold text-[#050505] uppercase tracking-wider mb-1">SSO Password</label>
+<div class="relative">
+<input class="styled-input w-full min-h-[42px] pl-3.5 pr-10 rounded-xl text-xs font-medium" id="loginPasswordInput" placeholder="••••••••••••" required="" type="password"/>
+<button class="absolute inset-y-0 right-0 pr-3 flex items-center text-[#050505]/50 hover:text-[#1B9AAA]" onclick="togglePasswordVisibility('loginPasswordInput', this)" type="button">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+<path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+</div>
+</div>
+<button class="btn-primary w-full min-h-[44px] rounded-xl text-xs font-bold mt-2" type="submit">
+          Authenticate &amp; Continue
+        </button>
+</form>
+</div>
+</div>
+<!-- MODAL 2: ADMIN STUDIO MODAL -->
+<div class="hidden fixed inset-0 z-50 flex items-center justify-center p-4" id="adminModal">
+<div class="modal-backdrop absolute inset-0" onclick="closeModal('adminModal')"></div>
+<div class="modal-dialog relative w-full max-w-sm rounded-2xl p-6 space-y-4 z-10">
+<div class="flex items-center justify-between pb-3 border-b border-[#DDDBCB]">
+<div class="flex items-center gap-2.5">
+<div class="w-8 h-8 rounded-lg bg-[#050505] text-white flex items-center justify-center">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
+<h3 class="text-sm font-bold text-[#050505]">Club Admin Portal</h3>
+</div>
+<button class="w-8 h-8 rounded-lg bg-[#F5F1E3] border border-[#DDDBCB] text-[#050505] flex items-center justify-center hover:border-[#1B9AAA] transition-colors" onclick="closeModal('adminModal')">
+          ✕
+        </button>
+</div>
+<div class="space-y-3 text-xs text-[#050505]/75">
+<p class="font-medium">Welcome Society Lead. Access event publishing, RSVP check-in QR scanner, and venue capacity requests.</p>
+<div class="p-3.5 bg-[#F5F1E3] rounded-xl border border-[#DDDBCB] space-y-1">
+<span class="text-[10px] uppercase font-bold text-[#1B9AAA]">Assigned Org</span>
+<p class="text-xs font-bold text-[#050505]">ACM Student Computing Chapter (#04)</p>
+</div>
+</div>
+<div class="flex items-center gap-2 pt-2">
+<button class="btn-primary flex-1 min-h-[44px] rounded-xl text-xs font-bold" onclick="closeModal('adminModal')">
+          Open Lead Studio
+        </button>
+<button class="btn-secondary min-h-[44px] px-4 rounded-xl text-xs font-semibold" onclick="closeModal('adminModal')">
+          Cancel
+        </button>
+</div>
+</div>
+</div>
+<!-- MODAL 3: EVENT DETAILS MODAL (1) -->
+<div class="hidden fixed inset-0 z-50 flex items-center justify-center p-4" id="detailsModal1">
+<div class="modal-backdrop absolute inset-0" onclick="closeModal('detailsModal1')"></div>
+<div class="modal-dialog relative w-full max-w-md rounded-2xl p-6 space-y-4 z-10 max-h-[90vh] overflow-y-auto">
+<div class="flex items-center justify-between pb-3 border-b border-[#DDDBCB]">
+<span class="text-xs font-bold uppercase tracking-wider text-[#1B9AAA]">Event Specification</span>
+<button class="w-8 h-8 rounded-lg bg-[#F5F1E3] border border-[#DDDBCB] text-[#050505] flex items-center justify-center hover:border-[#1B9AAA] transition-colors" onclick="closeModal('detailsModal1')">
+          ✕
+        </button>
+</div>
+<div class="space-y-2">
+<h4 class="text-base font-bold text-[#050505]">Nexus 24hr Campus Hack: Generative AI &amp; Web3</h4>
+<p class="text-xs text-[#050505]/70 leading-relaxed">
+          Open to all undergraduate and graduate students. Free catered food, hardware kits provided, and mentorship from industry tech partners.
+        </p>
+</div>
+<div class="space-y-2 pt-2 border-t border-[#DDDBCB] text-xs">
+<div class="flex justify-between py-1.5 border-b border-[#DDDBCB]/50">
+<span class="text-[#050505]/60">Format</span>
+<span class="font-bold text-[#050505]">In-Person 24hr Sprint</span>
+</div>
+<div class="flex justify-between py-1.5 border-b border-[#DDDBCB]/50">
+<span class="text-[#050505]/60">Check-in</span>
+<span class="font-bold text-[#050505]">Friday 5:00 PM - 5:45 PM</span>
+</div>
+<div class="flex justify-between py-1.5 border-b border-[#DDDBCB]/50">
+<span class="text-[#050505]/60">Max Team Size</span>
+<span class="font-bold text-[#050505]">4 Hackers / Team</span>
+</div>
+</div>
+<button class="btn-primary w-full min-h-[44px] rounded-xl text-xs font-bold" onclick="closeModal('detailsModal1')">
+        Got It, Back to Buzz
+      </button>
+</div>
+</div>
+<!-- MODAL 4: EVENT DETAILS MODAL (2) -->
+<div class="hidden fixed inset-0 z-50 flex items-center justify-center p-4" id="detailsModal2">
+<div class="modal-backdrop absolute inset-0" onclick="closeModal('detailsModal2')"></div>
+<div class="modal-dialog relative w-full max-w-md rounded-2xl p-6 space-y-4 z-10 max-h-[90vh] overflow-y-auto">
+<div class="flex items-center justify-between pb-3 border-b border-[#DDDBCB]">
+<span class="text-xs font-bold uppercase tracking-wider text-[#1B9AAA]">Performance Details</span>
+<button class="w-8 h-8 rounded-lg bg-[#F5F1E3] border border-[#DDDBCB] text-[#050505] flex items-center justify-center hover:border-[#1B9AAA] transition-colors" onclick="closeModal('detailsModal2')">
+          ✕
+        </button>
+</div>
+<div class="space-y-2">
+<h4 class="text-base font-bold text-[#050505]">Spring Twilight Jazz Gala &amp; Brass Showcase</h4>
+<p class="text-xs text-[#050505]/70 leading-relaxed">
+          An evening of brass ensemble arrangements and contemporary jazz solos. Refreshments served in the atrium during intermission.
+        </p>
+</div>
+<div class="space-y-2 pt-2 border-t border-[#DDDBCB] text-xs">
+<div class="flex justify-between py-1.5 border-b border-[#DDDBCB]/50">
+<span class="text-[#050505]/60">Doors Open</span>
+<span class="font-bold text-[#050505]">7:15 PM EST</span>
+</div>
+<div class="flex justify-between py-1.5 border-b border-[#DDDBCB]/50">
+<span class="text-[#050505]/60">Pass Status</span>
+<span class="font-bold text-[#1B9AAA]">Confirmed Seat #BZ-492</span>
+</div>
+</div>
+<button class="btn-primary w-full min-h-[44px] rounded-xl text-xs font-bold" onclick="closeModal('detailsModal2')">
+        Close Window
+      </button>
+</div>
+</div>
+<!-- MODAL 5: EVENT DETAILS MODAL (3) -->
+<div class="hidden fixed inset-0 z-50 flex items-center justify-center p-4" id="detailsModal3">
+<div class="modal-backdrop absolute inset-0" onclick="closeModal('detailsModal3')"></div>
+<div class="modal-dialog relative w-full max-w-md rounded-2xl p-6 space-y-4 z-10 max-h-[90vh] overflow-y-auto">
+<div class="flex items-center justify-between pb-3 border-b border-[#DDDBCB]">
+<span class="text-xs font-bold uppercase tracking-wider text-[#1B9AAA]">Roundtable Schedule</span>
+<button class="w-8 h-8 rounded-lg bg-[#F5F1E3] border border-[#DDDBCB] text-[#050505] flex items-center justify-center hover:border-[#1B9AAA] transition-colors" onclick="closeModal('detailsModal3')">
+          ✕
+        </button>
+</div>
+<div class="space-y-2">
+<h4 class="text-base font-bold text-[#050505]">Alumni Venture Roundtable: Pitch to Seed Angels</h4>
+<p class="text-xs text-[#050505]/70 leading-relaxed">
+          Five selected campus founder teams pitch live to partner angel networks. Followed by an open networking coffee hour.
+        </p>
+</div>
+<div class="space-y-2 pt-2 border-t border-[#DDDBCB] text-xs">
+<div class="flex justify-between py-1.5 border-b border-[#DDDBCB]/50">
+<span class="text-[#050505]/60">Format</span>
+<span class="font-bold text-[#050505]">5-min pitches + Q&amp;A</span>
+</div>
+<div class="flex justify-between py-1.5 border-b border-[#DDDBCB]/50">
+<span class="text-[#050505]/60">Dress Code</span>
+<span class="font-bold text-[#050505]">Smart Casual / Founder</span>
+</div>
+</div>
+<button class="btn-primary w-full min-h-[44px] rounded-xl text-xs font-bold" onclick="closeModal('detailsModal3')">
+        Close Window
+      </button>
+</div>
+</div>
+<!-- SCRIPT FOR MODALS, THEME TOGGLE, AND BOOKING STATE TOGGLE -->
+<script>
+    function openModal(id) {
+      const modal = document.getElementById(id);
+      if (modal) {
+        modal.classList.remove('hidden');
+      }
+    }
+
+    function closeModal(id) {
+      const modal = document.getElementById(id);
+      if (modal) {
+        modal.classList.add('hidden');
+      }
+    }
+
+    function toggleTheme() {
+      const html = document.documentElement;
+      const isDark = html.classList.toggle('dark');
+      const icon = document.getElementById('themeIcon');
+      if (isDark) {
+        // Switch to moon icon
+        icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>';
+      } else {
+        // Switch to sun icon
+        icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>';
+      }
+    }
+
+    function togglePasswordVisibility(inputId, btn) {
+      const input = document.getElementById(inputId);
+      if (input.type === 'password') {
+        input.type = 'text';
+        btn.classList.add('text-[#1B9AAA]');
+      } else {
+        input.type = 'password';
+        btn.classList.remove('text-[#1B9AAA]');
+      }
+    }
+
+    function registerEvent(btn) {
+      btn.className = 'btn-booked flex-1 min-h-[44px] rounded-xl text-xs flex items-center justify-center gap-1.5';
+      btn.innerHTML = '<svg class="w-4 h-4 text-[#1B9AAA]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg><span>Pass Confirmed #BZ-819</span>';
+      btn.onclick = null;
+    }
+  </script>
+</body></html>
