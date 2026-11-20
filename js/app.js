@@ -26,6 +26,42 @@ class UniPulseApp {
     this.bookmarks = this.loadStorage('unipulse_bookmarks', []);
     this.registrations = this.loadStorage('unipulse_registrations', typeof INITIAL_REGISTRATIONS !== 'undefined' ? INITIAL_REGISTRATIONS : []);
 
+    // Load dynamic campus notifications (matching 3 unread initial badge)
+    this.notifications = this.loadStorage('unipulse_notifications', null);
+    if (!this.notifications || !Array.isArray(this.notifications) || this.notifications.length === 0) {
+      this.notifications = [
+        {
+          id: 'notif-1',
+          title: 'Registration Confirmed! 🎟️',
+          message: "Your E-Pass for HackPulse '26 is confirmed with QR check-in.",
+          time: '10m ago',
+          type: 'ticket',
+          eventId: 'evt-101',
+          ticketId: 'TKT-8491',
+          read: false
+        },
+        {
+          id: 'notif-2',
+          title: 'Workshop Reminder 🤖',
+          message: 'Hands-on Generative AI Workshop starts in 2 days at CS Lab 304.',
+          time: '2h ago',
+          type: 'workshop',
+          eventId: 'evt-103',
+          read: false
+        },
+        {
+          id: 'notif-3',
+          title: 'Trending Event Alert 🔥',
+          message: "Euphoria '26 passes are 82% booked. Reserve your spot before slots fill up!",
+          time: '1d ago',
+          type: 'event',
+          eventId: 'evt-102',
+          read: false
+        }
+      ];
+      this.saveStorage('unipulse_notifications', this.notifications);
+    }
+
     this.selectedOrgEvent = 'all';
     this.chartInstances = {};
   }
@@ -46,6 +82,7 @@ class UniPulseApp {
     this.renderClubs();
     this.renderCalendar();
     this.updateRegistrationBadge();
+    this.renderNotifications();
     this.renderDashboard();
     this.renderOrganizerTable();
     this.updateCategoryCounters();
@@ -137,6 +174,7 @@ class UniPulseApp {
     this.renderClubs();
     this.renderCalendar();
     this.updateRegistrationBadge();
+    this.renderNotifications();
     this.renderDashboard();
     this.renderOrganizerTable();
     this.updateCategoryCounters();
@@ -211,7 +249,7 @@ class UniPulseApp {
     if (tabOrganizer) tabOrganizer.style.display = isAdmin ? 'inline-flex' : 'none';
     if (hostBtn) hostBtn.style.display = 'none';
     if (heroHostBtn) heroHostBtn.style.display = isAdmin ? 'inline-flex' : 'none';
-    if (notifBtn) notifBtn.style.display = isStudent ? 'inline-flex' : 'none';
+    if (notifBtn) notifBtn.style.display = 'inline-flex';
 
     if (mainNavLinks) mainNavLinks.style.display = 'flex';
 
@@ -259,6 +297,7 @@ class UniPulseApp {
 
     this.renderEvents();
     this.updateRegistrationBadge();
+    this.renderNotifications();
     if (this.currentView === 'dashboard') this.renderDashboard();
     if (this.currentView === 'organizer') {
       this.populateOrgEventDropdown();
@@ -1245,6 +1284,13 @@ class UniPulseApp {
       willCancel ? 'error' : 'success'
     );
 
+    this.addNotification({
+      title: willCancel ? 'Event Notice: Cancelled ⛔' : 'Event Notice: Re-activated ✅',
+      message: `"${evt.title}" has been ${willCancel ? 'cancelled by campus organizers.' : 'restored and registrations are active.'}`,
+      type: 'event',
+      eventId: evt.id
+    });
+
     this.closeModal('modalEventDetails');
     this.renderEvents();
     this.renderCalendar();
@@ -1508,6 +1554,13 @@ class UniPulseApp {
 
     this.showToast(isPaid ? `🎉 Payment of ₹${evt.price} Successful! E-Pass & Receipt generated.` : '🎉 Booking Confirmed! Digital E-Pass generated.', 'success');
     this.updateRegistrationBadge();
+    this.addNotification({
+      title: 'Registration Confirmed! 🎟️',
+      message: `Your E-Pass for "${evt.title}" is ready with QR barcode.`,
+      type: 'ticket',
+      eventId: evt.id,
+      ticketId: newTicketId
+    });
     this.renderEvents();
     this.updateCategoryCounters();
     this.renderOrganizerTable();
@@ -3187,11 +3240,179 @@ class UniPulseApp {
     await this.processScannedTicket(val);
   }
 
+  /* ---------------- Interactive Campus Notifications System ---------------- */
   showNotificationsModal() {
-    if (this.currentUser && this.currentUser.role === 'admin') {
+    this.renderNotifications();
+    this.openModal('modalNotifications');
+  }
+
+  renderNotifications() {
+    const badge = document.getElementById('notifBadge');
+    const modalBadge = document.getElementById('modalNotifUnreadCount');
+    const listEl = document.getElementById('notifsList');
+
+    if (!this.notifications || !Array.isArray(this.notifications)) {
+      this.notifications = [];
+    }
+
+    const unreadCount = this.notifications.filter(n => !n.read).length;
+
+    // Update navbar badge
+    if (badge) {
+      if (unreadCount > 0) {
+        badge.textContent = unreadCount > 99 ? '99+' : unreadCount;
+        badge.style.display = 'inline-flex';
+      } else {
+        badge.style.display = 'none';
+      }
+    }
+
+    // Update modal header badge
+    if (modalBadge) {
+      if (unreadCount > 0) {
+        modalBadge.textContent = `${unreadCount} New`;
+        modalBadge.style.display = 'inline-flex';
+        modalBadge.style.background = 'var(--accent)';
+      } else {
+        modalBadge.textContent = 'All Read';
+        modalBadge.style.display = 'inline-flex';
+        modalBadge.style.background = 'var(--text-dim)';
+      }
+    }
+
+    if (!listEl) return;
+
+    if (this.notifications.length === 0) {
+      listEl.innerHTML = `
+        <div class="notif-empty-state">
+          <div class="notif-empty-icon"><i class="fa-regular fa-bell-slash"></i></div>
+          <div class="notif-empty-title">All caught up!</div>
+          <div class="notif-empty-desc">You have no campus notifications right now. Check back later for upcoming event alerts and booking confirmations.</div>
+        </div>
+      `;
       return;
     }
-    this.openModal('modalNotifications');
+
+    listEl.innerHTML = this.notifications.map(n => {
+      let iconClass = 'fa-solid fa-bell';
+      let iconColor = 'var(--primary)';
+      let actionLabel = '';
+
+      if (n.type === 'ticket') {
+        iconClass = 'fa-solid fa-ticket';
+        iconColor = 'var(--primary)';
+        actionLabel = '<span class="notif-action-tag"><i class="fa-solid fa-qrcode"></i> View E-Pass</span>';
+      } else if (n.type === 'workshop') {
+        iconClass = 'fa-solid fa-laptop-code';
+        iconColor = 'var(--accent-amber)';
+        actionLabel = '<span class="notif-action-tag"><i class="fa-solid fa-arrow-right"></i> View Workshop</span>';
+      } else if (n.type === 'event') {
+        iconClass = 'fa-solid fa-calendar-check';
+        iconColor = 'var(--accent-emerald)';
+        actionLabel = '<span class="notif-action-tag"><i class="fa-solid fa-arrow-right"></i> Event Details</span>';
+      } else if (n.type === 'alert') {
+        iconClass = 'fa-solid fa-bullhorn';
+        iconColor = 'var(--accent-rose)';
+        actionLabel = '';
+      }
+
+      return `
+        <div class="notif-card ${n.read ? 'read' : 'unread'}" onclick="app.handleNotificationClick('${n.id}')">
+          <div class="notif-card-icon" style="color: ${iconColor}; background: ${iconColor}1a;">
+            <i class="${iconClass}"></i>
+          </div>
+          <div class="notif-card-content">
+            <div class="notif-card-header">
+              <span class="notif-card-title">${n.title}</span>
+              <span class="notif-card-time">${n.time || 'Recently'}</span>
+            </div>
+            <div class="notif-card-desc">${n.message}</div>
+            <div class="notif-card-footer">
+              ${actionLabel}
+              ${!n.read ? '<span class="notif-unread-dot" title="Unread"></span>' : ''}
+            </div>
+          </div>
+          <button class="notif-card-delete" onclick="event.stopPropagation(); app.dismissNotification('${n.id}')" title="Dismiss notification">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+      `;
+    }).join('');
+  }
+
+  handleNotificationClick(id) {
+    const notif = this.notifications.find(n => n.id === id);
+    if (!notif) return;
+
+    if (!notif.read) {
+      notif.read = true;
+      this.saveStorage('unipulse_notifications', this.notifications);
+      this.renderNotifications();
+    }
+
+    if (notif.ticketId) {
+      this.closeModal('modalNotifications');
+      const reg = this.registrations.find(r => r.ticketId === notif.ticketId);
+      if (reg) {
+        this.viewTicket(notif.ticketId);
+      } else if (notif.eventId) {
+        this.viewTicketForEvent(notif.eventId);
+      } else {
+        this.showToast('🎟️ Digital Pass: ' + notif.ticketId, 'info');
+      }
+    } else if (notif.eventId) {
+      this.closeModal('modalNotifications');
+      this.openEventDetails(notif.eventId);
+    }
+  }
+
+  markAllNotificationsRead() {
+    if (!this.notifications || this.notifications.length === 0) return;
+    let changed = false;
+    this.notifications.forEach(n => {
+      if (!n.read) {
+        n.read = true;
+        changed = true;
+      }
+    });
+    if (changed) {
+      this.saveStorage('unipulse_notifications', this.notifications);
+      this.renderNotifications();
+      this.showToast('✅ All notifications marked as read', 'success');
+    } else {
+      this.showToast('All notifications are already marked as read', 'info');
+    }
+  }
+
+  clearAllNotifications() {
+    if (!this.notifications || this.notifications.length === 0) return;
+    this.notifications = [];
+    this.saveStorage('unipulse_notifications', this.notifications);
+    this.renderNotifications();
+    this.showToast('All notifications cleared', 'info');
+  }
+
+  dismissNotification(id) {
+    this.notifications = this.notifications.filter(n => n.id !== id);
+    this.saveStorage('unipulse_notifications', this.notifications);
+    this.renderNotifications();
+  }
+
+  addNotification({ title, message, type = 'alert', eventId = null, ticketId = null }) {
+    if (!this.notifications) this.notifications = [];
+    const newNotif = {
+      id: `notif-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+      title,
+      message,
+      time: 'Just now',
+      type,
+      eventId,
+      ticketId,
+      read: false
+    };
+    this.notifications.unshift(newNotif);
+    this.saveStorage('unipulse_notifications', this.notifications);
+    this.renderNotifications();
   }
 
   /* ---------------- Modal Helpers ---------------- */
