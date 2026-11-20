@@ -1,7 +1,7 @@
 /* ==========================================================
-   ✨ UNIBuzz Editorial Campus Hub — Stitch Design System
-   Modern Tactile Minimalism | Curated 4-Color Foundation
-   Canvas: #FFF3E3 | Primary: #9FA0FF | Secondary: #D5E8E6 | Alert: #FF7171 | Ink: #1E2029
+   ✨ UNIBuzz Editorial Campus Hub — Clean Brand DNA Design System
+   Modern Tactile Minimalism | Curated 5-Color Foundation
+   Canvas: #F5F1E3 | Primary: #1B9AAA | Frame: #DDDBCB | Surface: #FFFFFF | Text: #050505
    ========================================================== */
 
 /* ---------------- Design System Variables ---------------- */
@@ -412,11 +412,11 @@ img {
 }
 
 .nav-item-btn.active {
-  color: #1E2029;
+  color: #FFFFFF;
   background: var(--accent);
   border-color: var(--accent);
   font-weight: 700;
-  box-shadow: 0 2px 8px rgba(159, 160, 255, 0.35);
+  box-shadow: 0 2px 8px rgba(27, 154, 170, 0.25);
 }
 
 .nav-actions {
@@ -484,10 +484,10 @@ img {
 }
 
 .user-menu-btn:hover {
-  background: var(--glass-bg-hover);
+  background: var(--bg-surface);
   border-color: var(--accent);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 14px rgba(159, 160, 255, 0.25);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(27, 154, 170, 0.18);
 }
 
 .user-avatar {
@@ -581,28 +581,6 @@ img {
   color: #FFFFFF;
 }
 
-[data-theme="dark"] .btn-primary {
-  background: linear-gradient(135deg, #9FA0FF, #8586FF);
-  color: #10121A;
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  box-shadow: 0 4px 16px rgba(159, 160, 255, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.5);
-}
-
-.btn-primary:hover {
-  background: linear-gradient(135deg, #8E8FFF, #7374FF);
-  border-color: rgba(255, 255, 255, 0.8);
-  color: #FFFFFF;
-  box-shadow: 0 8px 24px rgba(159, 160, 255, 0.52), inset 0 1px 0 #FFFFFF;
-  transform: translateY(-2px);
-}
-
-[data-theme="dark"] .btn-primary:hover {
-  background: linear-gradient(135deg, #B5B6FF, #9FA0FF);
-  color: #10121A;
-  box-shadow: 0 8px 24px rgba(159, 160, 255, 0.5);
-  transform: translateY(-2px);
-}
-
 .btn-secondary {
   background-color: var(--bg-surface);
   color: var(--text-main);
@@ -612,10 +590,11 @@ img {
 }
 
 .btn-secondary:hover {
-  background-color: var(--border-subtle);
+  background-color: var(--bg-surface-alt);
   border-color: var(--accent);
   color: var(--text-main);
   transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
 }
 
 .btn-secondary:active {
@@ -644,14 +623,6 @@ img {
 
 .btn-booked:hover {
   background-color: rgba(27, 154, 170, 0.18) !important;
-}
-
-.btn-secondary:hover {
-  background: var(--glass-bg-hover);
-  border-color: var(--accent);
-  color: var(--text-main);
-  box-shadow: 0 4px 14px rgba(159, 160, 255, 0.2), inset 0 1px 0 #FFFFFF;
-  transform: translateY(-2px);
 }
 
 .btn-sm {
@@ -724,16 +695,6 @@ img {
   color: rgba(255, 255, 255, 0.40);
 }
 
-.form-control:focus {
-  outline: none;
-  background: var(--glass-bg-hover);
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(159, 160, 255, 0.25), inset 0 1px 2px rgba(0, 0, 0, 0.03);
-}
-
-.form-control::placeholder {
-  color: rgba(30, 32, 41, 0.45);
-}
 
 .form-help {
   font-size: 12px;
@@ -803,18 +764,15 @@ img {
   display: inline-flex;
   align-items: center;
   gap: 0.45rem;
-  padding: 0.4rem 1.05rem;
+  padding: 0.35rem 0.95rem;
   border-radius: var(--radius-full);
-  background: rgba(159, 160, 255, 0.16);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: var(--color-teal-tint);
   color: var(--accent);
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.025em;
   margin-bottom: 1.25rem;
-  border: 1px solid rgba(159, 160, 255, 0.35);
-  box-shadow: 0 2px 10px rgba(159, 160, 255, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  border: 1px solid var(--border-subtle);
 }
 
 .hero-title {
@@ -860,27 +818,20 @@ img {
 .stat-card {
   background: var(--bg-surface);
   border: 1px solid var(--border-subtle);
-  border-radius: 16px;
-  padding: 1.25rem;
+  border-radius: 14px;
+  padding: 1.15rem;
   display: flex;
   align-items: center;
-  gap: 1rem;
-  box-shadow: var(--shadow-sm);
-  transition: transform var(--transition-normal), box-shadow var(--transition-normal), border-color var(--transition-normal);
+  gap: 0.9rem;
+  box-shadow: 0 2px 6px rgba(5, 5, 5, 0.03);
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .stat-card:hover {
   background: var(--bg-surface);
   border-color: var(--accent);
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-md);
-}
-
-.stat-card:hover {
-  background: var(--glass-bg-hover);
-  border-color: var(--glass-border-hover);
-  transform: translateY(-4px);
-  box-shadow: var(--glass-shadow-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(5, 5, 5, 0.06);
 }
 
 .stat-icon {
@@ -1058,23 +1009,6 @@ img {
   border-color: var(--accent);
 }
 
-.category-pill:hover {
-  background: var(--glass-bg-hover);
-  border-color: var(--accent);
-  color: var(--text-main);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 18px rgba(159, 160, 255, 0.22);
-}
-
-.category-pill.active {
-  background: linear-gradient(135deg, rgba(159, 160, 255, 0.95), rgba(126, 127, 255, 0.95));
-  color: #1E2029;
-  font-weight: 700;
-  border-color: rgba(255, 255, 255, 0.7);
-  box-shadow: 0 6px 20px rgba(159, 160, 255, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.8);
-  transform: translateY(-2px);
-}
-
 /* ---------------- Bento Event Cards Grid ---------------- */
 .events-grid {
   display: grid;
@@ -1086,19 +1020,19 @@ img {
 .event-card {
   background-color: var(--bg-surface);
   border: 1px solid var(--border-subtle);
-  border-radius: 18px;
+  border-radius: 16px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  box-shadow: var(--shadow-sm);
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 2px 8px rgba(5, 5, 5, 0.04);
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   position: relative;
 }
 
 .event-card:hover {
-  transform: translateY(-6px);
+  transform: translateY(-3px);
   border-color: var(--accent);
-  box-shadow: 0 16px 32px rgba(5, 5, 5, 0.08);
+  box-shadow: 0 12px 28px rgba(5, 5, 5, 0.07);
 }
 
 [data-theme="dark"] .event-card {
@@ -1108,14 +1042,7 @@ img {
 
 [data-theme="dark"] .event-card:hover {
   border-color: var(--accent);
-  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.7);
-}
-
-.event-card:hover {
-  background: var(--glass-bg-hover);
-  border-color: var(--glass-border-hover);
-  transform: translateY(-8px) scale(1.01);
-  box-shadow: var(--glass-shadow-hover);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.7);
 }
 
 .event-card-media {
@@ -1318,9 +1245,8 @@ img {
 
 .progress-bar-fill {
   height: 100%;
-  background: linear-gradient(90deg, #9FA0FF, #7E7FFF);
+  background: var(--accent);
   border-radius: var(--radius-full);
-  box-shadow: 0 0 10px rgba(159, 160, 255, 0.5);
 }
 
 .event-card-footer {
