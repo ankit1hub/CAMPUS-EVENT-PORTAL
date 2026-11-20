@@ -1864,7 +1864,7 @@ class UniPulseApp {
             <div class="event-card-media" style="height: 150px;">
               <img src="${e.banner}" class="event-card-img" alt="${e.title}" loading="lazy" decoding="async">
               <span class="event-card-category category-${e.category}">${e.categoryName}</span>
-              <button class="event-bookmark-btn bookmarked" onclick="app.toggleBookmark('${e.id}', event)">
+              <button class="event-bookmark-btn bookmarked" title="Remove Bookmark" aria-label="Remove Bookmark" onclick="app.toggleBookmark('${e.id}', event)">
                 <i class="fa-solid fa-bookmark"></i>
               </button>
             </div>
