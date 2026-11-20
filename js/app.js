@@ -87,12 +87,17 @@ class UniPulseApp {
     this.renderOrganizerTable();
     this.updateCategoryCounters();
 
-    // Purge removed / test events (e.g. Free Fire test event) from local cache
+    // Purge removed / test events from local cache
     this.events = this.events.filter(e => {
       if (!e) return false;
       const t = (e.title || '').toLowerCase();
       return !t.includes('free fire') && !t.includes('esports mania') && e.id !== 'evt-2798' && e.id !== 'evt-3972';
     });
+
+    // Clean up orphaned registrations for non-existing / deleted events
+    const validEventIds = new Set(this.events.map(e => e.id));
+    this.registrations = this.registrations.filter(r => r && validEventIds.has(r.eventId));
+    this.saveStorage('unipulse_registrations', this.registrations);
     // Convert any legacy dollar amounts to INR and update event photos to match UI aesthetic
     const MODERN_EVENT_BANNERS = {
       'evt-101': 'https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=600&q=75',
@@ -155,7 +160,8 @@ class UniPulseApp {
       try {
         const liveRegs = await supabaseService.fetchRegistrations();
         if (liveRegs && liveRegs.length > 0) {
-          liveRegs.forEach(lr => {
+          const currentEventIds = new Set(this.events.map(e => e.id));
+          liveRegs.filter(lr => currentEventIds.has(lr.eventId)).forEach(lr => {
             const idx = this.registrations.findIndex(r => r.ticketId === lr.ticketId);
             if (idx >= 0) {
               this.registrations[idx] = { ...this.registrations[idx], ...lr };
@@ -163,6 +169,7 @@ class UniPulseApp {
               this.registrations.unshift(lr);
             }
           });
+          this.registrations = this.registrations.filter(r => r && currentEventIds.has(r.eventId));
           this.saveStorage('unipulse_registrations', this.registrations);
         }
       } catch (err) {
@@ -1585,8 +1592,11 @@ class UniPulseApp {
   getMyRegistrations() {
     if (!this.currentUser) return [];
 
-    // Filter registrations that belong specifically to the currently logged in student
+    const validEventIds = new Set(this.events.map(e => e.id));
+
+    // Filter registrations that belong to the student AND point to an active event
     const userRegs = this.registrations.filter(r => {
+      if (!r || !r.eventId || !validEventIds.has(r.eventId)) return false;
       if (this.currentUser.id && r.userId === this.currentUser.id) return true;
       if (this.currentUser.email && r.email && r.email.toLowerCase() === this.currentUser.email.toLowerCase()) return true;
       if (this.currentUser.rollNo && r.rollNo && r.rollNo.toLowerCase() === this.currentUser.rollNo.toLowerCase()) return true;
@@ -1623,12 +1633,11 @@ class UniPulseApp {
     const reg = this.registrations.find(r => r.ticketId === ticketId);
     if (!reg) return;
 
-    const evt = this.events.find(e => e.id === reg.eventId) || {
-      title: "Campus Flagship Event",
-      date: "2026-10-18",
-      venue: "Main Auditorium",
-      categoryName: "Event"
-    };
+    const evt = this.events.find(e => e.id === reg.eventId);
+    if (!evt) {
+      this.showToast('Event not found or has been removed.', 'error');
+      return;
+    }
 
     const passIdEl = document.getElementById('ticketPassId');
     const evTitleEl = document.getElementById('ticketEventTitle');
@@ -1793,14 +1802,8 @@ class UniPulseApp {
       if (emptyTickets) emptyTickets.style.display = 'none';
       if (ticketsGrid) {
         ticketsGrid.innerHTML = myRegs.map(reg => {
-          const evt = this.events.find(e => e.id === reg.eventId) || {
-            title: "Campus Event",
-            banner: "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=600&q=75",
-            category: "tech",
-            categoryName: "Event",
-            venue: "Main Campus",
-            date: "2026-10-18"
-          };
+          const evt = this.events.find(e => e.id === reg.eventId);
+          if (!evt) return '';
 
           const isCancelled = !!evt.isCancelled;
 
@@ -1842,7 +1845,7 @@ class UniPulseApp {
               </div>
             </div>
           `;
-        }).join('');
+        }).filter(Boolean).join('');
       }
     }
 
@@ -2357,9 +2360,9 @@ class UniPulseApp {
     const tbody = document.getElementById('organizerAttendeesTableBody');
     if (!tbody) return;
 
-    let displayList = this.registrations;
+    let displayList = this.registrations.filter(r => r && this.events.some(e => e.id === r.eventId));
     if (this.selectedOrgEvent && this.selectedOrgEvent !== 'all') {
-      displayList = this.registrations.filter(r => r.eventId === this.selectedOrgEvent);
+      displayList = displayList.filter(r => r.eventId === this.selectedOrgEvent);
     }
 
     if (displayList.length === 0) {
@@ -2378,7 +2381,8 @@ class UniPulseApp {
     }
 
     tbody.innerHTML = displayList.map(r => {
-      const evt = this.events.find(e => e.id === r.eventId) || { title: "Campus Event" };
+      const evt = this.events.find(e => e.id === r.eventId);
+      if (!evt) return '';
       const isPaid = (r.isPaid || (evt.price && evt.price > 0));
       const txn = r.paymentTxn || (isPaid ? 'TXN-UPI-AUTO' : 'FREE-PASS');
       const isAI = r.aiVerified || r.isCheckedIn;
@@ -2442,7 +2446,7 @@ class UniPulseApp {
           </td>
         </tr>
       `;
-    }).join('');
+    }).filter(Boolean).join('');
   }
 
   /* ---------------- PulseAI Autonomous Verification Engine ---------------- */
