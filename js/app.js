@@ -667,10 +667,6 @@ class UniPulseApp {
           ? '<span class="role-pill role-admin">🛡️ Administrator Account</span>'
           : '<span class="role-pill role-student">🎓 Enrolled Student Account</span>';
       }
-      const modalHostBtn = document.getElementById('modalUserSubmitEventBtn');
-      if (modalHostBtn) {
-        modalHostBtn.style.display = this.currentUser.role === 'admin' ? 'flex' : 'none';
-      }
     }
     this.openModal('modalUserDropdown');
   }
