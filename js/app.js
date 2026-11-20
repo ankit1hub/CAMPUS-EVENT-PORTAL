@@ -17,6 +17,23 @@ class UniPulseApp {
     this.studentUser = null;
     this.adminUser = null;
 
+    // Automatic cache version bump / URL query trigger (?clear=1 or ?reset=1)
+    const CURRENT_CACHE_VERSION = '20261120_v3';
+    try {
+      const storedVersion = localStorage.getItem('unipulse_cache_version');
+      const urlParams = new URLSearchParams(window.location.search);
+      if (storedVersion !== CURRENT_CACHE_VERSION || urlParams.has('clear') || urlParams.has('reset')) {
+        localStorage.removeItem('unipulse_events');
+        localStorage.removeItem('unipulse_clubs');
+        localStorage.removeItem('unipulse_bookmarks');
+        localStorage.removeItem('unipulse_registrations');
+        localStorage.removeItem('unipulse_notifications');
+        localStorage.setItem('unipulse_cache_version', CURRENT_CACHE_VERSION);
+      }
+    } catch (e) {
+      console.warn('Cache check warning:', e);
+    }
+
     // Load active session (default to guest / null)
     this.currentUser = this.loadStorage('unipulse_user', null);
 
@@ -1047,6 +1064,18 @@ class UniPulseApp {
     this.selectCategoryPill('all');
     this.renderEvents();
     this.showToast('Filters reset', 'info');
+  }
+
+  /* ---------------- Cache Reset Utility ---------------- */
+  clearCache() {
+    try {
+      localStorage.clear();
+      sessionStorage.clear();
+      console.log('App cache cleared successfully.');
+    } catch (e) {
+      console.warn('Clear cache error:', e);
+    }
+    window.location.reload();
   }
 
   /* ---------------- Bookmark Toggle ---------------- */
