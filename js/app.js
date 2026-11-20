@@ -56,8 +56,19 @@ class UniPulseApp {
       const t = (e.title || '').toLowerCase();
       return !t.includes('free fire') && !t.includes('esports mania') && e.id !== 'evt-2798' && e.id !== 'evt-3972';
     });
-    // Convert any legacy dollar amounts to INR in cached events
+    // Convert any legacy dollar amounts to INR and update event photos to match UI aesthetic
+    const MODERN_EVENT_BANNERS = {
+      'evt-101': 'https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=600&q=75',
+      'evt-102': 'https://images.unsplash.com/photo-1501386761578-eac5c94b800a?auto=format&fit=crop&w=600&q=75',
+      'evt-103': 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=600&q=75',
+      'evt-104': 'https://images.unsplash.com/photo-1579952363873-27f3bade9f55?auto=format&fit=crop&w=600&q=75',
+      'evt-105': 'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=600&q=75',
+      'evt-106': 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=600&q=75'
+    };
     this.events.forEach(e => {
+      if (e && MODERN_EVENT_BANNERS[e.id]) {
+        e.banner = MODERN_EVENT_BANNERS[e.id];
+      }
       if (e && e.description) {
         e.description = e.description.replace(/\$5,000\+/g, '₹5,00,000+').replace(/\$25/g, '₹2,000');
       }
@@ -78,6 +89,9 @@ class UniPulseApp {
           });
           // Merge with current state to preserve any cancellation overrides
           this.events = liveEvents.map(le => {
+            if (MODERN_EVENT_BANNERS[le.id]) {
+              le.banner = MODERN_EVENT_BANNERS[le.id];
+            }
             const localMatch = this.events.find(e => e.id === le.id);
             if (localMatch && (localMatch.isCancelled || localMatch.status === 'cancelled' || localMatch.is_cancelled)) {
               le.isCancelled = true;
@@ -95,6 +109,7 @@ class UniPulseApp {
             });
           }
           this.saveStorage('unipulse_events', this.events);
+          this.renderEvents();
         }
       } catch (err) {
         console.warn('Live events sync error:', err);

@@ -21,7 +21,7 @@ const INITIAL_EVENTS = [
     maxCapacity: 300,
     registeredCount: 248,
     isFeatured: true,
-    banner: "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=600&q=75",
+    banner: "https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=600&q=75",
     tags: ["Coding", "AI", "Team", "Prizes", "Swags"],
     perks: ["Verified Certificate", "Free Meals & Energy Drinks", "Exclusive Swag Kit", "Official Attendance Credit (2 Days)"],
     agenda: [
@@ -56,7 +56,7 @@ const INITIAL_EVENTS = [
     maxCapacity: 1200,
     registeredCount: 980,
     isFeatured: true,
-    banner: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=600&q=75",
+    banner: "https://images.unsplash.com/photo-1501386761578-eac5c94b800a?auto=format&fit=crop&w=600&q=75",
     tags: ["Music", "Dance", "Food Stalls", "Live Band"],
     perks: ["Concert Entry Wristband", "Food Stalls Discount Vouchers", "Live DJ After-Party"],
     agenda: [
@@ -90,7 +90,7 @@ const INITIAL_EVENTS = [
     maxCapacity: 90,
     registeredCount: 88,
     isFeatured: false,
-    banner: "https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&w=600&q=75",
+    banner: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=600&q=75",
     tags: ["AI/ML", "Hands-on", "Python", "Certificate"],
     perks: ["Hands-on Project Repo", "Free Cloud API Credits (₹2,000)", "Official Skill Certificate", "Attendance Credit"],
     agenda: [
@@ -122,7 +122,7 @@ const INITIAL_EVENTS = [
     maxCapacity: 500,
     registeredCount: 340,
     isFeatured: false,
-    banner: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&w=600&q=75",
+    banner: "https://images.unsplash.com/photo-1579952363873-27f3bade9f55?auto=format&fit=crop&w=600&q=75",
     tags: ["Sports", "Cricket", "Football", "Trophy"],
     perks: ["Championship Medals & Trophy", "Department Pride Points", "Sports Energy Kit"],
     agenda: [
@@ -154,7 +154,7 @@ const INITIAL_EVENTS = [
     maxCapacity: 64,
     registeredCount: 52,
     isFeatured: false,
-    banner: "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=600&q=75",
+    banner: "https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=600&q=75",
     tags: ["Esports", "Valorant", "BGMI", "Gaming Gear"],
     perks: ["₹25,000 Cash Prize Pool", "Gaming Headsets for MVP", "Live Stream Spotlight"],
     agenda: [
@@ -186,7 +186,7 @@ const INITIAL_EVENTS = [
     maxCapacity: 400,
     registeredCount: 310,
     isFeatured: false,
-    banner: "https://images.unsplash.com/photo-1475721027785-f74eccf877e2?auto=format&fit=crop&w=600&q=75",
+    banner: "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=600&q=75",
     tags: ["Career", "FAANG", "Startups", "Networking"],
     perks: ["Resume Review Slots", "Direct Internship Referrals", "Q&A Session with Founders", "Digital Certificate"],
     agenda: [
