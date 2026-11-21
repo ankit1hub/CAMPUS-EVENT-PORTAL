@@ -2467,7 +2467,9 @@ body.login-view-active #mainNavLinks,
 body.login-view-active #navNotifBtn,
 body.login-view-active #navAuthBtns,
 body.login-view-active #navUserPill,
-body.login-view-active .brand-sub-text {
+body.login-view-active .brand-sub-text,
+body.login-view-active #topTicker,
+body.login-view-active .site-footer {
   display: none !important;
 }
 

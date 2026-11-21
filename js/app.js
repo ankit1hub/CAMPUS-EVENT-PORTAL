@@ -4,21 +4,12 @@
 
 class UniPulseApp {
   constructor() {
-    this.currentView = 'events';
-    this.selectedCategory = 'all';
-    this.searchQuery = '';
-    this.priceFilter = 'all';
-    this.sortFilter = 'date-asc';
-    this.searchDebounceTimer = null;
-    
-    this.calendarDate = new Date(2026, 9, 1); // October 2026
-
     // Default state: Guest (No pre-saved persona)
     this.studentUser = null;
     this.adminUser = null;
 
     // Automatic cache version bump / URL query trigger (?clear=1 or ?reset=1)
-    const CURRENT_CACHE_VERSION = '20261121_reset_bookings_v7';
+    const CURRENT_CACHE_VERSION = '20261122_v9_terracotta_auth';
     try {
       const storedVersion = localStorage.getItem('unipulse_cache_version');
       const urlParams = new URLSearchParams(window.location.search);
@@ -36,6 +27,14 @@ class UniPulseApp {
 
     // Load active session (default to guest / null)
     this.currentUser = this.loadStorage('unipulse_user', null);
+    this.currentView = this.currentUser ? (this.currentUser.role === 'admin' ? 'organizer' : 'events') : 'login';
+    this.selectedCategory = 'all';
+    this.searchQuery = '';
+    this.priceFilter = 'all';
+    this.sortFilter = 'date-asc';
+    this.searchDebounceTimer = null;
+    
+    this.calendarDate = new Date(2026, 9, 1); // October 2026
 
     // Load datasets
     this.events = this.loadStorage('unipulse_events', INITIAL_EVENTS);
@@ -366,12 +365,14 @@ class UniPulseApp {
       if (navRole) navRole.innerHTML = '';
     }
 
-    if (isStudent && (this.currentView === 'organizer' || this.currentView === 'login')) {
+    if (!this.currentUser) {
+      if (this.currentView !== 'login') {
+        this.navigate('login');
+      }
+    } else if (isStudent && (this.currentView === 'organizer' || this.currentView === 'login')) {
       this.navigate('events');
     } else if (isAdmin && (this.currentView === 'dashboard' || this.currentView === 'login')) {
       this.navigate('organizer');
-    } else if (!this.currentUser && (this.currentView === 'organizer' || this.currentView === 'dashboard')) {
-      this.navigate('login');
     }
 
     this.renderEvents();
@@ -800,13 +801,15 @@ class UniPulseApp {
     this.currentUser = null;
     this.studentUser = null;
     this.adminUser = null;
-    localStorage.removeItem('unipulse_user');
-    sessionStorage.removeItem('unipulse_user');
-    sessionStorage.clear();
+    try {
+      localStorage.removeItem('unipulse_user');
+      sessionStorage.removeItem('unipulse_user');
+      sessionStorage.clear();
+    } catch (e) {}
     this.closeModal('modalUserDropdown');
     this.closeModal('modalAuth');
-    this.updateUIForRole();
     this.navigate('login');
+    this.updateUIForRole();
     this.showToast('You have signed out.', 'info');
   }
 
