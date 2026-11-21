@@ -27,56 +27,24 @@
 
 ---
 
-### 4. Rival Map & The Gap
-- **Commercial Platforms (Luma, Eventbrite):** Generic, commercialized, lack campus department and attendance credit integration.
-- **Legacy ERP Portals (University Blackboard/ERP):** Cluttered, outdated, despised by students.
-- **The Gap (Our Territory):** *Quiet Campus Clarity* — ultra-fast, zero-ad, verified campus passes.
+### 4. Brand & Style Foundation: Modern Tactile Minimalism
+- **Canvas & Containers (`#FAF8FF` / `#FFF3E3`):** Warm cream & airy soft lavender act as the universal ground, lending the interface warmth, tactile presence, and soft contrast against typical clinical white backgrounds.
+- **Primary / Accent (`#9FA0FF` / `#5354AD`):** Digital periwinkle powers active navigation items, high-priority action buttons, indicator tags, and prominent interactive triggers.
+- **Secondary / Soft Mint (`#D5E8E6` / `#506260`):** Cool, refreshing pale mint used strictly for subtle structural frames, 1px separation lines, secondary button surfaces, chip backgrounds, and ambient badge containers.
+- **Alert / Action / Coral (`#FF7171` / `#BA1A1A`):** High-energy coral for urgent campus alerts, live status indicators, sell-outs, destructive operations, and active bookmark/favorite toggles.
+- **Neutral Deep Slate (`#1E2029` / `#191B24`):** Primary ink ensuring absolute legibility across titles, data figures, and high-density body typography.
 
 ---
 
-### 5. Promises The Business Must Keep ("Must Be True")
-1. **1-Tap Registration:** If a student is logged in, booking a free seat must never take more than one click.
-2. **Instant QR E-Pass:** Confirmation is immediate, verifiable offline, and saved straight to the student's dashboard.
-3. **Zero Sponsored Spam:** No external ad banners, popups, or paid tracking cluttering student screens.
+### 5. Typography Specification
+- **Display & Headlines:** `Plus Jakarta Sans`, sans-serif (800 for Hero Display, 700 for Section Headings, 600 for Card Titles).
+- **Body & Operational Meta:** `Inter`, sans-serif (400 for Body, 500 for Badges, 600 for Buttons and Labels).
 
 ---
 
-### 6. Personality & Voice
-- **What It Is:** *Tactile, Honest, Effortless.*
-- **What It Isn't:** *Corporate, Chaotic, Flashy.*
-- **Voice Examples:**
-  - *Do:* "Your HackPulse '26 E-Pass is confirmed. See you at CS Lab 304."
-  - *Don't:* "Hurry!! Limited seats left! Smash that register button for the sickest event of the year!!"
-
----
-
-### 7. Colour & Typography Direction
-- **Canvas Ground:** `#F5F1E3` (Warm Eggshell) — organic paper-like ground that reduces eye strain.
-- **Elevated Surface:** `#FFFFFF` (Pure White) — high contrast, crisp cards.
-- **Architectural Frame:** `#DDDBCB` (Warm Alabaster) — physical 1px hairline borders instead of noisy drop shadows.
-- **High-Contrast Text:** `#050505` (Deep Obsidian) — 15.8:1 contrast ratio for effortless readability.
-- **Action Signal:** `#1B9AAA` (Pacific Teal) — clean, focused highlight for primary buttons and confirmation badges.
-- **Typography:** `Plus Jakarta Sans` — modern geometric grotesque with exceptional readability at small interface sizes.
-
----
-
-### 8. What This Brand Will Never Do
-- Never sell student registration data to third-party commercial promoters.
-- Never use dark patterns (fake urgency countdowns, hidden ticketing fees, or unskippable splash screens).
-- Never clutter the primary event feed with bureaucratic university notices that aren't events.
-
----
-
-### 9. Test First: Cheap Real-World Validation Tests
-1. **The 30-Second Pass Test:** Place 10 freshmen in front of the portal; measure if 9 out of 10 can discover an event and obtain a QR pass in under 30 seconds.
-2. **The Gate Scan Test:** Test check-in speed at an auditorium door using the built-in QR barcode scanner against manual roll-call sheets.
-3. **WhatsApp Share Test:** Share one event link into a major campus batch group; track whether incoming click-to-registration conversion exceeds 40%.
-*What would invalidate the position:* If students prefer browsing flyers on Instagram over a consolidated campus feed.
-
----
-
-### 10. Evidence Sources & Confidence
-- Competitor review analysis: Luma, Eventbrite, University ERP systems `[RESEARCH]`
-- Student feedback on campus Google Form fatigue `[RESEARCH]`
-- Behavioral models: Hick-Hyman Law (Cognitive load reduction), Default Effect `[RESEARCH]`
-- Note: This Brand DNA is a strong hypothesis built on empirical student patterns; live feedback from next semester's club fest will validate conversion rates.
+### 6. Component & Button Guidelines (Preserving Structure)
+- **Primary Action Buttons:** Solid `#9FA0FF` fill, `#1E2029` text, `rounded-md` (12px).
+- **Secondary Action Buttons:** `#D5E8E6` fill, `#1E2029` text, 1px border in `#D5E8E6`.
+- **Alert & Danger Action:** `#FF7171` background, `#FFF3E3` text, rounded at 12px.
+- **Event Cards:** 16px corner radius (`rounded-lg`), elevated pure surface with 1px `#D5E8E6` border, subtle ambient elevation `0 8px 30px rgba(30, 32, 41, 0.06)`, and hover lift `translateY(-2px)`.
+- **Interactivity:** 100% reactive state management, debounced search, modal dialogs, category chips, live capacity counters, dynamic QR codes, and ticket downloads.

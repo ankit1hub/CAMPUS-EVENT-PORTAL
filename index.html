@@ -8,10 +8,10 @@
   <title>UNIBuzz | Campus Event Management & Registration Portal</title>
   <!-- UniPulse Deployment Build 2026-11-02 -->
   
-  <!-- Google Fonts: Inter & Plus Jakarta Sans (Stitch Brand DNA) -->
+  <!-- Google Fonts: Inter & Plus Jakarta Sans (Brand DNA) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   
   <!-- FontAwesome 6 for crisp icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -32,7 +32,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   
   <!-- Custom CSS -->
-  <link rel="stylesheet" href="css/styles.css?v=20261120_v3">
+  <link rel="stylesheet" href="css/styles.css?v=20261121_editorial">
 </head>
 <body>
 
@@ -50,7 +50,10 @@
         <div class="brand-icon">
           <i class="fa-solid fa-graduation-cap"></i>
         </div>
-        <span><span class="brand-text-uni">UNI</span><span class="brand-text-buzz">Buzz</span></span>
+        <div class="brand-text-group">
+          <span class="brand-main-text"><span class="brand-text-uni">UNI</span><span class="brand-text-buzz">Buzz</span></span>
+          <span class="brand-sub-text">Campus Life Hub</span>
+        </div>
       </a>
 
       <!-- Desktop Navigation Tabs -->
@@ -88,6 +91,11 @@
         <button class="icon-btn" id="navNotifBtn" onclick="app.showNotificationsModal()" title="Campus Notifications" aria-label="Campus Notifications">
           <i class="fa-regular fa-bell"></i>
           <span class="icon-badge" id="notifBadge">3</span>
+        </button>
+
+        <!-- + Host Event Pill (Target UI) -->
+        <button class="btn btn-primary btn-sm btn-host-pill" id="navHostBtn" onclick="app.handleHostEventClick()">
+          <i class="fa-solid fa-plus"></i> Host Event
         </button>
 
 
@@ -325,99 +333,84 @@
          VIEW 1: EXPLORE EVENTS (STUDENT VIEW)
          ========================================== -->
     <section id="view-events" class="view-section">
-      <!-- Hero Banner -->
-      <div class="hero-section">
-        <div class="container hero-center-container">
-          <div class="hero-text-content">
-            <div class="hero-tag">
-              <i class="fa-solid fa-sparkles"></i> Fall Semester 2026 Season
+      <!-- University Experience Feed Header (Target UI) -->
+      <div class="feed-header-section">
+        <div class="container">
+          <!-- Top Row: Season Pill + Portal Switcher -->
+          <div class="feed-top-row flex items-center justify-between" style="margin-bottom: 0.5rem; flex-wrap: wrap; gap: 0.75rem;">
+            <div class="feed-season-badge">
+              <span class="season-dot"></span>
+              <span>• SEMESTER LIVE SEASON • FALL 2026</span>
             </div>
-            <h1 class="hero-title">
-              Experience, Compete & Elevate Your <span class="brand-gradient">Campus Life</span>
-            </h1>
-            <p class="hero-desc">
-              Discover university hackathons, cultural fests, hands-on tech workshops, sports tournaments, and club meets. Register in 1-click & claim official attendance credits.
-            </p>
-            <div class="hero-actions">
-              <button class="btn btn-primary btn-lg" onclick="document.getElementById('exploreSection').scrollIntoView({behavior: 'smooth'})">
-                <i class="fa-solid fa-fire"></i> Explore Trending Events
-              </button>
-              <button class="btn btn-secondary btn-lg" id="heroHostBtn" style="display: none;" onclick="app.handleHostEventClick()">
-                <i class="fa-solid fa-bullhorn"></i> Submit Club Event
-              </button>
-            </div>
-            <!-- Quick Stats Bento Grid -->
-            <div class="stats-grid-row hero-stats-grid">
-              <div class="stat-card">
-                <div class="stat-icon"><i class="fa-solid fa-calendar-check"></i></div>
-                <div>
-                  <div class="stat-val" id="statLiveEvents">5+</div>
-                  <div class="stat-title">Live Events</div>
-                </div>
-              </div>
-              <div class="stat-card">
-                <div class="stat-icon"><i class="fa-solid fa-users"></i></div>
-                <div>
-                  <div class="stat-val" id="statTotalRegistrations">1,318+</div>
-                  <div class="stat-title">Students Registered</div>
-                </div>
-              </div>
-              <div class="stat-card">
-                <div class="stat-icon"><i class="fa-solid fa-people-group"></i></div>
-                <div>
-                  <div class="stat-val">24</div>
-                  <div class="stat-title">Active Campus Clubs</div>
-                </div>
-              </div>
-              <div class="stat-card">
-                <div class="stat-icon"><i class="fa-solid fa-award"></i></div>
-                <div>
-                  <div class="stat-val">100%</div>
-                  <div class="stat-title">Verified E-Certificates</div>
-                  <div class="stat-subtext">For Hackathons and Workshops</div>
-                </div>
-              </div>
+            <div class="feed-portal-toggle">
+              <button class="portal-toggle-btn active" id="heroToggleStudent" onclick="app.navigate('events')">Student Portal</button>
+              <button class="portal-toggle-btn" id="heroToggleAdmin" onclick="app.navigate('organizer')">Admin / Host Studio</button>
             </div>
           </div>
-        </div>
-      </div>
 
-      <!-- Category Quick Filter Section -->
-      <div class="search-filter-section" id="exploreSection">
-        <div class="container">
-          <!-- Category Quick Pills -->
-          <div class="category-pills">
+          <!-- Main Feed Heading -->
+          <h1 class="feed-main-title">University Experience Feed</h1>
+
+          <!-- Search & Action Bar -->
+          <div class="feed-search-bar-row">
+            <div class="feed-search-input-wrap">
+              <i class="fa-solid fa-magnifying-glass feed-search-icon"></i>
+              <input type="text" id="eventSearchInput" class="feed-search-input" placeholder="Search by name, faculty, guest speaker, venue or society..." oninput="app.handleSearchInput(this.value)">
+              <button id="eventSearchClearBtn" class="feed-search-clear hidden" onclick="app.clearSearch()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="feed-action-btns">
+              <button class="btn-saved-pill" onclick="app.openSavedBookmarks()">
+                <i class="fa-regular fa-bookmark"></i> Saved Events (<span id="savedEventsCount">0</span>)
+              </button>
+              <button class="btn-idpass-pill" onclick="app.openIDPassPortal()">
+                <i class="fa-solid fa-id-badge"></i> ID Pass Portal
+              </button>
+            </div>
+          </div>
+
+          <!-- Category Quick Filter Pills -->
+          <div class="category-pills-row" id="exploreSection">
             <button class="category-pill active" data-category="all" onclick="app.selectCategoryPill('all')">
-              <i class="fa-solid fa-layer-group"></i> All Events (<span id="countAll">0</span>)
+              <span>All Events</span> <span class="pill-badge" id="countAll">6</span>
             </button>
             <button class="category-pill" data-category="hackathon" onclick="app.selectCategoryPill('hackathon')">
-              <i class="fa-solid fa-code"></i> Hackathons (<span id="countHackathon">0</span>)
+              <span>Hackathon</span> <span class="pill-badge" id="countHackathon">1</span>
+            </button>
+            <button class="category-pill" data-category="tech" onclick="app.selectCategoryPill('tech')">
+              <span>Tech & Robotics</span> <span class="pill-badge" id="countTech">1</span>
             </button>
             <button class="category-pill" data-category="cultural" onclick="app.selectCategoryPill('cultural')">
-              <i class="fa-solid fa-guitar"></i> Cultural & Arts (<span id="countCultural">0</span>)
-            </button>
-            <button class="category-pill" data-category="workshop" onclick="app.selectCategoryPill('workshop')">
-              <i class="fa-solid fa-laptop-code"></i> Workshops & AI (<span id="countWorkshop">0</span>)
+              <span>Cultural Fest</span> <span class="pill-badge" id="countCultural">1</span>
             </button>
             <button class="category-pill" data-category="sports" onclick="app.selectCategoryPill('sports')">
-              <i class="fa-solid fa-trophy"></i> Sports & Fitness (<span id="countSports">0</span>)
+              <span>Sports</span> <span class="pill-badge" id="countSports">1</span>
+            </button>
+            <button class="category-pill" data-category="workshop" onclick="app.selectCategoryPill('workshop')">
+              <span>Workshops</span> <span class="pill-badge" id="countWorkshop">1</span>
             </button>
             <button class="category-pill" data-category="gaming" onclick="app.selectCategoryPill('gaming')">
-              <i class="fa-solid fa-gamepad"></i> Gaming & Esports (<span id="countGaming">0</span>)
+              <span>Gaming & Esports</span> <span class="pill-badge" id="countGaming">1</span>
             </button>
           </div>
         </div>
       </div>
 
       <!-- Events List Grid -->
-      <div class="container">
+      <div class="container" style="padding-top: 0.5rem; padding-bottom: 3.5rem;">
         <div class="flex items-center justify-between" style="margin-bottom: 1.25rem;">
-          <h2 style="font-size: 1.45rem;" id="eventsSectionTitle">Upcoming Campus Events</h2>
-          <span style="font-size: 0.85rem; color: var(--text-muted);" id="eventsMatchCounter">Showing 6 events</span>
+          <h2 style="font-size: 1.35rem; font-weight: 700; color: var(--text-main);" id="eventsSectionTitle">Curated Campus Lineup</h2>
+          <span style="font-size: 0.85rem; color: var(--text-secondary); font-weight: 500;" id="eventsMatchCounter">Showing 6 events</span>
         </div>
         
         <div class="events-grid" id="eventsGrid">
           <!-- Rendered dynamically by JS -->
+        </div>
+
+        <!-- Hidden elements to preserve backward compatibility for JS statistics counters -->
+        <div style="display: none;" aria-hidden="true">
+          <span id="statLiveEvents">6+</span>
+          <span id="statTotalRegistrations">1,318+</span>
+          <button id="heroHostBtn" onclick="app.handleHostEventClick()"></button>
         </div>
       </div>
     </section>
@@ -1615,8 +1608,8 @@
   </footer>
 
   <!-- App Data & Scripts -->
-  <script src="js/data.js?v=20261120_v3"></script>
-  <script src="js/supabase.js?v=20261120_v3"></script>
-  <script src="js/app.js?v=20261120_v3"></script>
+  <script src="js/data.js?v=20261121_editorial"></script>
+  <script src="js/supabase.js?v=20261121_editorial"></script>
+  <script src="js/app.js?v=20261121_editorial"></script>
 </body>
 </html>
