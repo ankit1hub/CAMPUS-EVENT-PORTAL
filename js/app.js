@@ -9,7 +9,7 @@ class UniPulseApp {
     this.adminUser = null;
 
     // Automatic cache version bump / URL query trigger (?clear=1 or ?reset=1)
-    const CURRENT_CACHE_VERSION = '20261122_v9_terracotta_auth';
+    const CURRENT_CACHE_VERSION = '20261122_v10_login_home';
     try {
       const storedVersion = localStorage.getItem('unipulse_cache_version');
       const urlParams = new URLSearchParams(window.location.search);
@@ -457,9 +457,9 @@ class UniPulseApp {
     if (res.success) {
       this.currentUser = res.user;
       this.saveStorage('unipulse_user', this.currentUser);
+      this.navigate('events');
       this.updateUIForRole();
       this.showToast(`🎓 Welcome back, ${this.currentUser.name}!`, 'success');
-      this.navigate('events');
     } else {
       this.showToast(`Authentication failed: ${res.error}`, 'error');
     }
@@ -483,10 +483,10 @@ class UniPulseApp {
     if (res.success) {
       this.currentUser = res.user;
       this.saveStorage('unipulse_user', this.currentUser);
+      this.navigate('events');
       this.updateUIForRole();
       this.triggerConfetti();
       this.showToast(`🎉 Account Created! Welcome, ${this.currentUser.name}`, 'success');
-      this.navigate('events');
     } else {
       this.showToast(`Sign up failed: ${res.error}`, 'error');
     }
@@ -635,9 +635,9 @@ class UniPulseApp {
       this.currentUser = res.user;
       this.saveStorage('unipulse_user', this.currentUser);
       this.closeModal('modalAuth');
+      this.navigate('events');
       this.updateUIForRole();
       this.showToast(`🎓 Welcome back, ${this.currentUser.name}!`, 'success');
-      this.navigate('events');
     } else {
       this.showToast(`Authentication failed: ${res.error}`, 'error');
     }
@@ -662,10 +662,10 @@ class UniPulseApp {
       this.currentUser = res.user;
       this.saveStorage('unipulse_user', this.currentUser);
       this.closeModal('modalAuth');
+      this.navigate('events');
       this.updateUIForRole();
       this.triggerConfetti();
       this.showToast(`🎉 Account Created! Welcome, ${this.currentUser.name}`, 'success');
-      this.navigate('events');
     } else {
       this.showToast(`Sign up failed: ${res.error}`, 'error');
     }
@@ -752,9 +752,9 @@ class UniPulseApp {
     this.currentUser = { ...this.studentUser };
     this.saveStorage('unipulse_user', this.currentUser);
     this.closeModal('modalAuth');
+    this.navigate('events');
     this.updateUIForRole();
     this.showToast(`🎓 Logged in as Student: ${this.currentUser.name}`, 'success');
-    this.navigate('events');
   }
 
   loginAsDemoAdmin() {
