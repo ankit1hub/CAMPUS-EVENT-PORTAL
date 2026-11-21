@@ -459,7 +459,7 @@ class UniPulseApp {
       this.saveStorage('unipulse_user', this.currentUser);
       this.updateUIForRole();
       this.showToast(`🎓 Welcome back, ${this.currentUser.name}!`, 'success');
-      this.navigate('dashboard');
+      this.navigate('events');
     } else {
       this.showToast(`Authentication failed: ${res.error}`, 'error');
     }
@@ -486,7 +486,7 @@ class UniPulseApp {
       this.updateUIForRole();
       this.triggerConfetti();
       this.showToast(`🎉 Account Created! Welcome, ${this.currentUser.name}`, 'success');
-      this.navigate('dashboard');
+      this.navigate('events');
     } else {
       this.showToast(`Sign up failed: ${res.error}`, 'error');
     }
@@ -637,7 +637,7 @@ class UniPulseApp {
       this.closeModal('modalAuth');
       this.updateUIForRole();
       this.showToast(`🎓 Welcome back, ${this.currentUser.name}!`, 'success');
-      this.navigate('dashboard');
+      this.navigate('events');
     } else {
       this.showToast(`Authentication failed: ${res.error}`, 'error');
     }
@@ -665,7 +665,7 @@ class UniPulseApp {
       this.updateUIForRole();
       this.triggerConfetti();
       this.showToast(`🎉 Account Created! Welcome, ${this.currentUser.name}`, 'success');
-      this.navigate('dashboard');
+      this.navigate('events');
     } else {
       this.showToast(`Sign up failed: ${res.error}`, 'error');
     }
@@ -754,7 +754,7 @@ class UniPulseApp {
     this.closeModal('modalAuth');
     this.updateUIForRole();
     this.showToast(`🎓 Logged in as Student: ${this.currentUser.name}`, 'success');
-    this.navigate('dashboard');
+    this.navigate('events');
   }
 
   loginAsDemoAdmin() {
