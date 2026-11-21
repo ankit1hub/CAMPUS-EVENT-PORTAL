@@ -18,7 +18,7 @@ class UniPulseApp {
     this.adminUser = null;
 
     // Automatic cache version bump / URL query trigger (?clear=1 or ?reset=1)
-    const CURRENT_CACHE_VERSION = '20261121_editorial_v6';
+    const CURRENT_CACHE_VERSION = '20261121_reset_bookings_v7';
     try {
       const storedVersion = localStorage.getItem('unipulse_cache_version');
       const urlParams = new URLSearchParams(window.location.search);
@@ -42,6 +42,16 @@ class UniPulseApp {
     this.clubs = this.loadStorage('unipulse_clubs', INITIAL_CLUBS);
     this.bookmarks = this.loadStorage('unipulse_bookmarks', []);
     this.registrations = this.loadStorage('unipulse_registrations', typeof INITIAL_REGISTRATIONS !== 'undefined' ? INITIAL_REGISTRATIONS : []);
+
+    // Purge any pre-existing mock registrations for Ankit Ghosh
+    this.registrations = (this.registrations || []).filter(r => {
+      if (!r) return false;
+      const n = (r.attendeeName || r.fullName || '').toLowerCase();
+      const em = (r.email || '').toLowerCase();
+      const roll = (r.rollNo || '').toLowerCase();
+      return !n.includes('ankit ghosh') && !em.includes('ankit.ghosh') && !roll.includes('22bcs10043');
+    });
+    this.saveStorage('unipulse_registrations', this.registrations);
 
     // Load dynamic campus notifications (matching 3 unread initial badge)
     this.notifications = this.loadStorage('unipulse_notifications', null);
@@ -111,9 +121,15 @@ class UniPulseApp {
       return !t.includes('free fire') && !t.includes('esports mania') && e.id !== 'evt-2798' && e.id !== 'evt-3972';
     });
 
-    // Clean up orphaned registrations for non-existing / deleted events
+    // Clean up orphaned registrations for non-existing / deleted events & purge previous mock bookings
     const validEventIds = new Set(this.events.map(e => e.id));
-    this.registrations = this.registrations.filter(r => r && validEventIds.has(r.eventId));
+    this.registrations = this.registrations.filter(r => {
+      if (!r || !validEventIds.has(r.eventId)) return false;
+      const n = (r.attendeeName || r.fullName || '').toLowerCase();
+      const em = (r.email || '').toLowerCase();
+      const roll = (r.rollNo || '').toLowerCase();
+      return !n.includes('ankit ghosh') && !em.includes('ankit.ghosh') && !roll.includes('22bcs10043');
+    });
     this.saveStorage('unipulse_registrations', this.registrations);
     // Convert any legacy dollar amounts to INR and update event photos to match UI aesthetic
     const MODERN_EVENT_BANNERS = {
@@ -1726,6 +1742,7 @@ class UniPulseApp {
       badge.textContent = myRegs.length;
       badge.style.display = 'inline-flex';
     } else {
+      badge.textContent = '0';
       badge.style.display = 'none';
     }
   }
