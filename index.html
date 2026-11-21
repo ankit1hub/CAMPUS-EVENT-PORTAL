@@ -146,11 +146,11 @@
           <!-- 1. STUDENT AUTH GATEWAY PANEL -->
           <div id="gatewayStudentPanel">
             <!-- Mode Switcher: Sign In vs Create Account -->
-            <div style="display: flex; justify-content: center; gap: 0.5rem; margin-bottom: 1.25rem;">
-              <button class="btn btn-secondary btn-sm active" id="gatewayStudentSignInBtn" style="flex: 1;" onclick="app.toggleGatewayStudentMode('signin')">
+            <div style="display: flex; justify-content: center; gap: 0.65rem; margin-bottom: 1.35rem;">
+              <button class="btn btn-gateway-mode active" id="gatewayStudentSignInBtn" style="flex: 1;" onclick="app.toggleGatewayStudentMode('signin')">
                 Sign In
               </button>
-              <button class="btn btn-secondary btn-sm" id="gatewayStudentSignUpBtn" style="flex: 1;" onclick="app.toggleGatewayStudentMode('signup')">
+              <button class="btn btn-gateway-mode" id="gatewayStudentSignUpBtn" style="flex: 1;" onclick="app.toggleGatewayStudentMode('signup')">
                 Create Account
               </button>
             </div>
@@ -176,7 +176,7 @@
                 </label>
                 <a href="#" onclick="app.showToast('Please contact campus helpdesk or sign up for a new account.', 'info')">Forgot Password?</a>
               </div>
-              <button type="submit" class="btn btn-primary w-full" style="width: 100%;" id="gatewayStudentSignInSubmitBtn">
+              <button type="submit" class="btn btn-primary w-full btn-gateway-submit" style="width: 100%;" id="gatewayStudentSignInSubmitBtn">
                 <i class="fa-solid fa-right-to-bracket"></i> Sign In to Student Portal
               </button>
             </form>
@@ -233,7 +233,7 @@
                 </div>
               </div>
 
-              <button type="submit" class="btn btn-primary w-full" style="width: 100%;" id="gatewayStudentSignUpSubmitBtn">
+              <button type="submit" class="btn btn-primary w-full btn-gateway-submit" style="width: 100%;" id="gatewayStudentSignUpSubmitBtn">
                 <i class="fa-solid fa-user-plus"></i> Register & Enter Student Portal
               </button>
             </form>
@@ -242,11 +242,11 @@
           <!-- 2. ADMIN AUTH GATEWAY PANEL -->
           <div id="gatewayAdminPanel" class="hidden">
             <!-- Mode Switcher: Sign In vs Create Account for Admin -->
-            <div style="display: flex; justify-content: center; gap: 0.5rem; margin-bottom: 1.25rem;">
-              <button class="btn btn-secondary btn-sm active" id="gatewayAdminSignInBtn" style="flex: 1;" onclick="app.toggleGatewayAdminMode('signin')">
+            <div style="display: flex; justify-content: center; gap: 0.65rem; margin-bottom: 1.35rem;">
+              <button class="btn btn-gateway-mode active" id="gatewayAdminSignInBtn" style="flex: 1;" onclick="app.toggleGatewayAdminMode('signin')">
                 Sign In
               </button>
-              <button class="btn btn-secondary btn-sm" id="gatewayAdminSignUpBtn" style="flex: 1;" onclick="app.toggleGatewayAdminMode('signup')">
+              <button class="btn btn-gateway-mode" id="gatewayAdminSignUpBtn" style="flex: 1;" onclick="app.toggleGatewayAdminMode('signup')">
                 Create Admin Account
               </button>
             </div>
@@ -267,7 +267,7 @@
                 </div>
                 <div class="form-help">Enter club lead key or faculty admin credentials.</div>
               </div>
-              <button type="submit" class="btn btn-primary w-full" style="width: 100%;" id="gatewayAdminSignInSubmitBtn">
+              <button type="submit" class="btn btn-primary w-full btn-gateway-submit" style="width: 100%;" id="gatewayAdminSignInSubmitBtn">
                 <i class="fa-solid fa-lock-open"></i> Login to Admin Studio
               </button>
             </form>
@@ -313,7 +313,7 @@
                 </div>
               </div>
 
-              <button type="submit" class="btn btn-primary w-full" style="width: 100%;" id="gatewayAdminSignUpSubmitBtn">
+              <button type="submit" class="btn btn-primary w-full btn-gateway-submit" style="width: 100%;" id="gatewayAdminSignUpSubmitBtn">
                 <i class="fa-solid fa-user-shield"></i> Register Administrator Account
               </button>
             </form>

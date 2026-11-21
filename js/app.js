@@ -278,6 +278,12 @@ class UniPulseApp {
       document.body.classList.remove('admin-active');
     }
 
+    if (this.currentView === 'login') {
+      document.body.classList.add('login-view-active');
+    } else {
+      document.body.classList.remove('login-view-active');
+    }
+
     const tabEvents = document.getElementById('navTabEvents');
     const tabClubs = document.getElementById('navTabClubs');
     const tabDashboard = document.getElementById('navTabDashboard');
@@ -407,13 +413,13 @@ class UniPulseApp {
     if (mode === 'signup') {
       if (signinForm) signinForm.classList.add('hidden');
       if (signupForm) signupForm.classList.remove('hidden');
-      if (signinBtn) { signinBtn.classList.remove('active'); signinBtn.style.background = 'var(--bg-surface)'; signinBtn.style.color = 'var(--text-main)'; }
-      if (signupBtn) { signupBtn.classList.add('active'); signupBtn.style.background = 'var(--primary)'; signupBtn.style.color = '#fff'; }
+      if (signinBtn) { signinBtn.classList.remove('active'); signinBtn.style.background = ''; signinBtn.style.color = ''; }
+      if (signupBtn) { signupBtn.classList.add('active'); signupBtn.style.background = ''; signupBtn.style.color = ''; }
     } else {
       if (signupForm) signupForm.classList.add('hidden');
       if (signinForm) signinForm.classList.remove('hidden');
-      if (signupBtn) { signupBtn.classList.remove('active'); signupBtn.style.background = 'var(--bg-surface)'; signupBtn.style.color = 'var(--text-main)'; }
-      if (signinBtn) { signinBtn.classList.add('active'); signinBtn.style.background = 'var(--primary)'; signinBtn.style.color = '#fff'; }
+      if (signupBtn) { signupBtn.classList.remove('active'); signupBtn.style.background = ''; signupBtn.style.color = ''; }
+      if (signinBtn) { signinBtn.classList.add('active'); signinBtn.style.background = ''; signinBtn.style.color = ''; }
     }
   }
 
@@ -426,13 +432,13 @@ class UniPulseApp {
     if (mode === 'signup') {
       if (signinForm) signinForm.classList.add('hidden');
       if (signupForm) signupForm.classList.remove('hidden');
-      if (signinBtn) { signinBtn.classList.remove('active'); signinBtn.style.background = 'var(--bg-surface)'; signinBtn.style.color = 'var(--text-main)'; }
-      if (signupBtn) { signupBtn.classList.add('active'); signupBtn.style.background = 'linear-gradient(135deg, #059669, #10b981)'; signupBtn.style.color = '#fff'; }
+      if (signinBtn) { signinBtn.classList.remove('active'); signinBtn.style.background = ''; signinBtn.style.color = ''; }
+      if (signupBtn) { signupBtn.classList.add('active'); signupBtn.style.background = ''; signupBtn.style.color = ''; }
     } else {
       if (signupForm) signupForm.classList.add('hidden');
       if (signinForm) signinForm.classList.remove('hidden');
-      if (signupBtn) { signupBtn.classList.remove('active'); signupBtn.style.background = 'var(--bg-surface)'; signupBtn.style.color = 'var(--text-main)'; }
-      if (signinBtn) { signinBtn.classList.add('active'); signinBtn.style.background = 'linear-gradient(135deg, #059669, #10b981)'; signinBtn.style.color = '#fff'; }
+      if (signupBtn) { signupBtn.classList.remove('active'); signupBtn.style.background = ''; signupBtn.style.color = ''; }
+      if (signinBtn) { signinBtn.classList.add('active'); signinBtn.style.background = ''; signinBtn.style.color = ''; }
     }
   }
 
@@ -861,6 +867,12 @@ class UniPulseApp {
     }
 
     this.currentView = viewName;
+
+    if (viewName === 'login') {
+      document.body.classList.add('login-view-active');
+    } else {
+      document.body.classList.remove('login-view-active');
+    }
 
     const sections = document.querySelectorAll('.view-section');
     sections.forEach(sec => sec.classList.add('hidden'));

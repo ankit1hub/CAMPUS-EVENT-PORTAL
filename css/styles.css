@@ -424,18 +424,18 @@ img {
 .brand-icon {
   width: 2.25rem;
   height: 2.25rem;
-  background: var(--color-primary-container, #9fa0ff);
+  background: #c8643f !important;
   border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--color-on-surface, #191b24);
+  color: #ffffff !important;
   font-size: 1rem;
-  box-shadow: 0 2px 8px rgba(159, 160, 255, 0.3);
+  box-shadow: 0 2px 8px rgba(200, 100, 63, 0.28);
 }
 
 .brand-gradient {
-  color: var(--accent);
+  color: #c8643f;
 }
 
 .brand-text-uni {
@@ -445,7 +445,9 @@ img {
 }
 
 .brand-text-buzz {
-  color: var(--color-primary, #5354ad);
+  color: #c8643f !important;
+  font-weight: 800;
+  letter-spacing: -0.01em;
 }
 
 [data-theme="dark"] .brand-text-uni {
@@ -2202,70 +2204,290 @@ body.admin-active #welcomeHeroSection {
   gap: 0.75rem;
 }
 
-/* ---------------- Login Gateway Section ---------------- */
+/* ---------------- Login Gateway Section (Terracotta Brand Theme) ---------------- */
 .login-page-section {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 3rem 1.25rem;
+  padding: 3.5rem 1.25rem 4.5rem;
+  min-height: calc(100vh - 72px);
+  background-color: #f9f8f3;
+  transition: background-color var(--transition-normal);
+}
+
+[data-theme="dark"] .login-page-section {
+  background-color: #121316;
 }
 
 .login-gateway-card {
-  background: var(--glass-bg);
-  backdrop-filter: var(--glass-blur-lg);
-  -webkit-backdrop-filter: var(--glass-blur-lg);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius-xl);
-  padding: 2.25rem;
+  background: #ffffff;
+  border: 1px solid #eae6de;
+  border-radius: 20px;
+  padding: 2.75rem 2.5rem;
   width: 100%;
-  max-width: 520px;
-  box-shadow: 0 20px 50px rgba(31, 38, 135, 0.08), inset 0 1px 1px rgba(255, 255, 255, 0.95);
+  max-width: 490px;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.04), 0 2px 8px rgba(0, 0, 0, 0.02);
+  transition: all var(--transition-normal);
+}
+
+[data-theme="dark"] .login-gateway-card {
+  background: #1c1d22;
+  border-color: rgba(255, 255, 255, 0.09);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
 }
 
 .gateway-header {
   text-align: center;
-  margin-bottom: 1.75rem;
+  margin-bottom: 1.5rem;
 }
 
 .gateway-logo-icon {
-  width: 3.5rem;
-  height: 3.5rem;
-  border-radius: var(--radius-lg);
-  background: var(--accent);
-  color: #fff;
-  font-size: 1.75rem;
+  width: 58px;
+  height: 58px;
+  border-radius: 14px;
+  background: #c8643f;
+  color: #ffffff;
+  font-size: 1.85rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0 auto 1rem;
+  margin: 0 auto 1.25rem;
+  box-shadow: 0 4px 14px rgba(200, 100, 63, 0.28);
 }
 
+.gateway-title {
+  font-size: 1.85rem;
+  font-weight: 800;
+  color: #191b24;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.35rem;
+}
+
+[data-theme="dark"] .gateway-title {
+  color: #ffffff;
+}
+
+.gateway-subtitle {
+  color: #737373;
+  font-size: 0.88rem;
+  line-height: 1.45;
+  max-width: 390px;
+  margin: 0 auto 1.35rem;
+}
+
+[data-theme="dark"] .gateway-subtitle {
+  color: #a0a0a8;
+}
+
+/* Role Switcher Tabs (Enclosed Segmented Pill) */
 .auth-role-tabs {
   display: flex;
-  gap: 0.5rem;
-  background: var(--bg-canvas);
+  gap: 0.35rem;
+  background: #f5f2eb;
   padding: 0.35rem;
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--border-strong);
+  border-radius: 12px;
+  border: 1px solid #e8e3d8;
+  margin-bottom: 1.25rem;
+}
+
+[data-theme="dark"] .auth-role-tabs {
+  background: #25262e;
+  border-color: rgba(255, 255, 255, 0.1);
 }
 
 .auth-role-tab {
   flex: 1;
   min-height: 44px;
-  border: none;
+  border: 1px solid transparent;
   background: transparent;
-  color: var(--text-secondary);
+  color: #63615e;
   font-weight: 600;
-  border-radius: var(--radius-md);
+  font-size: 0.88rem;
+  border-radius: 9px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+}
+
+[data-theme="dark"] .auth-role-tab {
+  color: #a5a5ad;
+}
+
+.auth-role-tab.active {
+  background: #ffffff;
+  color: #c8643f;
+  border-color: #e2ded4;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+  font-weight: 700;
+}
+
+[data-theme="dark"] .auth-role-tab.active {
+  background: #1e1e24;
+  color: #e0764e;
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+/* Mode Switcher Buttons (Sign In vs Create Account) */
+.btn-gateway-mode {
+  min-height: 44px;
+  border-radius: 10px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  transition: all var(--transition-fast);
+  background: #ffffff;
+  color: #2b2b2b;
+  border: 1px solid #e0ded8;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-gateway-mode.active {
+  background: #c8643f !important;
+  color: #ffffff !important;
+  border-color: #c8643f !important;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(200, 100, 63, 0.25);
+}
+
+[data-theme="dark"] .btn-gateway-mode {
+  background: #25262e;
+  color: #e0e0e0;
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+[data-theme="dark"] .btn-gateway-mode.active {
+  background: #c8643f !important;
+  color: #ffffff !important;
+  border-color: #c8643f !important;
+}
+
+/* Gateway Form Controls */
+.login-gateway-card .form-group {
+  margin-bottom: 1.15rem;
+}
+
+.login-gateway-card .form-label {
+  color: #333333;
+  font-weight: 600;
+  font-size: 0.84rem;
+  margin-bottom: 0.45rem;
+  display: block;
+}
+
+[data-theme="dark"] .login-gateway-card .form-label {
+  color: #d1d1d6;
+}
+
+.login-gateway-card .form-control {
+  min-height: 46px;
+  height: 46px;
+  border-radius: 10px;
+  border: 1px solid #e2ded5;
+  background: #ffffff;
+  color: #191b24;
+  padding: 0 1rem;
+  font-size: 0.92rem;
+  transition: all var(--transition-fast);
+}
+
+.login-gateway-card .form-control:focus {
+  border-color: #c8643f;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(200, 100, 63, 0.15);
+}
+
+[data-theme="dark"] .login-gateway-card .form-control {
+  background: #25262e;
+  border-color: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+}
+
+[data-theme="dark"] .login-gateway-card .form-control:focus {
+  border-color: #e0764e;
+  box-shadow: 0 0 0 3px rgba(224, 118, 78, 0.2);
+}
+
+.login-gateway-card a {
+  color: #c8643f;
+  font-weight: 600;
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.login-gateway-card a:hover {
+  color: #a84725;
+  text-decoration: underline;
+}
+
+/* Gateway Submit Button (Terracotta Pill) */
+.btn-gateway-submit {
+  width: 100% !important;
+  min-height: 48px !important;
+  height: 48px !important;
+  border-radius: 10px !important;
+  background-color: #c8643f !important;
+  color: #ffffff !important;
+  border: 1px solid #c8643f !important;
+  font-weight: 700 !important;
+  font-size: 0.95rem !important;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  box-shadow: 0 4px 14px rgba(200, 100, 63, 0.28);
   cursor: pointer;
   transition: all var(--transition-fast);
 }
 
-.auth-role-tab.active {
-  background: var(--bg-surface);
-  color: var(--accent);
-  border: 1px solid var(--border-strong);
-  box-shadow: var(--shadow-sm);
+.btn-gateway-submit:hover {
+  background-color: #b25432 !important;
+  border-color: #b25432 !important;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(200, 100, 63, 0.35);
+}
+
+/* Minimal Navbar when on Login View */
+body.login-view-active .site-header {
+  background: #f9f8f3 !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.04) !important;
+  box-shadow: none !important;
+}
+
+[data-theme="dark"] body.login-view-active .site-header {
+  background: #121316 !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+body.login-view-active #mainNavLinks,
+body.login-view-active #navNotifBtn,
+body.login-view-active #navAuthBtns,
+body.login-view-active #navUserPill,
+body.login-view-active .brand-sub-text {
+  display: none !important;
+}
+
+body.login-view-active #themeToggleBtn {
+  display: inline-flex !important;
+  width: 40px !important;
+  height: 40px !important;
+  border-radius: 10px !important;
+  border: 1px solid #e0ded8 !important;
+  background: #ffffff !important;
+  align-items: center;
+  justify-content: center;
+  color: #191b24 !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+[data-theme="dark"] body.login-view-active #themeToggleBtn {
+  background: #1c1d22 !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  color: #ffffff !important;
 }
 
 /* ---------------- Toast Notifications ---------------- */
