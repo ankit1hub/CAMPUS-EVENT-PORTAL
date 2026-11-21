@@ -1141,6 +1141,140 @@ img {
   padding-left: 2.5rem;
 }
 
+/* ---------------- Portal Welcome & About Hub Hero ---------------- */
+.portal-welcome-hero {
+  padding: 3.5rem 1rem 2.75rem 1rem;
+  background: linear-gradient(180deg, rgba(159, 160, 255, 0.12) 0%, rgba(255, 255, 255, 0) 100%);
+  border-bottom: 1px solid var(--border-subtle, #ededfa);
+}
+
+[data-theme="dark"] .portal-welcome-hero {
+  background: linear-gradient(180deg, rgba(159, 160, 255, 0.08) 0%, rgba(25, 27, 36, 0) 100%);
+  border-bottom-color: rgba(199, 197, 211, 0.12);
+}
+
+.welcome-hero-content {
+  max-width: 800px;
+  margin: 0 auto;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.welcome-hero-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 0.4rem 1rem;
+  border-radius: 9999px;
+  background: var(--color-secondary-container, #d3e6e4);
+  color: var(--color-on-surface, #191b24);
+  margin-bottom: 1.25rem;
+  border: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+.welcome-hero-title {
+  font-size: 2.35rem;
+  font-weight: 800;
+  line-height: 1.25;
+  letter-spacing: -0.025em;
+  color: var(--text-main, #191b24);
+  font-family: var(--font-heading);
+  margin-bottom: 1rem;
+}
+
+@media (max-width: 768px) {
+  .welcome-hero-title {
+    font-size: 1.75rem;
+  }
+}
+
+.welcome-hero-desc {
+  font-size: 1.05rem;
+  line-height: 1.65;
+  color: var(--text-secondary, #464651);
+  margin-bottom: 1.75rem;
+  max-width: 680px;
+}
+
+[data-theme="dark"] .welcome-hero-desc {
+  color: var(--text-secondary, #c7c5d3);
+}
+
+.welcome-hero-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 2rem;
+}
+
+.btn-explore-scroll {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  min-height: 40px;
+  padding: 0.55rem 1.4rem;
+  border-radius: 9999px;
+  background: var(--color-primary-container, #9fa0ff);
+  color: var(--color-on-surface, #191b24);
+  border: 1px solid var(--color-primary-container, #9fa0ff);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  box-shadow: 0 4px 14px rgba(159, 160, 255, 0.35);
+}
+
+.btn-explore-scroll:hover {
+  background: #8e8fff;
+  border-color: #8e8fff;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(159, 160, 255, 0.45);
+}
+
+.btn-explore-scroll i {
+  font-size: 12px;
+  transition: transform var(--transition-fast);
+}
+
+.btn-explore-scroll:hover i {
+  transform: translateY(3px);
+}
+
+[data-theme="dark"] .btn-explore-scroll {
+  color: var(--color-on-primary-fixed, #0a0169);
+}
+
+.welcome-hero-stats {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.75rem;
+  flex-wrap: wrap;
+}
+
+.hero-feature-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-outline, #777683);
+}
+
+.hero-feature-item i {
+  color: var(--color-primary, #5354ad);
+}
+
+[data-theme="dark"] .hero-feature-item {
+  color: var(--text-secondary, #c7c5d3);
+}
+
 /* ---------------- Feed Header Section (Target Editorial Brand DNA) ---------------- */
 .feed-header-section {
   padding-top: 1.5rem;

@@ -990,6 +990,13 @@ class UniPulseApp {
     if (statRegs) statRegs.textContent = `${totalRegs.toLocaleString()}+`;
   }
 
+  scrollToEvents() {
+    const target = document.getElementById('feedHeaderSection') || document.getElementById('exploreSection');
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
+
   openSavedBookmarks() {
     this.navigate('dashboard');
     this.switchDashboardTab('bookmarks');
