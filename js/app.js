@@ -18,7 +18,7 @@ class UniPulseApp {
     this.adminUser = null;
 
     // Automatic cache version bump / URL query trigger (?clear=1 or ?reset=1)
-    const CURRENT_CACHE_VERSION = '20261121_editorial';
+    const CURRENT_CACHE_VERSION = '20261121_editorial_v3';
     try {
       const storedVersion = localStorage.getItem('unipulse_cache_version');
       const urlParams = new URLSearchParams(window.location.search);
@@ -271,7 +271,10 @@ class UniPulseApp {
     if (tabClubs) tabClubs.style.display = isStudent ? 'inline-flex' : 'none';
     if (tabDashboard) tabDashboard.style.display = isStudent ? 'inline-flex' : 'none';
     if (tabOrganizer) tabOrganizer.style.display = isAdmin ? 'inline-flex' : 'none';
-    if (hostBtn) hostBtn.style.display = isAdmin ? 'inline-flex' : 'none';
+
+    // Strict RBAC: Remove + Host Event from student profile & views; keep ONLY in Admin Portal
+    const isAdminInPortal = isAdmin && this.currentView === 'organizer';
+    if (hostBtn) hostBtn.style.setProperty('display', isAdminInPortal ? 'inline-flex' : 'none', 'important');
     if (heroHostBtn) heroHostBtn.style.display = isAdmin ? 'inline-flex' : 'none';
     if (notifBtn) notifBtn.style.display = 'inline-flex';
 
@@ -806,6 +809,12 @@ class UniPulseApp {
     sections.forEach(sec => sec.classList.add('hidden'));
     const target = document.getElementById(`view-${viewName}`);
     if (target) target.classList.remove('hidden');
+
+    // Strict RBAC: Remove + Host Event from student profile & views; keep ONLY in Admin Portal
+    const hostBtn = document.getElementById('navHostBtn') || document.getElementById('navHostEventBtn');
+    const isAdmin = this.currentUser && this.currentUser.role === 'admin';
+    const isAdminInPortal = isAdmin && viewName === 'organizer';
+    if (hostBtn) hostBtn.style.setProperty('display', isAdminInPortal ? 'inline-flex' : 'none', 'important');
 
     document.querySelectorAll('.nav-links .nav-item-btn').forEach(btn => {
       if (btn.getAttribute('data-view') === viewName) {
