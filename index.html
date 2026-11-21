@@ -373,21 +373,14 @@
           <!-- Main Feed Heading -->
           <h1 class="feed-main-title">University Experience Feed</h1>
 
-          <!-- Search & Action Bar -->
+          <!-- Search Bar -->
           <div class="feed-search-bar-row">
             <div class="feed-search-input-wrap">
               <i class="fa-solid fa-magnifying-glass feed-search-icon"></i>
               <input type="text" id="eventSearchInput" class="feed-search-input" placeholder="Search by name, faculty, guest speaker, venue or society..." oninput="app.handleSearchInput(this.value)">
               <button id="eventSearchClearBtn" class="feed-search-clear hidden" onclick="app.clearSearch()"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            <div class="feed-action-btns">
-              <button class="btn-saved-pill" onclick="app.openSavedBookmarks()">
-                <i class="fa-regular fa-bookmark"></i> Saved Events (<span id="savedEventsCount">0</span>)
-              </button>
-              <button class="btn-idpass-pill" onclick="app.openIDPassPortal()">
-                <i class="fa-solid fa-id-badge"></i> ID Pass Portal
-              </button>
-            </div>
+            <span id="savedEventsCount" style="display: none;" aria-hidden="true">0</span>
           </div>
 
           <!-- Category Quick Filter Pills (Exact 6 Pills from Image 2) -->
