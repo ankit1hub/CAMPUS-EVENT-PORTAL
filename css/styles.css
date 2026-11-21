@@ -579,7 +579,7 @@ img {
   border-radius: 50% !important;
   padding: 0 !important;
   margin: 0;
-  display: inline-flex !important;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   background: transparent !important;
@@ -589,6 +589,21 @@ img {
   position: relative;
   outline: none;
   box-shadow: none !important;
+}
+
+/* Strictly hide user profile pill when logged out or guest */
+[data-user-role="guest"] #navUserPill,
+[data-user-role="guest"] .nav-profile-circle-btn,
+[data-user-role="guest"] .nav-user-pill,
+body:not(.logged-in) #navUserPill,
+body:not(.logged-in) .nav-profile-circle-btn,
+body:not(.logged-in) .nav-user-pill {
+  display: none !important;
+}
+
+[data-user-role="guest"] #navAuthBtns,
+body:not(.logged-in) #navAuthBtns {
+  display: inline-flex !important;
 }
 
 .profile-circle-avatar,
