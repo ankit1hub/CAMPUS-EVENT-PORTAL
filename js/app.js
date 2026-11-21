@@ -300,10 +300,9 @@ class UniPulseApp {
     if (tabDashboard) tabDashboard.style.display = isStudent ? 'inline-flex' : 'none';
     if (tabOrganizer) tabOrganizer.style.display = isAdmin ? 'inline-flex' : 'none';
 
-    // Strict RBAC: Remove + Host Event from student profile & views; keep ONLY in Admin Portal
-    const isAdminInPortal = isAdmin && this.currentView === 'organizer';
-    if (hostBtn) hostBtn.style.setProperty('display', isAdminInPortal ? 'inline-flex' : 'none', 'important');
-    if (heroHostBtn) heroHostBtn.style.display = isAdmin ? 'inline-flex' : 'none';
+    // Strict RBAC: Remove + Host Event from navbar on all views (both student and admin)
+    if (hostBtn) hostBtn.style.setProperty('display', 'none', 'important');
+    if (heroHostBtn) heroHostBtn.style.display = 'none';
     if (notifBtn) notifBtn.style.display = 'inline-flex';
 
     if (mainNavLinks) mainNavLinks.style.display = 'flex';
@@ -841,12 +840,12 @@ class UniPulseApp {
     const target = document.getElementById(`view-${viewName}`);
     if (target) target.classList.remove('hidden');
 
-    // Strict RBAC: Remove + Host Event from student profile & views; keep ONLY in Admin Portal
+    // Strict RBAC: Remove + Host Event from navbar on all views (both student and admin)
     const hostBtn = document.getElementById('navHostBtn') || document.getElementById('navHostEventBtn');
     const isAdmin = this.currentUser && this.currentUser.role === 'admin';
     const isStudent = this.currentUser && this.currentUser.role === 'student';
     const isAdminInPortal = isAdmin && viewName === 'organizer';
-    if (hostBtn) hostBtn.style.setProperty('display', isAdminInPortal ? 'inline-flex' : 'none', 'important');
+    if (hostBtn) hostBtn.style.setProperty('display', 'none', 'important');
 
     if (isAdminInPortal) {
       document.body.classList.add('admin-active');
