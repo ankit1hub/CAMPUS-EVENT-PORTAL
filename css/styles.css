@@ -594,6 +594,13 @@ img {
   color: var(--color-on-primary-fixed, #0a0169);
 }
 
+/* Strict RBAC: Remove Explore Events & Welcome Hero completely from student side */
+[data-user-role="student"] #navTabEvents,
+[data-user-role="student"] #welcomeHeroSection,
+body:not(.admin-active) #navHostBtn {
+  display: none !important;
+}
+
 .nav-actions {
   display: flex;
   align-items: center;

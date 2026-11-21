@@ -18,7 +18,7 @@ class UniPulseApp {
     this.adminUser = null;
 
     // Automatic cache version bump / URL query trigger (?clear=1 or ?reset=1)
-    const CURRENT_CACHE_VERSION = '20261121_editorial_v3';
+    const CURRENT_CACHE_VERSION = '20261121_editorial_v4';
     try {
       const storedVersion = localStorage.getItem('unipulse_cache_version');
       const urlParams = new URLSearchParams(window.location.search);
@@ -88,9 +88,11 @@ class UniPulseApp {
     this.initTicker();
     this.updateUIForRole();
 
-    // Direct guests & students to explore events; direct logged-in admin to organizer portal
+    // Direct guests to explore events; direct students to dashboard; direct admin to organizer portal
     if (this.currentUser && this.currentUser.role === 'admin') {
       this.navigate('organizer');
+    } else if (this.currentUser && this.currentUser.role === 'student') {
+      this.navigate('dashboard');
     } else {
       this.navigate('events');
     }
@@ -253,9 +255,18 @@ class UniPulseApp {
     const isStudent = this.currentUser && this.currentUser.role === 'student';
     const isAdmin = this.currentUser && this.currentUser.role === 'admin';
 
+    document.documentElement.setAttribute('data-user-role', this.currentUser ? this.currentUser.role : 'guest');
+    if (isAdmin && this.currentView === 'organizer') {
+      document.body.classList.add('admin-active');
+    } else {
+      document.body.classList.remove('admin-active');
+    }
+
+    const tabEvents = document.getElementById('navTabEvents');
     const tabClubs = document.getElementById('navTabClubs');
     const tabDashboard = document.getElementById('navTabDashboard');
     const tabOrganizer = document.getElementById('navTabOrganizer');
+    const welcomeHero = document.getElementById('welcomeHeroSection');
     const hostBtn = document.getElementById('navHostBtn') || document.getElementById('navHostEventBtn');
     const heroHostBtn = document.getElementById('heroHostBtn');
     const notifBtn = document.getElementById('navNotifBtn');
@@ -268,6 +279,9 @@ class UniPulseApp {
 
     const mainNavLinks = document.getElementById('mainNavLinks');
 
+    // Strict RBAC: Remove Explore Events & Welcome Hero completely from student side
+    if (tabEvents) tabEvents.style.setProperty('display', isStudent ? 'none' : 'inline-flex', 'important');
+    if (welcomeHero) welcomeHero.style.setProperty('display', isStudent ? 'none' : 'block', 'important');
     if (tabClubs) tabClubs.style.display = isStudent ? 'inline-flex' : 'none';
     if (tabDashboard) tabDashboard.style.display = isStudent ? 'inline-flex' : 'none';
     if (tabOrganizer) tabOrganizer.style.display = isAdmin ? 'inline-flex' : 'none';
@@ -314,8 +328,8 @@ class UniPulseApp {
       if (navAuthBtns) navAuthBtns.style.display = 'flex';
     }
 
-    if (isStudent && (this.currentView === 'organizer' || this.currentView === 'login')) {
-      this.navigate('events');
+    if (isStudent && (this.currentView === 'organizer' || this.currentView === 'login' || this.currentView === 'events')) {
+      this.navigate('dashboard');
     } else if (isAdmin && (this.currentView === 'dashboard' || this.currentView === 'login')) {
       this.navigate('organizer');
     } else if (!this.currentUser && (this.currentView === 'organizer' || this.currentView === 'dashboard')) {
@@ -406,7 +420,7 @@ class UniPulseApp {
       this.saveStorage('unipulse_user', this.currentUser);
       this.updateUIForRole();
       this.showToast(`🎓 Welcome back, ${this.currentUser.name}!`, 'success');
-      this.navigate('events');
+      this.navigate('dashboard');
     } else {
       this.showToast(`Authentication failed: ${res.error}`, 'error');
     }
@@ -433,7 +447,7 @@ class UniPulseApp {
       this.updateUIForRole();
       this.triggerConfetti();
       this.showToast(`🎉 Account Created! Welcome, ${this.currentUser.name}`, 'success');
-      this.navigate('events');
+      this.navigate('dashboard');
     } else {
       this.showToast(`Sign up failed: ${res.error}`, 'error');
     }
@@ -584,7 +598,7 @@ class UniPulseApp {
       this.closeModal('modalAuth');
       this.updateUIForRole();
       this.showToast(`🎓 Welcome back, ${this.currentUser.name}!`, 'success');
-      this.navigate('events');
+      this.navigate('dashboard');
     } else {
       this.showToast(`Authentication failed: ${res.error}`, 'error');
     }
@@ -612,7 +626,7 @@ class UniPulseApp {
       this.updateUIForRole();
       this.triggerConfetti();
       this.showToast(`🎉 Account Created! Welcome, ${this.currentUser.name}`, 'success');
-      this.navigate('events');
+      this.navigate('dashboard');
     } else {
       this.showToast(`Sign up failed: ${res.error}`, 'error');
     }
@@ -701,7 +715,7 @@ class UniPulseApp {
     this.closeModal('modalAuth');
     this.updateUIForRole();
     this.showToast(`🎓 Logged in as Student: ${this.currentUser.name}`, 'success');
-    this.navigate('events');
+    this.navigate('dashboard');
   }
 
   loginAsDemoAdmin() {
@@ -813,8 +827,21 @@ class UniPulseApp {
     // Strict RBAC: Remove + Host Event from student profile & views; keep ONLY in Admin Portal
     const hostBtn = document.getElementById('navHostBtn') || document.getElementById('navHostEventBtn');
     const isAdmin = this.currentUser && this.currentUser.role === 'admin';
+    const isStudent = this.currentUser && this.currentUser.role === 'student';
     const isAdminInPortal = isAdmin && viewName === 'organizer';
     if (hostBtn) hostBtn.style.setProperty('display', isAdminInPortal ? 'inline-flex' : 'none', 'important');
+
+    if (isAdminInPortal) {
+      document.body.classList.add('admin-active');
+    } else {
+      document.body.classList.remove('admin-active');
+    }
+
+    // Strict RBAC: Remove Explore Events & Welcome Hero completely from student side
+    const tabEvents = document.getElementById('navTabEvents');
+    const welcomeHero = document.getElementById('welcomeHeroSection');
+    if (tabEvents) tabEvents.style.setProperty('display', isStudent ? 'none' : 'inline-flex', 'important');
+    if (welcomeHero) welcomeHero.style.setProperty('display', isStudent ? 'none' : 'block', 'important');
 
     document.querySelectorAll('.nav-links .nav-item-btn').forEach(btn => {
       if (btn.getAttribute('data-view') === viewName) {
