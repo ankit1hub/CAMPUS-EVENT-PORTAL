@@ -625,9 +625,7 @@ img {
   border-color: rgba(199, 197, 211, 0.22);
 }
 
-/* Strict RBAC: Remove Explore Events & Welcome Hero completely from student side */
-[data-user-role="student"] #navTabEvents,
-[data-user-role="student"] #welcomeHeroSection,
+/* Strict RBAC: Remove + Host Event when not in admin portal */
 body:not(.admin-active) #navHostBtn {
   display: none !important;
 }
@@ -1181,18 +1179,23 @@ body:not(.admin-active) #navHostBtn {
 
 /* ---------------- Portal Welcome & About Hub Hero ---------------- */
 .portal-welcome-hero {
-  padding: 3.5rem 1rem 2.75rem 1rem;
-  background: linear-gradient(180deg, rgba(159, 160, 255, 0.12) 0%, rgba(255, 255, 255, 0) 100%);
+  min-height: calc(85vh - 72px);
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  padding: 4.5rem 1.5rem 4rem 1.5rem;
+  background: radial-gradient(circle at 50% 25%, rgba(159, 160, 255, 0.18) 0%, rgba(211, 230, 228, 0.12) 45%, var(--bg-surface) 100%);
   border-bottom: 1px solid var(--border-subtle, #ededfa);
+  position: relative;
 }
 
 [data-theme="dark"] .portal-welcome-hero {
-  background: linear-gradient(180deg, rgba(159, 160, 255, 0.08) 0%, rgba(25, 27, 36, 0) 100%);
-  border-bottom-color: rgba(199, 197, 211, 0.12);
+  background: radial-gradient(circle at 50% 25%, rgba(159, 160, 255, 0.10) 0%, rgba(46, 48, 57, 0.3) 55%, var(--bg-surface) 100%);
+  border-bottom-color: rgba(199, 197, 211, 0.15);
 }
 
 .welcome-hero-content {
-  max-width: 800px;
+  max-width: 840px;
   margin: 0 auto;
   text-align: center;
   display: flex;
@@ -1204,40 +1207,41 @@ body:not(.admin-active) #navHostBtn {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  font-size: 0.78rem;
+  font-size: 0.8rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
-  padding: 0.4rem 1rem;
+  letter-spacing: 0.08em;
+  padding: 0.45rem 1.15rem;
   border-radius: 9999px;
   background: var(--color-secondary-container, #d3e6e4);
   color: var(--color-on-surface, #191b24);
-  margin-bottom: 1.25rem;
-  border: 1px solid rgba(0, 0, 0, 0.04);
+  margin-bottom: 1.5rem;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
 .welcome-hero-title {
-  font-size: 2.35rem;
+  font-size: 2.65rem;
   font-weight: 800;
-  line-height: 1.25;
-  letter-spacing: -0.025em;
+  line-height: 1.2;
+  letter-spacing: -0.03em;
   color: var(--text-main, #191b24);
   font-family: var(--font-heading);
-  margin-bottom: 1rem;
+  margin-bottom: 1.25rem;
 }
 
 @media (max-width: 768px) {
   .welcome-hero-title {
-    font-size: 1.75rem;
+    font-size: 1.85rem;
   }
 }
 
 .welcome-hero-desc {
-  font-size: 1.05rem;
-  line-height: 1.65;
+  font-size: 1.1rem;
+  line-height: 1.7;
   color: var(--text-secondary, #464651);
-  margin-bottom: 1.75rem;
-  max-width: 680px;
+  margin-bottom: 2rem;
+  max-width: 720px;
 }
 
 [data-theme="dark"] .welcome-hero-desc {
@@ -1248,35 +1252,35 @@ body:not(.admin-active) #navHostBtn {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 2rem;
+  margin-bottom: 2.25rem;
 }
 
 .btn-explore-scroll {
   display: inline-flex;
   align-items: center;
-  gap: 0.55rem;
-  min-height: 40px;
-  padding: 0.55rem 1.4rem;
+  gap: 0.6rem;
+  min-height: 44px;
+  padding: 0.65rem 1.65rem;
   border-radius: 9999px;
   background: var(--color-primary-container, #9fa0ff);
   color: var(--color-on-surface, #191b24);
   border: 1px solid var(--color-primary-container, #9fa0ff);
-  font-size: 14px;
+  font-size: 14.5px;
   font-weight: 700;
   cursor: pointer;
   transition: all var(--transition-fast);
-  box-shadow: 0 4px 14px rgba(159, 160, 255, 0.35);
+  box-shadow: 0 4px 16px rgba(159, 160, 255, 0.4);
 }
 
 .btn-explore-scroll:hover {
   background: #8e8fff;
   border-color: #8e8fff;
   transform: translateY(-2px);
-  box-shadow: 0 6px 18px rgba(159, 160, 255, 0.45);
+  box-shadow: 0 6px 20px rgba(159, 160, 255, 0.5);
 }
 
 .btn-explore-scroll i {
-  font-size: 12px;
+  font-size: 12.5px;
   transition: transform var(--transition-fast);
 }
 
@@ -1299,8 +1303,8 @@ body:not(.admin-active) #navHostBtn {
 .hero-feature-item {
   display: inline-flex;
   align-items: center;
-  gap: 0.45rem;
-  font-size: 13px;
+  gap: 0.5rem;
+  font-size: 13.5px;
   font-weight: 600;
   color: var(--color-outline, #777683);
 }

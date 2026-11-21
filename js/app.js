@@ -18,7 +18,7 @@ class UniPulseApp {
     this.adminUser = null;
 
     // Automatic cache version bump / URL query trigger (?clear=1 or ?reset=1)
-    const CURRENT_CACHE_VERSION = '20261121_editorial_v5';
+    const CURRENT_CACHE_VERSION = '20261121_editorial_v6';
     try {
       const storedVersion = localStorage.getItem('unipulse_cache_version');
       const urlParams = new URLSearchParams(window.location.search);
@@ -88,11 +88,9 @@ class UniPulseApp {
     this.initTicker();
     this.updateUIForRole();
 
-    // Direct guests to explore events; direct students to dashboard; direct admin to organizer portal
+    // Direct admin to organizer portal; direct guests & students to explore events page with welcome hero
     if (this.currentUser && this.currentUser.role === 'admin') {
       this.navigate('organizer');
-    } else if (this.currentUser && this.currentUser.role === 'student') {
-      this.navigate('dashboard');
     } else {
       this.navigate('events');
     }
@@ -279,9 +277,9 @@ class UniPulseApp {
 
     const mainNavLinks = document.getElementById('mainNavLinks');
 
-    // Strict RBAC: Remove Explore Events & Welcome Hero completely from student side
-    if (tabEvents) tabEvents.style.setProperty('display', isStudent ? 'none' : 'inline-flex', 'important');
-    if (welcomeHero) welcomeHero.style.setProperty('display', isStudent ? 'none' : 'block', 'important');
+    // Welcome Hero & Explore Events visible on events page
+    if (tabEvents) tabEvents.style.display = 'inline-flex';
+    if (welcomeHero) welcomeHero.style.display = 'flex';
     if (tabClubs) tabClubs.style.display = isStudent ? 'inline-flex' : 'none';
     if (tabDashboard) tabDashboard.style.display = isStudent ? 'inline-flex' : 'none';
     if (tabOrganizer) tabOrganizer.style.display = isAdmin ? 'inline-flex' : 'none';
@@ -331,8 +329,8 @@ class UniPulseApp {
       if (navAuthBtns) navAuthBtns.style.display = 'flex';
     }
 
-    if (isStudent && (this.currentView === 'organizer' || this.currentView === 'login' || this.currentView === 'events')) {
-      this.navigate('dashboard');
+    if (isStudent && (this.currentView === 'organizer' || this.currentView === 'login')) {
+      this.navigate('events');
     } else if (isAdmin && (this.currentView === 'dashboard' || this.currentView === 'login')) {
       this.navigate('organizer');
     } else if (!this.currentUser && (this.currentView === 'organizer' || this.currentView === 'dashboard')) {
@@ -840,11 +838,11 @@ class UniPulseApp {
       document.body.classList.remove('admin-active');
     }
 
-    // Strict RBAC: Remove Explore Events & Welcome Hero completely from student side
+    // Welcome Hero & Explore Events visible on events page
     const tabEvents = document.getElementById('navTabEvents');
     const welcomeHero = document.getElementById('welcomeHeroSection');
-    if (tabEvents) tabEvents.style.setProperty('display', isStudent ? 'none' : 'inline-flex', 'important');
-    if (welcomeHero) welcomeHero.style.setProperty('display', isStudent ? 'none' : 'block', 'important');
+    if (tabEvents) tabEvents.style.display = 'inline-flex';
+    if (welcomeHero) welcomeHero.style.display = 'flex';
 
     document.querySelectorAll('.nav-links .nav-item-btn').forEach(btn => {
       if (btn.getAttribute('data-view') === viewName) {
@@ -1030,9 +1028,12 @@ class UniPulseApp {
   }
 
   scrollToEvents() {
-    const target = document.getElementById('feedHeaderSection') || document.getElementById('exploreSection');
+    const target = document.getElementById('feedHeaderSection') || document.getElementById('exploreSection') || document.getElementById('eventsGrid');
     if (target) {
-      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      const navEl = document.querySelector('.main-header');
+      const navOffset = navEl ? navEl.offsetHeight + 10 : 80;
+      const targetPos = target.getBoundingClientRect().top + window.pageYOffset - navOffset;
+      window.scrollTo({ top: targetPos, behavior: 'smooth' });
     }
   }
 
