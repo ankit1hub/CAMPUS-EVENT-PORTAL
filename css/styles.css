@@ -569,29 +569,60 @@ img {
   opacity: 0.7;
 }
 
+/* ---------------- Small Round Profile Avatar Button ---------------- */
+.nav-profile-circle-btn,
 .nav-user-pill {
-  display: inline-flex;
+  width: 40px !important;
+  height: 40px !important;
+  min-width: 40px !important;
+  min-height: 40px !important;
+  border-radius: 50% !important;
+  padding: 0 !important;
+  margin: 0;
+  display: inline-flex !important;
   align-items: center;
-  gap: 0.5rem;
-  background: #5354ad;
-  color: #ffffff;
-  padding: 0.45rem 1rem;
-  border-radius: 12px;
-  font-size: 13.5px;
-  font-weight: 700;
+  justify-content: center;
+  background: transparent !important;
+  border: none !important;
   cursor: pointer;
   transition: all var(--transition-fast);
-  box-shadow: 0 2px 8px rgba(83, 84, 173, 0.25);
+  position: relative;
+  outline: none;
+  box-shadow: none !important;
 }
 
-.nav-user-pill:hover {
-  background: #454696;
-  transform: translateY(-1px);
+.profile-circle-avatar,
+.nav-user-pill .profile-circle-avatar,
+#navAvatar {
+  width: 40px !important;
+  height: 40px !important;
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #5354ad, #6366f1);
+  color: #ffffff !important;
+  font-size: 13.5px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  border: 2px solid var(--border-subtle, #ededfa);
+  box-shadow: 0 2px 8px rgba(83, 84, 173, 0.28);
+  transition: all var(--transition-fast);
+  user-select: none;
 }
 
-[data-theme="dark"] .nav-user-pill {
-  background: var(--color-primary-container, #9fa0ff);
-  color: var(--color-on-primary-fixed, #0a0169);
+.nav-profile-circle-btn:hover .profile-circle-avatar,
+.nav-user-pill:hover .profile-circle-avatar,
+.nav-user-pill:hover #navAvatar {
+  transform: scale(1.08);
+  border-color: var(--color-primary-container, #9fa0ff);
+  box-shadow: 0 4px 14px rgba(83, 84, 173, 0.42);
+}
+
+[data-theme="dark"] .profile-circle-avatar,
+[data-theme="dark"] .nav-user-pill .profile-circle-avatar,
+[data-theme="dark"] #navAvatar {
+  border-color: rgba(199, 197, 211, 0.22);
 }
 
 /* Strict RBAC: Remove Explore Events & Welcome Hero completely from student side */

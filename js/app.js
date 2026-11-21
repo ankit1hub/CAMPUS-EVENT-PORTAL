@@ -18,7 +18,7 @@ class UniPulseApp {
     this.adminUser = null;
 
     // Automatic cache version bump / URL query trigger (?clear=1 or ?reset=1)
-    const CURRENT_CACHE_VERSION = '20261121_editorial_v4';
+    const CURRENT_CACHE_VERSION = '20261121_editorial_v5';
     try {
       const storedVersion = localStorage.getItem('unipulse_cache_version');
       const urlParams = new URLSearchParams(window.location.search);
@@ -309,8 +309,11 @@ class UniPulseApp {
         const initials = nameToUse.split(/[\s._-]+/).filter(Boolean).map(n => n[0]).slice(0, 2).join('').toUpperCase();
         navAvatar.textContent = initials || 'ST';
         navAvatar.style.background = isAdmin 
-          ? 'var(--accent-emerald)' 
-          : 'var(--accent)';
+          ? 'linear-gradient(135deg, #059669, #10b981)' 
+          : 'linear-gradient(135deg, #5354ad, #6366f1)';
+      }
+      if (navUserPill) {
+        navUserPill.setAttribute('title', `${displayName || 'User'} (${isAdmin ? 'Admin' : 'Student'})`);
       }
       if (navRole) {
         if (isAdmin) {

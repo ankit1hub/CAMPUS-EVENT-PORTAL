@@ -105,14 +105,12 @@
           <button class="nav-auth-link" onclick="app.openAuthModal('admin')">Admin Portal</button>
         </div>
 
-        <!-- Logged-in User Profile Dropdown Pill (Image 2) -->
-        <div class="nav-user-pill" id="navUserPill" onclick="app.openUserDropdownModal()" title="User Account" style="display: none;">
-          <i class="fa-solid fa-user"></i>
-          <span id="navUserName">Student</span>
-          <i class="fa-solid fa-chevron-down" style="font-size: 10px; margin-left: 2px;"></i>
-          <span id="navAvatar" style="display: none;">JD</span>
+        <!-- Logged-in User Profile Round Avatar (Compact Profile Circle) -->
+        <button class="nav-profile-circle-btn nav-user-pill" id="navUserPill" onclick="app.openUserDropdownModal()" title="User Account & Profile" aria-label="User Account" style="display: none;">
+          <span class="profile-circle-avatar" id="navAvatar">AG</span>
+          <span id="navUserName" style="display: none;">Student</span>
           <span id="navUserRole" style="display: none;"><span class="role-pill role-student">Student</span></span>
-        </div>
+        </button>
       </div>
     </div>
   </header>
