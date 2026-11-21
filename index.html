@@ -56,27 +56,27 @@
         </div>
       </a>
 
-      <!-- Desktop Navigation Tabs -->
+      <!-- Desktop Navigation Tabs (Image 2 Clean Style) -->
       <nav class="nav-links" id="mainNavLinks">
         <button class="nav-item-btn active" id="navTabEvents" data-view="events" onclick="app.navigate('events')">
-          <i class="fa-solid fa-compass"></i> Explore Events
+          Explore Events
         </button>
         <button class="nav-item-btn" id="navTabCalendar" data-view="calendar" onclick="app.navigate('calendar')">
-          <i class="fa-regular fa-calendar-days"></i> Calendar
+          Calendar
         </button>
         
         <!-- Student-Only Tabs -->
         <button class="nav-item-btn" id="navTabClubs" data-view="clubs" onclick="app.navigate('clubs')">
-          <i class="fa-solid fa-people-group"></i> Clubs & Societies
+          Clubs & Societies
         </button>
         <button class="nav-item-btn" id="navTabDashboard" data-view="dashboard" onclick="app.navigate('dashboard')">
-          <i class="fa-solid fa-ticket"></i> My Registrations
+          My Registrations
           <span class="icon-badge" id="myRegistrationsBadge" style="position: static; margin-left: 4px; display: none;">0</span>
         </button>
 
         <!-- Admin/Organizer-Only Tab -->
         <button class="nav-item-btn" id="navTabOrganizer" data-view="organizer" onclick="app.navigate('organizer')">
-          <i class="fa-solid fa-chart-line"></i> Admin Studio
+          Admin Studio
         </button>
       </nav>
 
@@ -95,27 +95,23 @@
 
         <!-- + Host Event Pill (Target UI) -->
         <button class="btn btn-primary btn-sm btn-host-pill" id="navHostBtn" onclick="app.handleHostEventClick()">
-          <i class="fa-solid fa-plus"></i> Host Event
+          + Host Event
         </button>
 
-
-        <!-- Logged-in User Profile Dropdown (Shown only when authenticated) -->
-        <div class="user-menu-btn" id="navUserPill" onclick="app.openUserDropdownModal()" title="User Account" style="display: none;">
-          <div class="user-avatar" id="navAvatar">JD</div>
-          <div class="user-meta">
-            <div class="user-name" id="navUserName">Student Member</div>
-            <div class="user-role-label" id="navUserRole"><span class="role-pill role-student">🎓 Student</span></div>
-          </div>
+        <!-- Logged-out Auth Action Links (Matching Image 2) -->
+        <div id="navAuthBtns" class="nav-auth-links">
+          <button class="nav-auth-link" onclick="app.openAuthModal('student')">Student Login</button>
+          <span class="nav-auth-sep">•</span>
+          <button class="nav-auth-link" onclick="app.openAuthModal('admin')">Admin Portal</button>
         </div>
 
-        <!-- Logged-out Auth Action Buttons (Default for guests) -->
-        <div id="navAuthBtns" class="flex items-center gap-2" style="display: flex;">
-          <button class="btn btn-secondary btn-sm" onclick="app.openAuthModal('student')">
-            <i class="fa-solid fa-user-graduate"></i> Student Login
-          </button>
-          <button class="btn btn-primary btn-sm" onclick="app.openAuthModal('admin')">
-            <i class="fa-solid fa-shield-halved"></i> Admin Portal
-          </button>
+        <!-- Logged-in User Profile Dropdown Pill (Image 2) -->
+        <div class="nav-user-pill" id="navUserPill" onclick="app.openUserDropdownModal()" title="User Account" style="display: none;">
+          <i class="fa-solid fa-user"></i>
+          <span id="navUserName">Student</span>
+          <i class="fa-solid fa-chevron-down" style="font-size: 10px; margin-left: 2px;"></i>
+          <span id="navAvatar" style="display: none;">JD</span>
+          <span id="navUserRole" style="display: none;"><span class="role-pill role-student">Student</span></span>
         </div>
       </div>
     </div>
@@ -336,20 +332,20 @@
       <!-- University Experience Feed Header (Target UI) -->
       <div class="feed-header-section">
         <div class="container">
-          <!-- Top Row: Season Pill + Portal Switcher -->
-          <div class="feed-top-row flex items-center justify-between" style="margin-bottom: 0.5rem; flex-wrap: wrap; gap: 0.75rem;">
-            <div class="feed-season-badge">
-              <span class="season-dot"></span>
-              <span>• SEMESTER LIVE SEASON • FALL 2026</span>
-            </div>
+          <!-- Season Badge Pill -->
+          <div class="feed-season-badge" style="margin-bottom: 0.5rem;">
+            <span class="season-dot"></span>
+            <span>• SEMESTER LIVE SEASON • FALL 2025</span>
+          </div>
+
+          <!-- Title Row: Heading on Left, Portal Switcher on Right (Image 2) -->
+          <div class="feed-title-row">
+            <h1 class="feed-main-title">University Experience Feed</h1>
             <div class="feed-portal-toggle">
               <button class="portal-toggle-btn active" id="heroToggleStudent" onclick="app.navigate('events')">Student Portal</button>
               <button class="portal-toggle-btn" id="heroToggleAdmin" onclick="app.navigate('organizer')">Admin / Host Studio</button>
             </div>
           </div>
-
-          <!-- Main Feed Heading -->
-          <h1 class="feed-main-title">University Experience Feed</h1>
 
           <!-- Search & Action Bar -->
           <div class="feed-search-bar-row">
@@ -368,7 +364,7 @@
             </div>
           </div>
 
-          <!-- Category Quick Filter Pills -->
+          <!-- Category Quick Filter Pills (Exact 6 Pills from Image 2) -->
           <div class="category-pills-row" id="exploreSection">
             <button class="category-pill active" data-category="all" onclick="app.selectCategoryPill('all')">
               <span>All Events</span> <span class="pill-badge" id="countAll">6</span>
@@ -386,10 +382,7 @@
               <span>Sports</span> <span class="pill-badge" id="countSports">1</span>
             </button>
             <button class="category-pill" data-category="workshop" onclick="app.selectCategoryPill('workshop')">
-              <span>Workshops</span> <span class="pill-badge" id="countWorkshop">1</span>
-            </button>
-            <button class="category-pill" data-category="gaming" onclick="app.selectCategoryPill('gaming')">
-              <span>Gaming & Esports</span> <span class="pill-badge" id="countGaming">1</span>
+              <span>Workshops</span> <span class="pill-badge" id="countWorkshop">2</span>
             </button>
           </div>
         </div>
@@ -397,7 +390,7 @@
 
       <!-- Events List Grid -->
       <div class="container" style="padding-top: 0.5rem; padding-bottom: 3.5rem;">
-        <div class="flex items-center justify-between" style="margin-bottom: 1.25rem;">
+        <div class="flex items-center justify-between" id="eventsLineupHeader" style="display: none;" aria-hidden="true">
           <h2 style="font-size: 1.35rem; font-weight: 700; color: var(--text-main);" id="eventsSectionTitle">Curated Campus Lineup</h2>
           <span style="font-size: 0.85rem; color: var(--text-secondary); font-weight: 500;" id="eventsMatchCounter">Showing 6 events</span>
         </div>

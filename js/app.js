@@ -926,7 +926,7 @@ class UniPulseApp {
             <div class="event-card-meta-top">
               <div class="event-date-text">
                 <i class="fa-regular fa-calendar"></i>
-                <span>${this.formatDate(e.date)} • ${e.time.split('-')[0].trim()}</span>
+                <span>${e.dateDisplay || `${this.formatDate(e.date)} • ${e.time.split('-')[0].trim()}`}</span>
               </div>
               <span class="event-duration-badge">${subBadge}</span>
             </div>
@@ -942,38 +942,15 @@ class UniPulseApp {
               <span>${e.venue}</span>
             </div>
 
-            <div class="event-progress-wrap">
-              <div class="progress-header">
-                <span><i class="fa-solid ${isCancelled ? 'fa-ban' : 'fa-fire'}" style="color: ${isCancelled ? 'var(--color-tertiary)' : 'var(--color-tertiary-container)'}; margin-right: 4px;"></i> ${isCancelled ? '<strong style="color: var(--color-tertiary)">EVENT CANCELLED</strong>' : `${fillPercentage}% Full`}</span>
-                <span>${isCancelled ? '<strong style="color: var(--color-tertiary)">REGISTRATIONS CLOSED</strong>' : (seatsLeft > 0 ? `${seatsLeft} seats left` : '<strong style="color: var(--color-tertiary)">SOLD OUT</strong>')}</span>
-              </div>
-              <div class="progress-bar-bg">
-                <div class="progress-bar-fill" style="width: ${fillPercentage}%; background: ${isCancelled ? 'var(--color-tertiary)' : (fillPercentage > 80 ? 'var(--color-tertiary-container)' : 'var(--color-primary-container)')};"></div>
-              </div>
-            </div>
-
             <div class="event-card-footer">
-              <button class="btn btn-secondary btn-sm" onclick="app.openEventDetails('${e.id}')">
-                <i class="fa-regular fa-eye"></i> View Brief
-              </button>
-              ${isAdmin ? `
-                <button class="btn btn-secondary btn-sm" style="${isCancelled ? 'color: var(--accent-emerald); border-color: var(--accent-emerald); background: rgba(16, 185, 129, 0.12);' : 'color: var(--color-tertiary); border-color: var(--color-tertiary); background: rgba(244, 63, 94, 0.12);'} font-weight: 700;" onclick="app.toggleCancelEvent('${e.id}')" title="${isCancelled ? 'Restore event' : 'Cancel event'}">
-                  <i class="fa-solid ${isCancelled ? 'fa-rotate-left' : 'fa-ban'}"></i> ${isCancelled ? 'Restore' : 'Cancel'}
-                </button>
-                <button class="btn btn-secondary btn-sm" style="color: var(--color-tertiary); border-color: rgba(225, 29, 72, 0.35); background: rgba(244, 63, 94, 0.08); font-weight: 700;" onclick="app.deleteEvent('${e.id}')" title="Permanently delete this event">
-                  <i class="fa-solid fa-trash-can"></i>
-                </button>
-              ` : isCancelled ? `
-                <button class="btn btn-secondary btn-sm" style="color: var(--color-tertiary); border-color: var(--color-tertiary); background: rgba(244, 63, 94, 0.08); font-weight: 700;" disabled>
-                  <i class="fa-solid fa-ban"></i> Cancelled
-                </button>
+              <button class="btn btn-secondary btn-sm" onclick="app.openEventDetails('${e.id}')">View Brief</button>
+              ${isCancelled ? `
+                <button class="btn btn-secondary btn-sm" disabled>Cancelled</button>
               ` : isRegistered ? `
-                <button class="btn btn-secondary btn-sm btn-booked" onclick="app.viewTicketForEvent('${e.id}')">
-                  <i class="fa-solid fa-circle-check"></i> Booked
-                </button>
+                <button class="btn btn-secondary btn-sm btn-booked" onclick="app.viewTicketForEvent('${e.id}')">Booked</button>
               ` : `
                 <button class="btn btn-primary btn-sm" onclick="app.openRegistrationModal('${e.id}')" ${seatsLeft <= 0 ? 'disabled' : ''}>
-                  <i class="fa-solid fa-ticket"></i> ${seatsLeft <= 0 ? 'Sold Out' : actionLabel}
+                  ${seatsLeft <= 0 ? 'Sold Out' : actionLabel}
                 </button>
               `}
             </div>
