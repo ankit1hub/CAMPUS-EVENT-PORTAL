@@ -32,7 +32,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   
   <!-- Custom CSS -->
-  <link rel="stylesheet" href="css/styles.css?v=20261122_v10_login_home">
+  <link rel="stylesheet" href="css/styles.css?v=20261122_v10_admin_card_actions">
 </head>
 <body>
 
@@ -409,6 +409,25 @@
 
       <!-- Events List Grid -->
       <div class="container" style="padding-top: 0.5rem; padding-bottom: 3.5rem;">
+        <!-- Administrator Home Notice Bar (Visible only for Admin) -->
+        <div id="adminEventsNotice" style="display: none; margin-bottom: 1.25rem;">
+          <div class="admin-home-banner">
+            <div style="display: flex; align-items: center; gap: 0.65rem;">
+              <div style="width: 32px; height: 32px; border-radius: var(--radius-full); background: rgba(16, 185, 129, 0.2); color: var(--accent-emerald); display: flex; align-items: center; justify-content: center; font-size: 0.95rem;">
+                <i class="fa-solid fa-shield-halved"></i>
+              </div>
+              <div>
+                <div style="font-weight: 700; font-size: 0.88rem; color: var(--text-main);">Administrator Controls Active</div>
+                <div style="font-size: 0.76rem; color: var(--text-muted);">You can View Event briefs, Cancel (or Restore), or Permanently Delete any event directly below.</div>
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              <button class="btn btn-secondary btn-sm" onclick="app.navigate('organizer')"><i class="fa-solid fa-chart-line"></i> Admin Studio</button>
+              <button class="btn btn-primary btn-sm" onclick="app.openCreateEventModal()"><i class="fa-solid fa-plus"></i> + Create Event</button>
+            </div>
+          </div>
+        </div>
+
         <div class="flex items-center justify-between" id="eventsLineupHeader" style="display: none;" aria-hidden="true">
           <h2 style="font-size: 1.35rem; font-weight: 700; color: var(--text-main);" id="eventsSectionTitle">Curated Campus Lineup</h2>
           <span style="font-size: 0.85rem; color: var(--text-secondary); font-weight: 500;" id="eventsMatchCounter">Showing 6 events</span>
@@ -574,6 +593,9 @@
             <select id="orgEventFilterSelect" class="form-control" style="font-weight: 600; padding: 0.55rem 0.85rem; flex: 1;" onchange="app.handleOrgEventFilterChange(this.value)">
               <option value="all">🌐 All Events (Campus Overview)</option>
             </select>
+            <button id="orgViewEventBtn" class="btn btn-secondary btn-sm" style="display: none; font-weight: 700; white-space: nowrap;" onclick="app.openEventDetails(app.selectedOrgEvent)">
+              <i class="fa-regular fa-eye"></i> View Event
+            </button>
             <button id="orgCancelEventBtn" class="btn btn-secondary btn-sm" style="display: none; color: var(--accent-rose); border-color: var(--accent-rose); background: rgba(244, 63, 94, 0.08); font-weight: 700; white-space: nowrap;" onclick="app.toggleCancelEvent(app.selectedOrgEvent)">
               <i class="fa-solid fa-ban"></i> Cancel Event
             </button>
@@ -1620,8 +1642,8 @@
   </footer>
 
   <!-- App Data & Scripts -->
-  <script src="js/data.js?v=20261122_v10_login_home"></script>
-  <script src="js/supabase.js?v=20261122_v10_login_home"></script>
-  <script src="js/app.js?v=20261122_v10_login_home"></script>
+  <script src="js/data.js?v=20261122_v10_admin_card_actions"></script>
+  <script src="js/supabase.js?v=20261122_v10_admin_card_actions"></script>
+  <script src="js/app.js?v=20261122_v10_admin_card_actions"></script>
 </body>
 </html>

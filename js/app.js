@@ -9,7 +9,7 @@ class UniPulseApp {
     this.adminUser = null;
 
     // Automatic cache version bump / URL query trigger (?clear=1 or ?reset=1)
-    const CURRENT_CACHE_VERSION = '20261122_v10_login_home';
+    const CURRENT_CACHE_VERSION = '20261122_v10_admin_card_actions';
     try {
       const storedVersion = localStorage.getItem('unipulse_cache_version');
       const urlParams = new URLSearchParams(window.location.search);
@@ -312,6 +312,11 @@ class UniPulseApp {
     if (tabClubs) tabClubs.style.display = isStudent ? 'inline-flex' : 'none';
     if (tabDashboard) tabDashboard.style.display = isStudent ? 'inline-flex' : 'none';
     if (tabOrganizer) tabOrganizer.style.display = isAdmin ? 'inline-flex' : 'none';
+
+    const adminEventsNotice = document.getElementById('adminEventsNotice');
+    if (adminEventsNotice) {
+      adminEventsNotice.style.display = (isAdmin && this.currentView === 'events') ? 'block' : 'none';
+    }
 
     // Strict RBAC: Remove + Host Event from navbar on all views (both student and admin)
     if (hostBtn) hostBtn.style.setProperty('display', 'none', 'important');
@@ -907,6 +912,11 @@ class UniPulseApp {
       }
     }
 
+    const adminEventsNotice = document.getElementById('adminEventsNotice');
+    if (adminEventsNotice) {
+      adminEventsNotice.style.display = (isAdmin && viewName === 'events') ? 'block' : 'none';
+    }
+
     document.querySelectorAll('.nav-links .nav-item-btn').forEach(btn => {
       if (btn.getAttribute('data-view') === viewName) {
         btn.classList.add('active');
@@ -1042,16 +1052,28 @@ class UniPulseApp {
               <span>${e.venue}</span>
             </div>
 
-            <div class="event-card-footer">
-              <button class="btn btn-secondary btn-sm" onclick="app.openEventDetails('${e.id}')">View Brief</button>
-              ${isCancelled ? `
-                <button class="btn btn-secondary btn-sm" disabled>Cancelled</button>
-              ` : isRegistered ? `
-                <button class="btn btn-secondary btn-sm btn-booked" onclick="app.viewTicketForEvent('${e.id}')">Booked</button>
-              ` : `
-                <button class="btn btn-primary btn-sm" onclick="app.openRegistrationModal('${e.id}')" ${seatsLeft <= 0 ? 'disabled' : ''}>
-                  ${seatsLeft <= 0 ? 'Sold Out' : actionLabel}
+            <div class="event-card-footer ${isAdmin ? 'admin-card-footer' : ''}">
+              ${isAdmin ? `
+                <button class="btn btn-secondary btn-sm btn-admin-view" onclick="app.openEventDetails('${e.id}')" title="View Event Brief & Details">
+                  <i class="fa-regular fa-eye"></i> View Event
                 </button>
+                <button class="btn btn-sm ${isCancelled ? 'btn-admin-restore' : 'btn-admin-cancel'}" onclick="app.toggleCancelEvent('${e.id}')" title="${isCancelled ? 'Restore / Re-activate Event' : 'Cancel Event'}">
+                  <i class="fa-solid ${isCancelled ? 'fa-rotate-left' : 'fa-ban'}"></i> ${isCancelled ? 'Restore' : 'Cancel'}
+                </button>
+                <button class="btn btn-sm btn-admin-delete" onclick="app.deleteEvent('${e.id}')" title="Permanently Delete Event">
+                  <i class="fa-solid fa-trash-can"></i> Delete Event
+                </button>
+              ` : `
+                <button class="btn btn-secondary btn-sm" onclick="app.openEventDetails('${e.id}')">View Brief</button>
+                ${isCancelled ? `
+                  <button class="btn btn-secondary btn-sm" disabled>Cancelled</button>
+                ` : isRegistered ? `
+                  <button class="btn btn-secondary btn-sm btn-booked" onclick="app.viewTicketForEvent('${e.id}')">Booked</button>
+                ` : `
+                  <button class="btn btn-primary btn-sm" onclick="app.openRegistrationModal('${e.id}')" ${seatsLeft <= 0 ? 'disabled' : ''}>
+                    ${seatsLeft <= 0 ? 'Sold Out' : actionLabel}
+                  </button>
+                `}
               `}
             </div>
           </div>
@@ -2261,10 +2283,11 @@ class UniPulseApp {
     const stat4Val = document.getElementById('orgStatSatisfaction');
     const stat4Label = document.getElementById('orgStat4Label');
     const scopeSubtext = document.getElementById('orgEventScopeSubtext');
+    const viewBtn = document.getElementById('orgViewEventBtn');
     const cancelBtn = document.getElementById('orgCancelEventBtn');
-
     const delBtn = document.getElementById('orgDeleteEventBtn');
     if (this.selectedOrgEvent === 'all') {
+      if (viewBtn) viewBtn.style.display = 'none';
       if (cancelBtn) cancelBtn.style.display = 'none';
       if (delBtn) delBtn.style.display = 'none';
       const totalEvents = this.events.length;
@@ -2286,6 +2309,9 @@ class UniPulseApp {
       if (!evt) return;
 
       const isCancelled = !!evt.isCancelled;
+      if (viewBtn) {
+        viewBtn.style.display = 'inline-flex';
+      }
       if (cancelBtn) {
         cancelBtn.style.display = 'inline-flex';
         cancelBtn.innerHTML = isCancelled 

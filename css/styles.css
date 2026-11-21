@@ -1944,6 +1944,125 @@ body.admin-active #welcomeHeroSection {
   font-weight: 700;
 }
 
+/* Admin Card Actions (View, Cancel, Delete) */
+.event-card-footer.admin-card-footer {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 0.45rem !important;
+  padding-top: 0.85rem !important;
+}
+
+.event-card-footer.admin-card-footer .btn {
+  height: 38px !important;
+  min-height: 38px !important;
+  border-radius: 10px !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  padding: 0 0.5rem !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0.32rem !important;
+  white-space: nowrap !important;
+  transition: all 0.2s ease !important;
+}
+
+.btn-admin-view {
+  background: var(--bg-surface, #ffffff) !important;
+  border: 1px solid var(--border-subtle, #ededfa) !important;
+  color: var(--text-main, #191b24) !important;
+  flex: 1.15 !important;
+}
+
+.btn-admin-view:hover {
+  background: var(--bg-surface-alt, #f3f2ff) !important;
+  border-color: var(--border-strong, #c7c5d3) !important;
+  transform: translateY(-1px);
+}
+
+.btn-admin-cancel {
+  background: rgba(245, 158, 11, 0.12) !important;
+  color: #b45309 !important;
+  border: 1px solid rgba(245, 158, 11, 0.45) !important;
+  flex: 1.05 !important;
+}
+
+.btn-admin-cancel:hover {
+  background: rgba(245, 158, 11, 0.22) !important;
+  border-color: #b45309 !important;
+  transform: translateY(-1px);
+}
+
+.btn-admin-restore {
+  background: rgba(16, 185, 129, 0.12) !important;
+  color: #047857 !important;
+  border: 1px solid rgba(16, 185, 129, 0.45) !important;
+  flex: 1.05 !important;
+}
+
+.btn-admin-restore:hover {
+  background: rgba(16, 185, 129, 0.22) !important;
+  border-color: #047857 !important;
+  transform: translateY(-1px);
+}
+
+.btn-admin-delete {
+  background: rgba(239, 68, 68, 0.1) !important;
+  color: #dc2626 !important;
+  border: 1px solid rgba(239, 68, 68, 0.35) !important;
+  flex: 1.05 !important;
+}
+
+.btn-admin-delete:hover {
+  background: #dc2626 !important;
+  color: #ffffff !important;
+  border-color: #dc2626 !important;
+  transform: translateY(-1px);
+}
+
+[data-theme="dark"] .btn-admin-view {
+  background: #1e2029 !important;
+  border-color: #2e3240 !important;
+  color: #f1f2f6 !important;
+}
+
+[data-theme="dark"] .btn-admin-cancel {
+  background: rgba(245, 158, 11, 0.18) !important;
+  color: #fbbf24 !important;
+  border-color: rgba(245, 158, 11, 0.5) !important;
+}
+
+[data-theme="dark"] .btn-admin-restore {
+  background: rgba(16, 185, 129, 0.18) !important;
+  color: #34d399 !important;
+  border-color: rgba(16, 185, 129, 0.5) !important;
+}
+
+[data-theme="dark"] .btn-admin-delete {
+  background: rgba(239, 68, 68, 0.18) !important;
+  color: #f87171 !important;
+  border-color: rgba(239, 68, 68, 0.5) !important;
+}
+
+.admin-home-banner {
+  background: rgba(16, 185, 129, 0.08);
+  border: 1.5px solid rgba(16, 185, 129, 0.3);
+  border-radius: var(--radius-lg);
+  padding: 0.85rem 1.25rem;
+  margin-bottom: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+[data-theme="dark"] .admin-home-banner {
+  background: rgba(16, 185, 129, 0.12);
+  border-color: rgba(16, 185, 129, 0.4);
+}
+
 /* ---------------- 48px Bento Data Table ---------------- */
 .data-table-wrap {
   background: var(--glass-bg);
