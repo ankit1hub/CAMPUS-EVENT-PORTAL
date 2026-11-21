@@ -293,9 +293,15 @@ class UniPulseApp {
 
     const mainNavLinks = document.getElementById('mainNavLinks');
 
-    // Welcome Hero & Explore Events visible on events page
+    // Welcome Hero visible on events page for students/guests; strictly hidden on admin portal and for admins
     if (tabEvents) tabEvents.style.display = 'inline-flex';
-    if (welcomeHero) welcomeHero.style.display = 'flex';
+    if (welcomeHero) {
+      if (isAdmin || this.currentView === 'organizer') {
+        welcomeHero.style.setProperty('display', 'none', 'important');
+      } else {
+        welcomeHero.style.setProperty('display', this.currentView === 'events' ? 'flex' : 'none', 'important');
+      }
+    }
     if (tabClubs) tabClubs.style.display = isStudent ? 'inline-flex' : 'none';
     if (tabDashboard) tabDashboard.style.display = isStudent ? 'inline-flex' : 'none';
     if (tabOrganizer) tabOrganizer.style.display = isAdmin ? 'inline-flex' : 'none';
@@ -853,11 +859,17 @@ class UniPulseApp {
       document.body.classList.remove('admin-active');
     }
 
-    // Welcome Hero & Explore Events visible on events page
+    // Welcome Hero visible on events page for students/guests; strictly hidden on admin portal and for admins
     const tabEvents = document.getElementById('navTabEvents');
     const welcomeHero = document.getElementById('welcomeHeroSection');
     if (tabEvents) tabEvents.style.display = 'inline-flex';
-    if (welcomeHero) welcomeHero.style.display = 'flex';
+    if (welcomeHero) {
+      if (isAdmin || viewName === 'organizer') {
+        welcomeHero.style.setProperty('display', 'none', 'important');
+      } else {
+        welcomeHero.style.setProperty('display', viewName === 'events' ? 'flex' : 'none', 'important');
+      }
+    }
 
     document.querySelectorAll('.nav-links .nav-item-btn').forEach(btn => {
       if (btn.getAttribute('data-view') === viewName) {

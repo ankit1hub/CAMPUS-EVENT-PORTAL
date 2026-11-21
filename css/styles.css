@@ -1180,13 +1180,21 @@ body:not(.admin-active) #navHostBtn {
 /* ---------------- Portal Welcome & About Hub Hero ---------------- */
 .portal-welcome-hero {
   min-height: calc(85vh - 72px);
-  display: flex !important;
+  display: flex;
   align-items: center;
   justify-content: center;
   padding: 4.5rem 1.5rem 4rem 1.5rem;
   background: radial-gradient(circle at 50% 25%, rgba(159, 160, 255, 0.18) 0%, rgba(211, 230, 228, 0.12) 45%, var(--bg-surface) 100%);
   border-bottom: 1px solid var(--border-subtle, #ededfa);
   position: relative;
+}
+
+/* Strictly hide intro hero on admin portal and for administrator accounts */
+[data-user-role="admin"] .portal-welcome-hero,
+[data-user-role="admin"] #welcomeHeroSection,
+body.admin-active .portal-welcome-hero,
+body.admin-active #welcomeHeroSection {
+  display: none !important;
 }
 
 [data-theme="dark"] .portal-welcome-hero {
