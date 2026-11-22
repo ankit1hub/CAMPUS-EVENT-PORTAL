@@ -9,7 +9,7 @@ class UniPulseApp {
     this.adminUser = null;
 
     // Automatic cache version bump / URL query trigger (?clear=1 or ?reset=1)
-    const CURRENT_CACHE_VERSION = '20261122_v10_admin_card_actions';
+    const CURRENT_CACHE_VERSION = '20261122_v11_accurate_analytics';
     try {
       const storedVersion = localStorage.getItem('unipulse_cache_version');
       const urlParams = new URLSearchParams(window.location.search);
@@ -2291,18 +2291,19 @@ class UniPulseApp {
       if (cancelBtn) cancelBtn.style.display = 'none';
       if (delBtn) delBtn.style.display = 'none';
       const totalEvents = this.events.length;
-      const totalRegistrations = this.events.reduce((sum, e) => sum + (e.registeredCount || 0), 0) + this.registrations.length;
-      const actualChecked = this.registrations.filter(r => r.isCheckedIn).length;
-      const totalChecked = 1240 + actualChecked;
+      const totalRegistrations = this.registrations.length;
+      const totalChecked = this.registrations.filter(r => r.isCheckedIn).length;
+      const totalCapacity = this.events.reduce((sum, e) => sum + (e.maxCapacity || 100), 0);
+      const overallFillPercent = totalCapacity > 0 ? Math.min(100, Math.round((totalRegistrations / totalCapacity) * 100)) : 0;
 
       if (stat1Val) stat1Val.textContent = totalEvents;
       if (stat1Label) stat1Label.textContent = 'Published Events';
       if (stat2Val) stat2Val.textContent = totalRegistrations.toLocaleString();
-      if (stat2Label) stat2Label.textContent = 'Total Registrations';
+      if (stat2Label) stat2Label.textContent = 'Confirmed Registrations';
       if (stat3Val) stat3Val.textContent = totalChecked.toLocaleString();
-      if (stat3Label) stat3Label.textContent = 'Checked-in Attendees';
-      if (stat4Val) stat4Val.textContent = '98.4%';
-      if (stat4Label) stat4Label.textContent = 'Student Satisfaction';
+      if (stat3Label) stat3Label.textContent = 'Verified / Checked-in';
+      if (stat4Val) stat4Val.textContent = `${overallFillPercent}%`;
+      if (stat4Label) stat4Label.textContent = 'Overall Capacity Filled';
       if (scopeSubtext) scopeSubtext.textContent = 'Showing aggregated campus overview across all published events';
     } else {
       const evt = this.events.find(e => e.id === this.selectedOrgEvent);
@@ -2326,16 +2327,16 @@ class UniPulseApp {
       }
 
       const evtActualRegs = this.registrations.filter(r => r.eventId === evt.id);
-      const totalRegs = (evt.registeredCount || 0) + evtActualRegs.length;
+      const totalRegs = evtActualRegs.length;
       const checkedInCount = evtActualRegs.filter(r => r.isCheckedIn).length;
-      const estimatedChecked = Math.round(totalRegs * 0.74) + checkedInCount;
-      const fillPercent = Math.min(100, Math.round((totalRegs / (evt.maxCapacity || 100)) * 100));
+      const maxCap = evt.maxCapacity || 100;
+      const fillPercent = Math.min(100, Math.round((totalRegs / maxCap) * 100));
 
-      if (stat1Val) stat1Val.textContent = evt.maxCapacity || 100;
+      if (stat1Val) stat1Val.textContent = maxCap;
       if (stat1Label) stat1Label.textContent = 'Max Capacity Limit';
       if (stat2Val) stat2Val.textContent = totalRegs.toLocaleString();
       if (stat2Label) stat2Label.textContent = 'Confirmed Registrations';
-      if (stat3Val) stat3Val.textContent = Math.min(totalRegs, estimatedChecked).toLocaleString();
+      if (stat3Val) stat3Val.textContent = checkedInCount.toLocaleString();
       if (stat3Label) stat3Label.textContent = 'Verified / Checked-in';
       if (stat4Val) stat4Val.textContent = isCancelled ? 'CANCELLED' : `${fillPercent}%`;
       if (stat4Label) stat4Label.textContent = isCancelled ? 'Event Status' : 'Slot Fill Rate';
