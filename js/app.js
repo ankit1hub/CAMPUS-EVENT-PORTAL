@@ -315,7 +315,7 @@ class UniPulseApp {
 
     const adminEventsNotice = document.getElementById('adminEventsNotice');
     if (adminEventsNotice) {
-      adminEventsNotice.style.display = (isAdmin && this.currentView === 'events') ? 'block' : 'none';
+      adminEventsNotice.style.display = 'none';
     }
 
     // Strict RBAC: Remove + Host Event from navbar on all views (both student and admin)
@@ -914,7 +914,7 @@ class UniPulseApp {
 
     const adminEventsNotice = document.getElementById('adminEventsNotice');
     if (adminEventsNotice) {
-      adminEventsNotice.style.display = (isAdmin && viewName === 'events') ? 'block' : 'none';
+      adminEventsNotice.style.display = 'none';
     }
 
     document.querySelectorAll('.nav-links .nav-item-btn').forEach(btn => {
