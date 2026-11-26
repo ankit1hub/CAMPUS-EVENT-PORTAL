@@ -9,7 +9,7 @@ class UniPulseApp {
     this.adminUser = null;
 
     // Automatic cache version bump / URL query trigger (?clear=1 or ?reset=1)
-    const CURRENT_CACHE_VERSION = '20261122_v11_accurate_analytics';
+    const CURRENT_CACHE_VERSION = '20261126_v12_supabase_events';
     try {
       const storedVersion = localStorage.getItem('unipulse_cache_version');
       const urlParams = new URLSearchParams(window.location.search);
@@ -3029,15 +3029,24 @@ class UniPulseApp {
     this.saveStorage('unipulse_events', this.events);
 
     // Save to Supabase Cloud if connected
+    let cloudErr = null;
     if (typeof supabaseService !== 'undefined' && supabaseService.isConnected) {
-      await supabaseService.createEvent(newEvent, this.currentUser ? this.currentUser.id : null);
+      const cloudRes = await supabaseService.createEvent(newEvent, this.currentUser ? this.currentUser.id : null);
+      if (!cloudRes || !cloudRes.success) {
+        cloudErr = (cloudRes && cloudRes.error) || 'Failed to sync event to database';
+        console.error('Supabase createEvent failed:', cloudErr);
+      }
     }
 
     this.closeModal('modalCreateEvent');
     this.removeSelectedBanner();
     document.getElementById('createEventForm').reset();
 
-    this.showToast(`🎉 "${title}" published by ${this.currentUser.name}!`, 'success');
+    if (cloudErr) {
+      this.showToast(`Saved locally, but Supabase sync failed: ${cloudErr}`, 'error');
+    } else {
+      this.showToast(`🎉 "${title}" published by ${this.currentUser.name}!`, 'success');
+    }
     this.renderEvents();
     this.updateCategoryCounters();
     this.renderCalendar();

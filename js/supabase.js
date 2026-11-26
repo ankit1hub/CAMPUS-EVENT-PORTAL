@@ -269,6 +269,7 @@ class SupabaseService {
   async createEvent(eventData, userId) {
     if (!this.isConnected) return { success: true, mode: 'local' };
     try {
+      const uuidRe = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
       const { data, error } = await this.client.from('events').insert([{
         id: eventData.id,
         title: eventData.title,
@@ -287,12 +288,10 @@ class SupabaseService {
         max_capacity: eventData.maxCapacity,
         registered_count: eventData.registeredCount || 0,
         is_featured: eventData.isFeatured || false,
-        is_cancelled: false,
-        status: 'active',
         banner: eventData.banner,
         tags: eventData.tags,
         perks: eventData.perks,
-        created_by: userId
+        created_by: (userId && uuidRe.test(userId)) ? userId : null
       }]).select();
 
       if (error) throw error;
